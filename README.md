@@ -1,5 +1,7 @@
 # Claude Code GitHub Agent
 
+__Work in Progress. Currently not working due to a bug in [Claude Code issues#551](https://github.com/anthropics/claude-code/issues/551)__
+
 An AI Agent that operates Claude Code on GitHub Actions. By using this action, you can directly invoke Claude Code from GitHub Issues or Pull Request comments and automate code changes.
 
 ## Features
