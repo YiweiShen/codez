@@ -165,35 +165,55 @@ function extractText(event: GitHubEvent): string | null {
 // Function to record Git state
 function captureFileState(workspace: string): string {
   try {
-    // Get current Git commit hash
-    const { stdout: commitHash } = execaSync('git', ['rev-parse', 'HEAD'], { cwd: workspace });
-    return commitHash.trim();
+    execaSync('git', ['config', '--global', 'user.name', 'github-actions[bot]'], { stdio: 'inherit' });
+    execaSync('git', ['config', '--global', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { stdio: 'inherit' });
+
+    // Get the current commit hash
+    const result = execaSync('git', ['rev-parse', 'HEAD'], { cwd: workspace });
+    core.info(`Captured initial commit hash: ${result.stdout}`);
+    return result.stdout.trim();
   } catch (error) {
-    core.warning('Failed to capture Git state. This might be a new repository without commits.');
-    return '';
+    core.error(`Error capturing file state: ${error}`);
+    throw new Error(`Failed to capture file state: ${error instanceof Error ? error.message : error}`);
   }
 }
 
 // Function to detect file changes using Git
 function detectChanges(workspace: string, originalCommitHash: string): string[] {
   try {
-    if (!originalCommitHash) {
-      // If there was no initial commit hash, get all files that would be committed
-      const { stdout } = execaSync('git', ['ls-files', '--others', '--modified', '--exclude-standard'], { cwd: workspace });
-      return stdout.split('\n').filter(Boolean);
-    }
+    // Ensure all changes are tracked, including untracked files
+    execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
 
-    // First stage all changes so we can detect them
-    execaSync('git', ['add', '-A'], { cwd: workspace });
-    
-    // Get list of changed files compared to the original commit
-    const { stdout } = execaSync('git', ['diff', '--name-only', '--cached', originalCommitHash], { cwd: workspace });
-    
-    // Return the list of changed files
-    return stdout.split('\n').filter(Boolean);
+    // Check for differences compared to the original state
+    // Use exit code to determine if there are changes
+    const diffResult = execaSync('git', ['diff', '--quiet', '--exit-code', originalCommitHash, 'HEAD', '--'], {
+      cwd: workspace,
+      reject: false, // Don't throw error on non-zero exit code
+      stdio: 'inherit'
+    });
+
+    if (diffResult.exitCode === 0) {
+      // No changes detected
+      core.info('No changes detected by git diff.');
+      // Revert any potential 'git add' if no actual changes occurred
+      execaSync('git', ['reset', 'HEAD'], { cwd: workspace, stdio: 'inherit' });
+      return [];
+    } else {
+      // Changes detected, get the list of changed files
+      const statusResult = execaSync('git', ['diff', '--name-only', originalCommitHash, 'HEAD', '--'], { cwd: workspace });
+      const changedFiles = statusResult.stdout.trim().split('\n').filter(file => file); // Filter out empty lines
+      core.info(`Detected changed files: ${changedFiles.join(', ')}`);
+      return changedFiles;
+    }
   } catch (error) {
-    core.warning(`Failed to detect changes: ${error instanceof Error ? error.message : String(error)}`);
-    return [];
+    core.error(`Error detecting changes: ${error}`);
+    // Attempt to reset any staged changes in case of error
+    try {
+      execaSync('git', ['reset', 'HEAD'], { cwd: workspace, stdio: 'inherit' });
+    } catch (resetError) {
+      core.error(`Failed to reset git state after error: ${resetError}`);
+    }
+    throw new Error(`Failed to detect changes: ${error instanceof Error ? error.message : error}`);
   }
 }
 
@@ -206,42 +226,44 @@ async function createPullRequest(
   changedFiles: string[],
   claudeOutput: string
 ): Promise<void> {
-  const branchName = `claude-code-github-agent-${Date.now()}`;
-  
-  // Create a new branch
-  await execa('git', ['checkout', '-b', branchName], { cwd: workspace });
-  
-  // Commit changes
-  await execa('git', ['add', '.'], { cwd: workspace });
-  await execa('git', ['config', 'user.name', 'GitHub Action'], { cwd: workspace });
-  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com'], { cwd: workspace });
-  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from issue #${event.issue.number}`], { cwd: workspace });
-  
-  // Push to remote
-  await execa('git', ['push', 'origin', branchName], { cwd: workspace });
-  
-  // Create PR
   const issueNumber = event.issue.number;
-  const issueTitle = event.issue.title;
-  const prTitle = `[Claude Code Github Agent] {${issueTitle}}`;
-  const prBody = `# Issue\n#${issueNumber}\n\n# Result\n${claudeOutput}\n`;
-  
-  const { data: pullRequest } = await octokit.rest.pulls.create({
-    ...repo,
-    title: prTitle,
-    body: prBody,
-    head: branchName,
-    base: 'main',
-  });
-  
-  core.info(`PR has been created: ${pullRequest.html_url}`);
-  
-  // Post a comment to the issue
-  await octokit.rest.issues.createComment({
-    ...repo,
-    issue_number: issueNumber,
-    body: `Claude Code Github Agent has made changes. PR has been created: ${pullRequest.html_url}`,
-  });
+  const branchName = `claude-changes-${issueNumber}`;
+  const commitMessage = `Apply changes by Claude for #${issueNumber}\n\n${claudeOutput}`;
+
+  try {
+    core.info(`Creating new branch: ${branchName}`);
+    execaSync('git', ['checkout', '-b', branchName], { cwd: workspace, stdio: 'inherit' });
+
+    core.info('Committing changes...');
+    // 'git add -A' was already done in detectChanges
+    execaSync('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
+
+    core.info(`Pushing changes to origin/${branchName}...`);
+    execaSync('git', ['push', 'origin', branchName, '--force'], { cwd: workspace, stdio: 'inherit' }); // Use force push for simplicity in case branch exists
+
+    core.info('Creating Pull Request...');
+    const pr = await octokit.rest.pulls.create({
+      ...repo,
+      title: `Claude changes for #${issueNumber}: ${event.issue.title}`,
+      head: branchName,
+      base: github.context.ref.replace('refs/heads/', ''), // Use the branch the action ran on as base
+      body: `Applied changes based on Issue #${issueNumber}.\n\n## Claude Output\n${claudeOutput}`,
+      maintainer_can_modify: true,
+    });
+
+    core.info(`Pull Request created: ${pr.data.html_url}`);
+
+    // Optionally, post a comment linking to the PR in the original issue
+    await octokit.rest.issues.createComment({
+        ...repo,
+        issue_number: issueNumber,
+        body: `Created Pull Request with Claude's changes: ${pr.data.html_url}`,
+    });
+
+  } catch (error) {
+    core.error(`Error creating Pull Request: ${error}`);
+    throw new Error(`Failed to create Pull Request: ${error instanceof Error ? error.message : error}`);
+  }
 }
 
 // Function to commit and push changes
@@ -253,35 +275,43 @@ async function commitAndPush(
   changedFiles: string[],
   claudeOutput: string
 ): Promise<void> {
-  const prNumber = event.issue.number;
-  
-  // Get PR information
-  const { data: pr } = await octokit.rest.pulls.get({
-    ...repo,
-    pull_number: prNumber,
-  });
-  
-  // Checkout PR branch
-  await execa('git', ['fetch', 'origin', pr.head.ref], { cwd: workspace });
-  await execa('git', ['checkout', pr.head.ref], { cwd: workspace });
-  
-  // Commit changes
-  await execa('git', ['add', '.'], { cwd: workspace });
-  await execa('git', ['config', 'user.name', 'GitHub Action'], { cwd: workspace });
-  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com'], { cwd: workspace });
-  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from PR #${prNumber}`], { cwd: workspace });
-  
-  // Push to remote
-  await execa('git', ['push', 'origin', pr.head.ref], { cwd: workspace });
-  
-  // Post a comment to the PR
-  await octokit.rest.issues.createComment({
-    ...repo,
-    issue_number: prNumber,
-    body: `# Result\n${claudeOutput}\n`,
-  });
-  
-  core.info(`Changes have been pushed to PR #${prNumber}`);
+  const prNumber = event.issue.number; // In PR comments, issue.number is the PR number
+  const commitMessage = `Apply changes by Claude based on comment in #${prNumber}\n\n${claudeOutput}`;
+
+  try {
+    // Get current branch name from the PR context if possible, otherwise from git
+    let currentBranch: string;
+    try {
+        const prData = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
+        currentBranch = prData.data.head.ref;
+        core.info(`Checked out PR branch: ${currentBranch}`);
+        execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+    } catch (e) {
+        core.warning(`Could not get PR branch from API, falling back to git: ${e}`);
+        const branchResult = execaSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: workspace });
+        currentBranch = branchResult.stdout.trim();
+        core.info(`Current branch from git: ${currentBranch}`);
+        // Ensure we are on the correct branch if the checkout happened before the action ran
+        execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+    }
+
+
+    core.info('Committing changes...');
+    // 'git add -A' was already done in detectChanges
+    execaSync('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
+
+    core.info(`Pushing changes to origin/${currentBranch}...`);
+    execaSync('git', ['push', 'origin', currentBranch], { cwd: workspace, stdio: 'inherit' });
+
+    core.info('Changes committed and pushed.');
+
+    // Post a comment confirming the changes
+    await postComment(octokit, repo, event, `Applied changes to this PR based on your comment.\n\n## Claude Output\n${claudeOutput}`);
+
+  } catch (error) {
+    core.error(`Error committing and pushing changes: ${error}`);
+    throw new Error(`Failed to commit and push changes: ${error instanceof Error ? error.message : error}`);
+  }
 }
 
 // Function to post a comment
