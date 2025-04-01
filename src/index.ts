@@ -98,7 +98,7 @@ async function run(): Promise<void> {
     
     // Execute Claude CLI
     core.info(`Executing Claude CLI: ${prompt}`);
-    const originalFileState = captureFileState();
+    const originalFileState = captureFileState(workspace);
     const claudeOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSecond * 1000);
 
     // `Credit balance is too low` error handling
@@ -108,7 +108,7 @@ async function run(): Promise<void> {
     }
     
     // Detect file changes
-    const changedFiles = detectChanges(originalFileState);
+    const changedFiles = detectChanges(workspace, originalFileState);
     
     if (changedFiles.length > 0) {
       // If files were changed
@@ -117,10 +117,10 @@ async function run(): Promise<void> {
       if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated')
       {
         // For issues, create a PR
-        await createPullRequest(octokit, repo, event.github, changedFiles, claudeOutput);
+        await createPullRequest(workspace, octokit, repo, event.github, changedFiles, claudeOutput);
       } else if (event.type === 'pullRequestCommentCreated') {
         // For PRs, commit the changes
-        await commitAndPush(octokit, repo, event.github, changedFiles, claudeOutput);
+        await commitAndPush(workspace, octokit, repo, event.github, changedFiles, claudeOutput);
       }
     } else {
       // If no files were changed, just post a comment
@@ -163,10 +163,10 @@ function extractText(event: GitHubEvent): string | null {
 }
 
 // Function to record Git state
-function captureFileState(): string {
+function captureFileState(workspace: string): string {
   try {
     // Get current Git commit hash
-    const { stdout: commitHash } = execaSync('git', ['rev-parse', 'HEAD']);
+    const { stdout: commitHash } = execaSync('git', ['rev-parse', 'HEAD'], { cwd: workspace });
     return commitHash.trim();
   } catch (error) {
     core.warning('Failed to capture Git state. This might be a new repository without commits.');
@@ -175,19 +175,19 @@ function captureFileState(): string {
 }
 
 // Function to detect file changes using Git
-function detectChanges(originalCommitHash: string): string[] {
+function detectChanges(workspace: string, originalCommitHash: string): string[] {
   try {
     if (!originalCommitHash) {
       // If there was no initial commit hash, get all files that would be committed
-      const { stdout } = execaSync('git', ['ls-files', '--others', '--modified', '--exclude-standard']);
+      const { stdout } = execaSync('git', ['ls-files', '--others', '--modified', '--exclude-standard'], { cwd: workspace });
       return stdout.split('\n').filter(Boolean);
     }
 
     // First stage all changes so we can detect them
-    execaSync('git', ['add', '-A']);
+    execaSync('git', ['add', '-A'], { cwd: workspace });
     
     // Get list of changed files compared to the original commit
-    const { stdout } = execaSync('git', ['diff', '--name-only', '--cached', originalCommitHash]);
+    const { stdout } = execaSync('git', ['diff', '--name-only', '--cached', originalCommitHash], { cwd: workspace });
     
     // Return the list of changed files
     return stdout.split('\n').filter(Boolean);
@@ -199,6 +199,7 @@ function detectChanges(originalCommitHash: string): string[] {
 
 // Function to create a PR
 async function createPullRequest(
+  workspace: string,
   octokit: ReturnType<typeof github.getOctokit>,
   repo: { owner: string; repo: string },
   event: GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
@@ -208,16 +209,16 @@ async function createPullRequest(
   const branchName = `claude-code-github-agent-${Date.now()}`;
   
   // Create a new branch
-  await execa('git', ['checkout', '-b', branchName]);
+  await execa('git', ['checkout', '-b', branchName], { cwd: workspace });
   
   // Commit changes
-  await execa('git', ['add', '.']);
-  await execa('git', ['config', 'user.name', 'GitHub Action']);
-  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com']);
-  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from issue #${event.issue.number}`]);
+  await execa('git', ['add', '.'], { cwd: workspace });
+  await execa('git', ['config', 'user.name', 'GitHub Action'], { cwd: workspace });
+  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com'], { cwd: workspace });
+  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from issue #${event.issue.number}`], { cwd: workspace });
   
   // Push to remote
-  await execa('git', ['push', 'origin', branchName]);
+  await execa('git', ['push', 'origin', branchName], { cwd: workspace });
   
   // Create PR
   const issueNumber = event.issue.number;
@@ -245,6 +246,7 @@ async function createPullRequest(
 
 // Function to commit and push changes
 async function commitAndPush(
+  workspace: string,
   octokit: ReturnType<typeof github.getOctokit>,
   repo: { owner: string; repo: string },
   event: GitHubEventPullRequestCommentCreated,
@@ -260,17 +262,17 @@ async function commitAndPush(
   });
   
   // Checkout PR branch
-  await execa('git', ['fetch', 'origin', pr.head.ref]);
-  await execa('git', ['checkout', pr.head.ref]);
+  await execa('git', ['fetch', 'origin', pr.head.ref], { cwd: workspace });
+  await execa('git', ['checkout', pr.head.ref], { cwd: workspace });
   
   // Commit changes
-  await execa('git', ['add', '.']);
-  await execa('git', ['config', 'user.name', 'GitHub Action']);
-  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com']);
-  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from PR #${prNumber}`]);
+  await execa('git', ['add', '.'], { cwd: workspace });
+  await execa('git', ['config', 'user.name', 'GitHub Action'], { cwd: workspace });
+  await execa('git', ['config', 'user.email', 'github-action@users.noreply.github.com'], { cwd: workspace });
+  await execa('git', ['commit', '-m', `Claude Code Github Agent: Changes from PR #${prNumber}`], { cwd: workspace });
   
   // Push to remote
-  await execa('git', ['push', 'origin', pr.head.ref]);
+  await execa('git', ['push', 'origin', pr.head.ref], { cwd: workspace });
   
   // Post a comment to the PR
   await octokit.rest.issues.createComment({
