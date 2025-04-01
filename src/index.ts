@@ -58,6 +58,7 @@ async function run(): Promise<void> {
     const githubToken = core.getInput('github-token', { required: true });
     const anthropicApiKey = core.getInput('anthropic-api-key', { required: true });
     const eventPath = core.getInput('event-path', { required: true });
+    const workspace = core.getInput('workspace', { required: true });
     const timeoutSecond = core.getInput('timeout') !== '' ? parseInt(core.getInput('timeout')) : 300;
 
     if(anthropicApiKey === '') {
@@ -98,7 +99,7 @@ async function run(): Promise<void> {
     // Execute Claude CLI
     core.info(`Executing Claude CLI: ${prompt}`);
     const originalFileState = captureFileState();
-    const claudeOutput = runClaudeCode(anthropicApiKey, prompt, timeoutSecond * 1000);
+    const claudeOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSecond * 1000);
 
     // `Credit balance is too low` error handling
     if (claudeOutput.includes('Credit balance is too low')) {
@@ -300,12 +301,12 @@ async function postComment(
 }
 
 
-function runClaudeCode(apiKey: string, prompt: string, timeout: number): string {
+function runClaudeCode(workspace:string, apiKey: string, prompt: string, timeout: number): string {
   // Execute claude command
   const claudeResult = execaSync({
     shell: '/bin/zsh',
     timeout: timeout, // ms,
-    cwd: process.cwd(),
+    cwd: workspace,
   })`ANTHROPIC_API_KEY=${apiKey} claude --verbose -p ${prompt} --allowedTools Bash,Edit,Write`;
   return claudeResult.stdout;
 }
