@@ -61,6 +61,25 @@ async function run(): Promise<void> {
     const workspace = core.getInput('workspace', { required: true });
     const timeoutSecond = core.getInput('timeout') !== '' ? parseInt(core.getInput('timeout')) : 300;
 
+    // --- Debugging Start ---
+    core.info(`Using workspace: ${workspace}`);
+    try {
+      const gitDirExists = fs.existsSync(`${workspace}/.git`);
+      core.info(`Does ${workspace}/.git exist? ${gitDirExists}`);
+      if (!gitDirExists) {
+        core.warning(`Could not find .git directory in workspace: ${workspace}. Listing directory contents:`);
+        try {
+          const files = fs.readdirSync(workspace);
+          core.info(files.join(', '));
+        } catch (readdirError) {
+          core.error(`Failed to read directory ${workspace}: ${readdirError}`);
+        }
+      }
+    } catch (e) {
+      core.error(`Error checking for .git directory: ${e}`);
+    }
+    // --- Debugging End ---
+
     if(anthropicApiKey === '') {
       core.setFailed('Anthropic API Key is required');
       return;
