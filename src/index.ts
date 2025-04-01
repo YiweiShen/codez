@@ -109,6 +109,8 @@ async function run(): Promise<void> {
     
     // Detect file changes
     const changedFiles = detectChanges(workspace, originalFileState);
+
+    core.info('File changes detected. Files:\n' + changedFiles.join('\n'));
     
     if (changedFiles.length > 0) {
       // If files were changed
@@ -165,8 +167,10 @@ function extractText(event: GitHubEvent): string | null {
 // Function to record Git state
 function captureFileState(workspace: string): string {
   try {
-    execaSync('git', ['config', '--global', 'user.name', 'github-actions[bot]'], { stdio: 'inherit' });
-    execaSync('git', ['config', '--global', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { stdio: 'inherit' });
+    // Configure Git user identity locally for this repository
+    core.info('Configuring Git user identity locally...');
+    execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
+    execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
 
     // Get the current commit hash
     const result = execaSync('git', ['rev-parse', 'HEAD'], { cwd: workspace });
