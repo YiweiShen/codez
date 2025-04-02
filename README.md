@@ -32,13 +32,7 @@ on:
 
 jobs:
   claude-agent:
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Run Claude Code GitHub Agent
         uses: potproject/claude-code-github-agent@v0-test
         with:
