@@ -2,6 +2,10 @@ import { execa, execaSync } from 'execa';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
+import { globSync } from 'glob';
+import * as path from 'path';
+import ignore from 'ignore';
 
 type AgentEvent = 
   | { type: 'issuesOpened', github: GitHubEventIssuesOpened }
@@ -227,61 +231,85 @@ function extractText(event: GitHubEvent): string | null {
   return null;
 }
 
-// Function to record Git state
-function captureFileState(workspace: string): string {
-  try {
-    // Configure Git user identity locally for this repository
-    core.info('Configuring Git user identity locally...');
-    execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
-    execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
-
-    // Get the current commit hash
-    const result = execaSync('git', ['rev-parse', 'HEAD'], { cwd: workspace });
-    core.info(`Captured initial commit hash: ${result.stdout}`);
-    return result.stdout.trim();
-  } catch (error) {
-    core.error(`Error capturing file state: ${error}`);
-    throw new Error(`Failed to capture file state: ${error instanceof Error ? error.message : error}`);
-  }
+// Function to calculate SHA-256 hash of a file
+function calculateFileHash(filePath: string): string {
+  const fileBuffer = fs.readFileSync(filePath);
+  const hashSum = crypto.createHash('sha256');
+  hashSum.update(fileBuffer);
+  return hashSum.digest('hex');
 }
 
-// Function to detect file changes using Git
-function detectChanges(workspace: string, originalCommitHash: string): string[] {
-  try {
-    // Ensure all changes are tracked, including untracked files
-    execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+// Function to capture the state of files in the workspace, respecting .gitignore
+function captureFileState(workspace: string): Map<string, string> {
+  core.info('Capturing current file state (respecting .gitignore)...');
+  const fileState = new Map<string, string>();
+  const gitignorePath = path.join(workspace, '.gitignore');
+  const ig = ignore();
 
-    // Check for differences compared to the original state
-    // Use exit code to determine if there are changes
-    const diffResult = execaSync('git', ['diff', '--quiet', '--exit-code', originalCommitHash, 'HEAD', '--'], {
-      cwd: workspace,
-      reject: false, // Don't throw error on non-zero exit code
-      stdio: 'inherit'
-    });
+  // Add default ignores
+  ig.add('.git/**');
+  ig.add('.github/**'); // Assuming we always want to ignore .github
 
-    if (diffResult.exitCode === 0) {
-      // No changes detected
-      core.info('No changes detected by git diff.');
-      // Revert any potential 'git add' if no actual changes occurred
-      execaSync('git', ['reset', 'HEAD'], { cwd: workspace, stdio: 'inherit' });
-      return [];
-    } else {
-      // Changes detected, get the list of changed files
-      const statusResult = execaSync('git', ['diff', '--name-only', originalCommitHash, 'HEAD', '--'], { cwd: workspace });
-      const changedFiles = statusResult.stdout.trim().split('\n').filter(file => file); // Filter out empty lines
-      core.info(`Detected changed files: ${changedFiles.join(', ')}`);
-      return changedFiles;
-    }
-  } catch (error) {
-    core.error(`Error detecting changes: ${error}`);
-    // Attempt to reset any staged changes in case of error
-    try {
-      execaSync('git', ['reset', 'HEAD'], { cwd: workspace, stdio: 'inherit' });
-    } catch (resetError) {
-      core.error(`Failed to reset git state after error: ${resetError}`);
-    }
-    throw new Error(`Failed to detect changes: ${error instanceof Error ? error.message : error}`);
+  if (fs.existsSync(gitignorePath)) {
+    core.info('Reading .gitignore rules...');
+    const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+    ig.add(gitignoreContent);
+  } else {
+    core.info('.gitignore not found, using default ignores.');
   }
+
+  // Use glob to find all files, then filter using ignore rules
+  const allFiles = globSync('**/*', { cwd: workspace, nodir: true, dot: true });
+  const filesToProcess = ig.filter(allFiles); // Filter files based on ignore rules
+
+  core.info(`Found ${allFiles.length} total files, processing ${filesToProcess.length} files after ignore rules.`);
+
+  for (const file of filesToProcess) {
+    const filePath = path.join(workspace, file);
+    try {
+      const hash = calculateFileHash(filePath);
+      fileState.set(file, hash); // Store relative path
+    } catch (error) {
+      core.warning(`Could not read file ${file}: ${error}`);
+    }
+  }
+  core.info(`Captured state of ${fileState.size} files.`);
+  return fileState;
+}
+
+// Function to detect file changes by comparing states
+function detectChanges(workspace: string, originalState: Map<string, string>): string[] {
+  core.info('Detecting file changes...');
+  const currentState = captureFileState(workspace);
+  const changedFiles = new Set<string>();
+
+  // Check for changed or added files
+  for (const [file, currentHash] of currentState.entries()) {
+    const originalHash = originalState.get(file);
+    if (!originalHash) {
+      core.info(`File added: ${file}`);
+      changedFiles.add(file); // New file added
+    } else if (originalHash !== currentHash) {
+      core.info(`File changed: ${file}`);
+      changedFiles.add(file); // File content changed
+    }
+  }
+
+  // Check for deleted files
+  for (const file of originalState.keys()) {
+    if (!currentState.has(file)) {
+      core.info(`File deleted: ${file}`);
+      changedFiles.add(file); // File deleted
+    }
+  }
+
+  if (changedFiles.size > 0) {
+    core.info(`Detected changes in files: ${Array.from(changedFiles).join(', ')}`);
+  } else {
+    core.info('No file changes detected.');
+  }
+
+  return Array.from(changedFiles);
 }
 
 // Function to create a PR
@@ -301,8 +329,21 @@ async function createPullRequest(
     core.info(`Creating new branch: ${branchName}`);
     execaSync('git', ['checkout', '-b', branchName], { cwd: workspace, stdio: 'inherit' });
 
+    core.info('Adding changed files to Git...');
+    // Add all changed files (including deleted ones)
+    execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+    // Alternatively, add specific files if needed:
+    // changedFiles.forEach(file => {
+    //   if (fs.existsSync(path.join(workspace, file))) {
+    //     execaSync('git', ['add', file], { cwd: workspace, stdio: 'inherit' });
+    //   } else {
+    //     // Handle deleted files if 'git add -A' is not used
+    //     execaSync('git', ['rm', file], { cwd: workspace, stdio: 'inherit' });
+    //   }
+    // });
+
+
     core.info('Committing changes...');
-    // 'git add -A' was already done in detectChanges
     execaSync('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
 
     core.info(`Pushing changes to origin/${branchName}...`);
@@ -363,8 +404,11 @@ async function commitAndPush(
     }
 
 
+    core.info('Adding changed files to Git...');
+    // Add all changed files (including deleted ones)
+    execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+
     core.info('Committing changes...');
-    // 'git add -A' was already done in detectChanges
     execaSync('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
 
     core.info(`Pushing changes to origin/${currentBranch}...`);

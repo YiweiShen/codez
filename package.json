@@ -20,7 +20,10 @@
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
     "@anthropic-ai/claude-code": "^0.2.45",
-    "execa": "^9.5.0"
+    "@types/glob": "^8.1.0",
+    "execa": "^9.5.0",
+    "glob": "^10.4.5",
+    "ignore": "^7.0.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
