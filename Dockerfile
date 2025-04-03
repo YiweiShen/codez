@@ -80,5 +80,12 @@ COPY . .
 
 RUN npm run build
 
+# /app/dist/index.jsをbinaryとして実行可能にする
+RUN mv /app/dist/index.js /usr/local/bin/claude-code-github-agent && \
+  sed -i '1s;^;#!/usr/bin/env node\n;' /app/dist/index.js && \
+  chmod +x /usr/local/bin/claude-code-github-agent
+
+RUN rm -rf /workspace/*
+
 # エントリポイントの設定
-ENTRYPOINT ["node", "/app/dist/index.js"]
+ENTRYPOINT ["claude-code-github-agent"]
