@@ -6,15 +6,16 @@ import * as crypto from 'crypto';
 import { globSync } from 'glob';
 import * as path from 'path';
 import ignore from 'ignore';
+import Anthropic from '@anthropic-ai/sdk';
 
-type AgentEvent = 
+type AgentEvent =
   | { type: 'issuesOpened', github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated', github: GitHubEventIssueCommentCreated }
   | { type: 'pullRequestCommentCreated', github: GitHubEventPullRequestCommentCreated }
-;
+  ;
 
 // Definition of event types
-type GitHubEvent = 
+type GitHubEvent =
   | GitHubEventIssuesOpened
   | GitHubEventIssueCommentCreated
   | GitHubEventPullRequestCommentCreated;
@@ -65,16 +66,16 @@ async function run(): Promise<void> {
     const workspace = "/workspace/app";
     const timeoutSecond = core.getInput('timeout') !== '' ? parseInt(core.getInput('timeout')) : 300;
 
-    if(anthropicApiKey === '') {
+    if (anthropicApiKey === '') {
       core.setFailed('Anthropic API Key is required');
       return;
     }
-    
+
     // Initialize GitHub Client
     const octokit = github.getOctokit(githubToken);
     const context = github.context;
     const repo = context.repo;
-    
+
     // Load event data
     const eventPayload = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
 
@@ -92,56 +93,66 @@ async function run(): Promise<void> {
       core.setFailed(`Failed during repository cloning: ${error instanceof Error ? error.message : error}`);
       return;
     }
-    
+
     // Check if text contains the /claude command
     const text = extractText(event.github);
     if (!text || !text.includes('/claude')) {
       core.info('/claude command not found');
       return;
     }
-    
+
     // Extract text after /claude
-    const prompt = text.substring(text.indexOf('/claude') + 7).trim();
-    if (!prompt) {
+    const userPrompt = text.substring(text.indexOf('/claude') + 7).trim();
+    if (!userPrompt) {
       core.info('No text found after /claude');
       return;
     }
-    
+
     // Execute Claude CLI
     const originalFileState = captureFileState(workspace);
-    
-    core.info(`Executing Claude CLI: ${prompt}`);
-    const claudeOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSecond * 1000);
+
+    core.info(`Executing Claude CLI: ${userPrompt}`);
+    const claudeOutput = runClaudeCode(workspace, anthropicApiKey, userPrompt, timeoutSecond * 1000);
 
     // `Credit balance is too low` error handling
     if (claudeOutput.includes('Credit balance is too low')) {
       core.setFailed('Credit balance is too low');
       return;
     }
-    
+
     // Detect file changes
     const changedFiles = detectChanges(workspace, originalFileState);
 
     core.info('File changes detected. Files:\n' + changedFiles.join('\n'));
-    
+
     if (changedFiles.length > 0) {
       // If files were changed
       core.info(`Changed files: ${changedFiles.join(', ')}`);
-      
-      if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated')
-      {
+
+      // get Commit message
+      const commitMessage = await generateCommitMessage(
+        anthropicApiKey,
+        changedFiles,
+        workspace,
+        claudeOutput,
+        {
+          issueNumber: event.type === 'issuesOpened' || event.type === 'issueCommentCreated' ? event.github.issue.number : undefined,
+          prNumber: event.type === 'pullRequestCommentCreated' ? event.github.issue.number : undefined,
+        }
+      );
+
+      if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
         // For issues, create a PR
-        await createPullRequest(workspace, octokit, repo, event.github, changedFiles, claudeOutput);
+        await createPullRequest(workspace, octokit, repo, event.github, commitMessage, claudeOutput);
       } else if (event.type === 'pullRequestCommentCreated') {
         // For PRs, commit the changes
-        await commitAndPush(workspace, octokit, repo, event.github, changedFiles, claudeOutput);
+        await commitAndPush(workspace, octokit, repo, event.github, commitMessage, claudeOutput);
       }
     } else {
       // If no files were changed, just post a comment
       core.info('No files were changed');
       await postComment(octokit, repo, event.github, claudeOutput);
     }
-    
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
@@ -318,14 +329,14 @@ async function createPullRequest(
   octokit: ReturnType<typeof github.getOctokit>,
   repo: { owner: string; repo: string },
   event: GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
-  changedFiles: string[],
+  commitMessage: string,
   claudeOutput: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
   const branchName = `claude-changes-${issueNumber}`;
-  const commitMessage = `Apply changes by Claude for #${issueNumber}\n\n${claudeOutput}`;
 
   try {
+    // Set up Git and create a new branch
     core.info('Configuring Git user identity locally...');
     execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
     execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
@@ -345,7 +356,7 @@ async function createPullRequest(
     core.info('Creating Pull Request...');
     const pr = await octokit.rest.pulls.create({
       ...repo,
-      title: `Claude changes for #${issueNumber}: ${event.issue.title}`,
+      title: `Claude changes for #${issueNumber}: ${commitMessage}`,
       head: branchName,
       base: github.context.ref.replace('refs/heads/', ''), // Use the branch the action ran on as base
       body: `Applied changes based on Issue #${issueNumber}.\n\n## Claude Output\n${claudeOutput}`,
@@ -356,14 +367,93 @@ async function createPullRequest(
 
     // Optionally, post a comment linking to the PR in the original issue
     await octokit.rest.issues.createComment({
-        ...repo,
-        issue_number: issueNumber,
-        body: `Created Pull Request with Claude's changes: ${pr.data.html_url}`,
+      ...repo,
+      issue_number: issueNumber,
+      body: `Created Pull Request with Claude's changes: ${pr.data.html_url}`,
     });
 
   } catch (error) {
     core.error(`Error creating Pull Request: ${error}`);
     throw new Error(`Failed to create Pull Request: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+/**
+ * Function to generate Git commit messages using Anthropic API
+ * @param apiKey Anthropic API Key
+ * @param changedFiles List of changed files
+ * @param workspace Workspace path
+ * @param userPrompt
+ * @param context Context information (PR number, Issue number, etc.)
+ * @returns Generated commit message
+ */
+async function generateCommitMessage(
+  apiKey: string,
+  changedFiles: string[],
+  workspace: string,
+  userPrompt: string,
+  context: { prNumber?: number; issueNumber?: number; }
+): Promise<string> {
+  try {
+    // Get changes
+    const gitDiff = execaSync('git', ['diff', '--staged'], { cwd: workspace }).stdout;
+
+    // Limit to 2000 characters
+    const truncatedDiff = gitDiff.length > 2000 ? gitDiff.substring(0, 2000) + '...(truncated)' : gitDiff;
+
+    // Create prompt
+    let prompt = `Based on the following Git diff, generate a concise and clear commit message.
+The commit message should follow this format:
+* Summary of changes (50 characters or less)
+
+User Request:
+${userPrompt}
+
+Git diff:
+\`\`\`
+${truncatedDiff}
+\`\`\``;
+
+    // Add context information if available
+    if (context.prNumber) {
+      prompt += `\n\nThis change is related to PR #${context.prNumber}.`;
+    }
+    if (context.issueNumber) {
+      prompt += `\n\nThis change is related to Issue #${context.issueNumber}.`;
+    }
+
+    // Call Anthropic API
+    const anthropic = new Anthropic({
+      apiKey: apiKey,
+    });
+
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    // Extract commit message from response
+    let commitMessage = '';
+    for (const block of response.content) {
+      if (block.type === 'text') {
+        commitMessage += block.text;
+      }
+    }
+    commitMessage = commitMessage.trim();
+
+    core.info(`Generated commit message: ${commitMessage}`);
+    return commitMessage;
+  } catch (error) {
+    core.warning(`Error generating commit message: ${error instanceof Error ? error.message : String(error)}`);
+    // Return default message in case of error
+    if (context.prNumber) {
+      return `Apply changes for PR #${context.prNumber}`;
+    } else if (context.issueNumber) {
+      return `Apply changes for Issue #${context.issueNumber}`;
+    } else {
+      return `Apply changes to ${changedFiles.length} files`;
+    }
   }
 }
 
@@ -373,27 +463,30 @@ async function commitAndPush(
   octokit: ReturnType<typeof github.getOctokit>,
   repo: { owner: string; repo: string },
   event: GitHubEventPullRequestCommentCreated,
-  changedFiles: string[],
+  commitMessage: string,
   claudeOutput: string
 ): Promise<void> {
   const prNumber = event.issue.number; // In PR comments, issue.number is the PR number
-  const commitMessage = `Apply changes by Claude based on comment in #${prNumber}\n\n${claudeOutput}`;
+
+  // Add changed files before committing
+  core.info('Adding changed files to Git...');
+  execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
 
   try {
     // Get current branch name from the PR context if possible, otherwise from git
     let currentBranch: string;
     try {
-        const prData = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
-        currentBranch = prData.data.head.ref;
-        core.info(`Checked out PR branch: ${currentBranch}`);
-        execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+      const prData = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
+      currentBranch = prData.data.head.ref;
+      core.info(`Checked out PR branch: ${currentBranch}`);
+      execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
     } catch (e) {
-        core.warning(`Could not get PR branch from API, falling back to git: ${e}`);
-        const branchResult = execaSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: workspace });
-        currentBranch = branchResult.stdout.trim();
-        core.info(`Current branch from git: ${currentBranch}`);
-        // Ensure we are on the correct branch if the checkout happened before the action ran
-        execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+      core.warning(`Could not get PR branch from API, falling back to git: ${e}`);
+      const branchResult = execaSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: workspace });
+      currentBranch = branchResult.stdout.trim();
+      core.info(`Current branch from git: ${currentBranch}`);
+      // Ensure we are on the correct branch if the checkout happened before the action ran
+      execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
     }
 
     core.info('Configuring Git user identity locally...');
@@ -429,26 +522,24 @@ async function postComment(
   claudeOutput: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
-  
+
   await octokit.rest.issues.createComment({
     ...repo,
     issue_number: issueNumber,
-    body: `## Claude Code Response:\n${claudeOutput}\n`,
+    body: `${claudeOutput}\n`,
   });
-  
+
   core.info(`Comment has been posted to Issue/PR #${issueNumber}`);
 }
 
 
-function runClaudeCode(workspace:string, apiKey: string, prompt: string, timeout: number): string {
+function runClaudeCode(workspace: string, apiKey: string, prompt: string, timeout: number): string {
   // Execute claude command
   const claudeResult = execaSync({
     shell: '/bin/zsh',
     timeout: timeout, // ms,
     cwd: workspace,
   })`ANTHROPIC_API_KEY=${apiKey} claude -p ${prompt} --allowedTools Bash,Edit,Write`;
-  //dump
-  core.info(`Claude CLI output: ${JSON.stringify(claudeResult)}`);
   return claudeResult.stdout;
 }
 
