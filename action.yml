@@ -20,10 +20,6 @@ inputs:
     description: 'Specify timeout duration (seconds)'
     default: '300'
     required: false
-  workspace:
-    description: 'Specify the workspace directory'
-    default: '/workspace'
-    required: false
 
 runs:
   using: 'docker'

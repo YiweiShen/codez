@@ -58,7 +58,7 @@ async function run(): Promise<void> {
     const githubToken = core.getInput('github-token', { required: true });
     const anthropicApiKey = core.getInput('anthropic-api-key', { required: true });
     const eventPath = core.getInput('event-path', { required: true });
-    const workspace = core.getInput('workspace', { required: true });
+    const workspace = "/workspace/app";
     const timeoutSecond = core.getInput('timeout') !== '' ? parseInt(core.getInput('timeout')) : 300;
 
     if(anthropicApiKey === '') {
