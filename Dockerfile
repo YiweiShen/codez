@@ -66,7 +66,9 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
 
-RUN rm -rf /workspace/*
+RUN rm -rf /workspace/* && \
+  chown -R node:node /workspace && \
+  chmod -R 777 /workspace
 
 # アプリケーションディレクトリを作成
 WORKDIR /app
