@@ -1,6 +1,6 @@
 # Claude Code GitHub Agent
 
-__Work in Progress. Currently not working due to a bug in [Claude Code issues#551](https://github.com/anthropics/claude-code/issues/551)__
+__Work in Progress.__ 
 
 An AI Agent that operates Claude Code on GitHub Actions. By using this action, you can directly invoke Claude Code from GitHub Issues or Pull Request comments and automate code changes.
 
@@ -11,6 +11,13 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 - Post Claude's output as a comment if there are no changes
 
 ## Usage
+
+### Project Setting
+`Actions` -> `General` -> `Workflow permissions`
+* Read and write permissions
+* ✔ Allow GitHub Actions to create and approve pull requests
+![image](https://github.com/user-attachments/assets/e78e60d0-9e16-425e-bcad-264c8f81b878)
+
 
 ### Workflow Configuration
 
@@ -35,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Claude Code GitHub Agent
-        uses: potproject/claude-code-github-agent@v0-test
+        uses: potproject/claude-code-github-agent@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
