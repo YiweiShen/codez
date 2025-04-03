@@ -328,7 +328,7 @@ async function createPullRequest(
   try {
     core.info('Configuring Git user identity locally...');
     execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
-   execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
+    execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
 
     core.info(`Creating new branch: ${branchName}`);
     execaSync('git', ['checkout', '-b', branchName], { cwd: workspace, stdio: 'inherit' });
@@ -396,6 +396,9 @@ async function commitAndPush(
         execaSync('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
     }
 
+    core.info('Configuring Git user identity locally...');
+    execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
+    execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
 
     core.info('Adding changed files to Git...');
     // Add all changed files (including deleted ones)
