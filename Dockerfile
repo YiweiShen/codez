@@ -83,4 +83,4 @@ COPY . .
 RUN npm run build
 
 # エントリポイントの設定
-ENTRYPOINT ["node", "claude-code-github-agent"]
+ENTRYPOINT ["node", "/app/dist/index.js"]
