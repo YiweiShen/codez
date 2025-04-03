@@ -83,8 +83,9 @@ RUN npm run build
 # /app/dist/index.jsをbinaryとして実行可能にする
 
 USER root
-RUN mv /app/dist/index.js /usr/local/bin/claude-code-github-agent && \
-  sed -i '1s;^;#!/usr/bin/env node\n;' /app/dist/index.js && \
+
+RUN sed -i '1s;^;#!/usr/bin/env node\n;' /app/dist/index.js && \
+  mv /app/dist/index.js /usr/local/bin/claude-code-github-agent && \
   chmod +x /usr/local/bin/claude-code-github-agent
 
 RUN rm -rf /workspace/*
