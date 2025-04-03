@@ -395,24 +395,19 @@ async function generateCommitMessage(
   context: { prNumber?: number; issueNumber?: number; }
 ): Promise<string> {
   try {
-    // Get changes
-    const gitDiff = execaSync('git', ['diff', '--staged'], { cwd: workspace }).stdout;
-
-    // Limit to 2000 characters
-    const truncatedDiff = gitDiff.length > 2000 ? gitDiff.substring(0, 2000) + '...(truncated)' : gitDiff;
 
     // Create prompt
-    let prompt = `Based on the following Git diff, generate a concise and clear commit message.
-The commit message should follow this format:
-* Summary of changes (50 characters or less)
+    let prompt = `Based on the following file changed and User Request, generate a concise and clear git commit message.
+  The commit message should follow this format:
+  * Summary of changes (50 characters or less). Please do not include any other text.
 
-User Request:
-${userPrompt}
+  User Request:
+  ${userPrompt}
 
-Git diff:
-\`\`\`
-${truncatedDiff}
-\`\`\``;
+  files changed:
+  \`\`\`
+  ${changedFiles.join('\n')}
+  \`\`\``;
 
     // Add context information if available
     if (context.prNumber) {
