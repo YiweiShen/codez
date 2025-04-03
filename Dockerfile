@@ -66,6 +66,8 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
 
+RUN rm -rf /workspace/*
+
 # アプリケーションディレクトリを作成
 WORKDIR /app
 
@@ -80,15 +82,5 @@ COPY . .
 
 RUN npm run build
 
-# /app/dist/index.jsをbinaryとして実行可能にする
-
-USER root
-
-RUN sed -i '1s;^;#!/usr/bin/env node\n;' /app/dist/index.js && \
-  mv /app/dist/index.js /usr/local/bin/claude-code-github-agent && \
-  chmod +x /usr/local/bin/claude-code-github-agent
-
-RUN rm -rf /workspace/*
-
 # エントリポイントの設定
-ENTRYPOINT ["claude-code-github-agent"]
+ENTRYPOINT ["node", "claude-code-github-agent"]
