@@ -38,6 +38,7 @@ type GitHubEventPullRequestCommentCreated = {
 }
 
 type GithubComment = {
+  id: number;
   body: string;
 }
 
@@ -84,6 +85,15 @@ async function run(): Promise<void> {
     if (!event) {
       core.info('Unsupported event type');
       return;
+    }
+
+    // Add eyes reaction to show the action is processing the event
+    try {
+      await addEyeReaction(octokit, repo, event.github);
+      core.info('Added eyes reaction to the event');
+    } catch (error) {
+      core.warning(`Could not add reaction: ${error instanceof Error ? error.message : error}`);
+      // Continue execution even if adding reaction fails
     }
 
     // Clone the repository
@@ -229,6 +239,35 @@ function getEventType(payload: any): AgentEvent | null {
     return { type: 'pullRequestCommentCreated', github: payload };
   }
   return null;
+}
+
+// Function to add eye reaction to the event source
+async function addEyeReaction(
+  octokit: ReturnType<typeof github.getOctokit>,
+  repo: { owner: string; repo: string },
+  event: GitHubEvent
+): Promise<void> {
+  try {
+    if (event.action === 'opened') {
+      // Add eye reaction to issue
+      await octokit.rest.reactions.createForIssue({
+        ...repo,
+        issue_number: event.issue.number,
+        content: 'eyes'
+      });
+      core.info(`Added eye reaction to issue #${event.issue.number}`);
+    } else if (event.action === 'created' && 'comment' in event) {
+      // Add eye reaction to comment
+      await octokit.rest.reactions.createForIssueComment({
+        ...repo,
+        comment_id: event.comment.id,
+        content: 'eyes'
+      });
+      core.info(`Added eye reaction to comment on issue/PR #${event.issue.number}`);
+    }
+  } catch (error) {
+    core.warning(`Failed to add reaction: ${error instanceof Error ? error.message : error}`);
+  }
 }
 
 // Function to extract text
@@ -530,12 +569,25 @@ async function postComment(
 
 function runClaudeCode(workspace: string, apiKey: string, prompt: string, timeout: number): string {
   // Execute claude command
-  const claudeResult = execaSync({
-    shell: '/bin/zsh',
-    timeout: timeout, // ms,
-    cwd: workspace,
-  })`ANTHROPIC_API_KEY=${apiKey} claude -p ${prompt} --allowedTools Bash,Edit,Write`;
-  return claudeResult.stdout;
+  try {
+    const claudeResult = execaSync({
+      shell: '/bin/zsh',
+      timeout: timeout, // ms,
+      cwd: workspace,
+    })`ANTHROPIC_API_KEY=${apiKey} claude -p ${prompt} --allowedTools Bash,Edit,Write`;
+    if (claudeResult.exitCode !== 0) {
+      throw new Error(`Claude command failed with exit code ${claudeResult.exitCode}`);
+    }
+
+    if (claudeResult.stderr) {
+      core.warning(`Claude command stderr: ${claudeResult.stderr}`);
+      return claudeResult.stderr;
+    }
+    return claudeResult.stdout;
+  } catch (error) {
+    core.error(`Error executing claude command: ${error}`);
+    throw new Error(`Failed to execute claude command: ${error instanceof Error ? error.message : error}`);
+  }
 }
 
 // Execute main function
