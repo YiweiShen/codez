@@ -326,22 +326,15 @@ async function createPullRequest(
   const commitMessage = `Apply changes by Claude for #${issueNumber}\n\n${claudeOutput}`;
 
   try {
+    core.info('Configuring Git user identity locally...');
+    execaSync('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
+   execaSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
+
     core.info(`Creating new branch: ${branchName}`);
     execaSync('git', ['checkout', '-b', branchName], { cwd: workspace, stdio: 'inherit' });
 
     core.info('Adding changed files to Git...');
-    // Add all changed files (including deleted ones)
     execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
-    // Alternatively, add specific files if needed:
-    // changedFiles.forEach(file => {
-    //   if (fs.existsSync(path.join(workspace, file))) {
-    //     execaSync('git', ['add', file], { cwd: workspace, stdio: 'inherit' });
-    //   } else {
-    //     // Handle deleted files if 'git add -A' is not used
-    //     execaSync('git', ['rm', file], { cwd: workspace, stdio: 'inherit' });
-    //   }
-    // });
-
 
     core.info('Committing changes...');
     execaSync('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
