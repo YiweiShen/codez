@@ -1,4 +1,4 @@
-# Claude Code GitHub Agent
+#  Code Agent
 
 An AI Agent that operates Claude Code on GitHub Actions. By using this action, you can directly invoke Claude Code from GitHub Issues or Pull Request comments and automate code changes.
 
@@ -20,7 +20,7 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 ### Workflow Configuration
 
 ```yaml
-name: Claude Code GitHub Agent
+name: Code Agent
 
 permissions:
   contents: write
@@ -36,11 +36,11 @@ on:
     types: [created]
 
 jobs:
-  claude-agent:
+  code-agent:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Claude Code GitHub Agent
-        uses: potproject/claude-code-github-agent@v0
+      - name: Run Code Agent
+        uses: potproject/code-agent@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -17,16 +17,16 @@ import { ActionConfig } from './config.js';
 import { ProcessedEvent } from './event.js';
 
 /**
- * Handles the result of Claude's execution based on file changes and event type.
+ * Handles the result of execution.
  * @param config Action configuration.
  * @param processedEvent Processed event data.
- * @param claudeOutput Output from the Claude CLI.
+ * @param output
  * @param changedFiles Array of changed file paths.
  */
 async function handleResult(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
-  claudeOutput: string,
+  output: string,
   changedFiles: string[]
 ): Promise<void> {
   const { octokit, repo, workspace, anthropicApiKey } = config;
@@ -54,7 +54,7 @@ async function handleResult(
         repo,
         agentEvent.github as GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
         commitMessage,
-        claudeOutput
+        output
       );
     } else if (agentEvent.type === 'pullRequestCommentCreated') {
       await commitAndPush(
@@ -63,12 +63,12 @@ async function handleResult(
         repo,
         agentEvent.github as GitHubEventPullRequestCommentCreated,
         commitMessage,
-        claudeOutput
+        output
       );
     }
   } else {
     // No files changed, post Claude's output as a comment
-    await postComment(octokit, repo, agentEvent.github, `${claudeOutput}`);
+    await postComment(octokit, repo, agentEvent.github, `${output}`);
   }
 }
 
@@ -96,9 +96,9 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   // Execute Claude CLI
   core.info('Executing Claude Code CLI...');
   core.info(`Prompt: \n${prompt}`);
-  let claudeOutput;
+  let output;
   try {
-    claudeOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
+    output = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
   } catch (error) {
     await postComment(
       octokit,
@@ -114,7 +114,7 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   const changedFiles = detectChanges(workspace, originalFileState);
 
   // Handle the results
-  await handleResult(config, processedEvent, claudeOutput, changedFiles);
+  await handleResult(config, processedEvent, output, changedFiles);
 
   core.info('Action completed successfully.');
 }

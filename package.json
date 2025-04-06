@@ -1,5 +1,5 @@
 {
-  "name": "claude-code-github-agent",
+  "name": "code-agent",
   "version": "1.0.0",
   "description": "AI Agent that operates Claude Code on GitHub Actions",
   "main": "dist/index.js",

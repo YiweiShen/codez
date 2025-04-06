@@ -70,13 +70,13 @@ ${changedFiles.join('\n')}
     core.warning(`Error generating commit message: ${error instanceof Error ? error.message : String(error)}. Using fallback.`);
     // Return default message in case of error
     if (context.prNumber) {
-      return `Apply Claude changes for PR #${context.prNumber}`;
+      return `Apply changes for PR #${context.prNumber}`;
     } else if (context.issueNumber) {
-      return `Apply Claude changes for Issue #${context.issueNumber}`;
+      return `Apply changes for Issue #${context.issueNumber}`;
     } else {
       // Generic fallback if no context number is available
       const fileCount = changedFiles.length;
-      return `Apply Claude changes to ${fileCount} file${fileCount !== 1 ? 's' : ''}`;
+      return `Apply changes to ${fileCount} file${fileCount !== 1 ? 's' : ''}`;
     }
   }
 }

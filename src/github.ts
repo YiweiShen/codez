@@ -195,12 +195,12 @@ export async function createPullRequest(
   repo: RepoContext,
   event: GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
   commitMessage: string,
-  claudeOutput: string
+  output: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
-  let branchName = `claude-changes-${issueNumber}`;
+  let branchName = `code-agent-changes-${issueNumber}`;
   if (event.action == "created") {
-    branchName = `claude-changes-${issueNumber}-${event.comment.id}`;
+    branchName = `code-agent-changes-${issueNumber}-${event.comment.id}`;
   }
   const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
@@ -229,10 +229,10 @@ export async function createPullRequest(
     core.info('Creating Pull Request...');
     const pr = await octokit.rest.pulls.create({
       ...repo,
-      title: `Claude changes for #${issueNumber}: ${commitMessage}`,
+      title: `Code Agent changes for #${issueNumber}: ${commitMessage}`,
       head: branchName,
       base: baseBranch, // Use the default branch as base
-      body: `Applied changes based on Issue #${issueNumber}.\n\n${claudeOutput}`,
+      body: `Applied changes based on Issue #${issueNumber}.\n\n${output}`,
       maintainer_can_modify: true,
     });
 
@@ -242,7 +242,7 @@ export async function createPullRequest(
     await octokit.rest.issues.createComment({
       ...repo,
       issue_number: issueNumber,
-      body: `Created Pull Request with Claude's changes: ${pr.data.html_url}`,
+      body: `Created Pull Request #${pr.data.number} for your issue: ${pr.data.html_url}`,
     });
 
   } catch (error) {
@@ -260,7 +260,7 @@ export async function commitAndPush(
   repo: RepoContext,
   event: GitHubEventPullRequestCommentCreated,
   commitMessage: string,
-  claudeOutput: string
+  output: string
 ): Promise<void> {
   const prNumber = event.issue.number; // In PR comments, issue.number is the PR number
 
@@ -295,8 +295,8 @@ export async function commitAndPush(
     const statusResult = execaSync('git', ['status', '--porcelain'], { cwd: workspace });
     if (!statusResult.stdout.trim()) {
         core.info('No changes to commit.');
-        // Post a comment indicating no changes were made or Claude's output if relevant
-        await postComment(octokit, repo, event, `${claudeOutput}`);
+        // Post a comment indicating no changes were made or output if relevant
+        await postComment(octokit, repo, event, `${output}`);
         return; // Exit early if no changes
     }
 
@@ -310,7 +310,7 @@ export async function commitAndPush(
     core.info('Changes committed and pushed.');
 
     // Post a comment confirming the changes
-    await postComment(octokit, repo, event, `${claudeOutput}`);
+    await postComment(octokit, repo, event, `${output}`);
 
   } catch (error) {
     core.error(`Error committing and pushing changes: ${error}`);
