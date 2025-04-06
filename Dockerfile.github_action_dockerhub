@@ -1,1 +1,1 @@
-FROM ghcr.io/potproject/claude-code-github-agent:latest
+FROM ghcr.io/potproject/claude-code-github-agent:v0

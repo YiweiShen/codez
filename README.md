@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Claude Code GitHub Agent
-        uses: potproject/claude-code-github-agent@main
+        uses: potproject/claude-code-github-agent@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
