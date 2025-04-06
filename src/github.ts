@@ -408,19 +408,18 @@ async function getIssueData(
       login: issueResponse.data.user?.login ?? 'anonymous'
     };
 
-    // Get the most recent 10 issue comments
-    const commentsResponse = await octokit.rest.issues.listComments({
+    // Get all issue comments by using paginate
+    const commentsData = await octokit.paginate(octokit.rest.issues.listComments, {
         ...repo,
         issue_number: issueNumber,
-        per_page: 10,     // Limit to 10 comments
-        sort: 'created',  // Sort by creation time
-        direction: 'desc' // Get the newest first
+        per_page: 100,    // Fetch 100 per page for efficiency
     });
-    const comments = commentsResponse.data.map(comment => ({
+    
+    const comments = commentsData.map(comment => ({
       body: comment.body ?? '',
       login: comment.user?.login ?? 'anonymous'
     })); // Extract comment bodies and authors
-    core.info(`Fetched ${comments.length} most recent comments for issue #${issueNumber}.`);
+    core.info(`Fetched ${commentsData.length} comments for issue #${issueNumber}.`);
 
     return { content, comments };
   } catch (error) {
@@ -452,19 +451,17 @@ async function getPullRequestData(
       login: prResponse.data.user?.login ?? 'anonymous'
     };
 
-    // Get the most recent 10 PR comments (using the issues API endpoint for the corresponding issue number)
-    const commentsResponse = await octokit.rest.issues.listComments({
+    // Get all PR comments by using paginate (using the issues API endpoint for the corresponding issue number)
+    const commentsData = await octokit.paginate(octokit.rest.issues.listComments, {
         ...repo,
         issue_number: pullNumber, // Use pullNumber as issue_number for comments
-        per_page: 10,     // Limit to 10 comments
-        sort: 'created',  // Sort by creation time
-        direction: 'desc' // Get the newest first
+        per_page: 100,    // Fetch 100 per page for efficiency
     });
-    const comments = commentsResponse.data.map(comment => ({
+    const comments = commentsData.map(comment => ({
       body: comment.body ?? '',
       login: comment.user?.login ?? 'unknown'
     }));
-    core.info(`Fetched ${comments.length} most recent comments for PR #${pullNumber}.`);
+    core.info(`Fetched ${commentsData.length} comments for PR #${pullNumber}.`);
 
     // Note: This fetches *issue comments* on the PR. To get *review comments* (comments on specific lines of code),
     // you would use `octokit.paginate(octokit.rest.pulls.listReviewComments, { ... })`.
