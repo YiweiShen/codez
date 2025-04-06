@@ -1,7 +1,5 @@
 # Claude Code GitHub Agent
 
-__Work in Progress.__ 
-
 An AI Agent that operates Claude Code on GitHub Actions. By using this action, you can directly invoke Claude Code from GitHub Issues or Pull Request comments and automate code changes.
 
 ## Features
@@ -67,7 +65,3 @@ Comment on an existing Pull Request to request code modifications:
 ```
 
 Claude will analyze the comment and add test code to the existing PR branch.
-
-## License
-
-MIT
