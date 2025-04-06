@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
-import { AgentEvent, getEventType, extractText, GitHubEvent } from './github';
-import { ActionConfig } from './config';
+import { AgentEvent, getEventType, extractText } from './github.js';
+import { ActionConfig } from './config.js';
 
 export interface ProcessedEvent {
   agentEvent: AgentEvent;

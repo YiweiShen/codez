@@ -10,11 +10,11 @@ import {
   GitHubEventPullRequestCommentCreated,
   AgentEvent // Add AgentEvent import
 } from './github';
-import { generateCommitMessage } from './claude';
-import { runClaudeCode } from './claudecode';
-import { captureFileState, detectChanges } from './file';
-import { ActionConfig } from './config';
-import { ProcessedEvent } from './event';
+import { generateCommitMessage } from './claude.js';
+import { runClaudeCode } from './claudecode.js';
+import { captureFileState, detectChanges } from './file.js';
+import { ActionConfig } from './config.js';
+import { ProcessedEvent } from './event.js';
 
 /**
  * Handles the result of Claude's execution based on file changes and event type.

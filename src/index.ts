@@ -1,4 +1,4 @@
-import { run } from './main';
+import { run } from './main.js';
 
 // Execute the main function
 run();

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
-import { getConfig } from './config';
-import { processEvent } from './event';
-import { runAction } from './action';
+import { getConfig } from './config.js';
+import { processEvent } from './event.js';
+import { runAction } from './action.js';
 
 /**
  * Main function for the GitHub Action.
