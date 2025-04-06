@@ -10,11 +10,20 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 
 ## Usage
 
-### Project Setting
-`Actions` -> `General` -> `Workflow permissions`
+### Project Settings
+
+#### Settings -> Actions -> General -> Workflow permissions
+
 * Read and write permissions
 * ✔ Allow GitHub Actions to create and approve pull requests
+
 ![image](https://github.com/user-attachments/assets/e78e60d0-9e16-425e-bcad-264c8f81b878)
+
+#### Settings -> Secrets and variables -> Actions -> Secrets
+
+* Repository secrets Set `ANTHROPIC_API_KEY`
+
+![image](https://github.com/user-attachments/assets/8ae22808-9df5-4709-adaa-1e9d8c634f51)
 
 
 ### Workflow Configuration
@@ -45,6 +54,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
+
+## Example
+
+View on [code-agent-example Issues](https://github.com/potproject/code-agent-example/issues) / [code-agent-example Pulls](https://github.com/potproject/code-agent-example/pulls)
 
 ### Example Usage in Issues
 
