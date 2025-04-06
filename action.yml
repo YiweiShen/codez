@@ -1,8 +1,8 @@
-name: 'CodeAgent'
+name: 'Code-Agent'
 description: 'AI Agent that operates Claude Code on GitHub'
 author: 'potproject'
 branding:
-  icon: 'message-circle'
+  icon: 'code'
   color: 'purple'
 
 inputs:
