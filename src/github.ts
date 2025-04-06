@@ -374,20 +374,22 @@ function genContentsString(content: { body: string; login: string }, userPrompt:
     return "";
   }
 
-  // bodyの先頭に/claudeがついている場合は削除する
+  // Remove the first line if it contains the command
+  if (!body.startsWith("/claude") || login !== 'github-actions[bot]') {
+    return "";
+  }
+
   if (body.startsWith("/claude")) {
     body = body.substring(body.indexOf("\n") + 1).trim();
   }
 
-  // bodyとuserPromptが同じ場合は、スキップする
-  if (body === userPrompt) {
-    core.info("Skip same body and userPrompt");
+  // If body and userPrompt are the same, skip
+  if (body === userPrompt.trim()) {
     return "";
   }
 
-  core.info(`login: ${login}`);
-  if (login === 'github-actions') {
-    // bodyの先頭に「>」をつける、改行も考慮する
+  if (login === 'github-actions[bot]') {
+    // Add ">" to the beginning of the body, considering line breaks
     const lines = body.split('\n');
     const quotedLines = lines.map(line => `> ${line}`);
     return `> ${quotedLines.join('\n> ')}\n\n`;
