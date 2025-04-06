@@ -381,9 +381,11 @@ function genContentsString(content: { body: string; login: string }, userPrompt:
 
   // bodyとuserPromptが同じ場合は、スキップする
   if (body === userPrompt) {
+    core.info("Skip same body and userPrompt");
     return "";
   }
 
+  core.info(`login: ${login}`);
   if (login === 'github-actions') {
     // bodyの先頭に「>」をつける、改行も考慮する
     const lines = body.split('\n');
