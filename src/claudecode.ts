@@ -16,7 +16,7 @@ export function runClaudeCode(workspace: string, apiKey: string, prompt: string,
       // Consider security implications of passing prompts directly if they contain sensitive info.
       const claudeResult = execaSync(
           'claude', // Assuming 'claude' is in the PATH
-          ['-p', prompt, '--allowedTools', 'Bash,Edit,Write'],
+          ['-p', prompt, '--allowedTools', 'Bash,Edit,Write,Replace'],
           {
               // shell: '/bin/zsh', // Avoid specifying shell unless necessary; execa handles PATH resolution
               timeout: timeout,
