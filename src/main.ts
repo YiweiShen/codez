@@ -2,20 +2,29 @@ import * as core from '@actions/core';
 import { getConfig } from './config.js';
 import { processEvent } from './event.js';
 import { runAction } from './action.js';
+import { checkPermission } from './permission.js';
 
 /**
  * Main function for the GitHub Action.
  */
 export async function run(): Promise<void> {
   try {
-    // 1. Get Configuration
+    
+    // Get Configuration
     const config = getConfig();
 
-    // 2. Process Event
+    // Process Event
     const processedEvent = processEvent(config);
 
-    // 3. Execute Action Logic or Handle Edge Cases
+    // Execute Action Logic or Handle Edge Cases
     if (!processedEvent) {
+      return;
+    }
+
+    // Permissions Check
+    const hasPermission = await checkPermission(config);
+    if (!hasPermission) {
+      core.warning('Permission check failed. Exiting process.');
       return;
     }
 
