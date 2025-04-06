@@ -349,19 +349,22 @@ export async function generatePrompt(
   event: AgentEvent,
   userPrompt: string
 ): Promise<string> {
-  if (event.type !== 'issuesOpened') {
+  if (event.type === 'issuesOpened') {
     return userPrompt;
   }
 
   const contents = await getContentsData(octokit, repo, event);
 
-  let propmt = "[History]\n";
-  propmt += genContentsString(contents.content, userPrompt);
+  let historyPropmt = genContentsString(contents.content, userPrompt);
   for (const comment of contents.comments) {
-    propmt += genContentsString(comment, userPrompt);
+    historyPropmt += genContentsString(comment, userPrompt);
   }
 
-  return propmt + "---\n\n" + userPrompt;
+  if (historyPropmt) {
+    return `[History]\n${historyPropmt}---\n\n${userPrompt}`;
+  }
+
+  return userPrompt;
 }
 
 function genContentsString(content: { body: string; login: string }, userPrompt: string): string {

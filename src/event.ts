@@ -50,7 +50,6 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
     core.info('No prompt found after "/claude" command.');
     return null; // Indicate missing prompt
   }
-  core.info(`User prompt: ${userPrompt}`);
 
   return { agentEvent, userPrompt };
 }
