@@ -20,8 +20,8 @@ export interface ActionConfig {
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const anthropicApiKey = core.getInput('anthropic-api-key', { required: true });
-  const eventPath = process.env.GITHUB_EVENT_PATH || core.getInput('event-path');
-  const workspace = process.env.GITHUB_WORKSPACE || '/workspace/app';
+  const eventPath = core.getInput('event-path');
+  const workspace = '/workspace/app';
   const timeoutSeconds = core.getInput('timeout') ? parseInt(core.getInput('timeout'), 10) : 300;
 
   if (!anthropicApiKey) {
