@@ -3,6 +3,7 @@ import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
 import { genContentsString } from './contents.js';
+import { eventNames } from 'process';
 
 // --- Type Definitions ---
 
@@ -197,7 +198,10 @@ export async function createPullRequest(
   claudeOutput: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
-  const branchName = `claude-changes-${issueNumber}`;
+  let branchName = `claude-changes-${issueNumber}`;
+  if (event.action == "created") {
+    branchName = `claude-changes-${issueNumber}-${event.comment.id}`;
+  }
   const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
   if (!baseBranch) {
