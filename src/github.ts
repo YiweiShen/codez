@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
+import { genContentsString } from './contents';
 
 // --- Type Definitions ---
 
@@ -366,40 +367,6 @@ export async function generatePrompt(
 
   return userPrompt;
 }
-
-function genContentsString(content: { body: string; login: string }, userPrompt: string): string {
-  let body = content.body.trim();
-  const login = content.login.trim();
-  if (!body) {
-    return "";
-  }
-
-  // Remove the first line if it contains the command
-  core.info(`[login]: ${login}`);
-  core.info(`[body]: ${body}`);
-  if (!body.startsWith("/claude") || login !== 'github-actions[bot]') {
-    return "";
-  }
-
-  if (body.startsWith("/claude")) {
-    body = body.substring(body.indexOf("\n") + 1).trim();
-  }
-
-  // If body and userPrompt are the same, skip
-  if (body === userPrompt.trim()) {
-    return "";
-  }
-
-  if (login === 'github-actions[bot]') {
-    // Add ">" to the beginning of the body, considering line breaks
-    const lines = body.split('\n');
-    const quotedLines = lines.map(line => `> ${line}`);
-    return `> ${quotedLines.join('\n> ')}\n\n`;
-  }
-
-  return body + "\n\n";
-}
-
 
 export async function getContentsData(
   octokit: Octokit,

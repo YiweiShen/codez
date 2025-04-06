@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "setting": "claude config set -g verbose true && claude config set -g autoUpdaterStatus disabled"
+    "test": "jest"
   },
   "keywords": [
     "github",
