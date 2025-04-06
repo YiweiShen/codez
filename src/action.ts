@@ -8,8 +8,7 @@ import {
   GitHubEventIssuesOpened,
   GitHubEventIssueCommentCreated,
   GitHubEventPullRequestCommentCreated,
-  AgentEvent // Add AgentEvent import
-} from './github';
+} from './github.js';
 import { generateCommitMessage } from './claude.js';
 import { runClaudeCode } from './claudecode.js';
 import { captureFileState, detectChanges } from './file.js';
