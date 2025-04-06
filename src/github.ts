@@ -54,6 +54,11 @@ export type GitHubPullRequest = {
   };
 }
 
+export type GithubContentsData = {
+  content: { number: number; title: string; body: string; login: string };
+  comments: { body: string; login: string }[];
+};
+
 type Octokit = ReturnType<typeof github.getOctokit>;
 type RepoContext = { owner: string; repo: string };
 
@@ -335,5 +340,159 @@ export async function postComment(
   } catch (error) {
       core.error(`Failed to post comment to Issue/PR #${issueNumber}: ${error}`);
       // Don't re-throw here, as posting a comment failure might not be critical
+  }
+}
+
+export async function generatePrompt(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: AgentEvent,
+  userPrompt: string
+): Promise<string> {
+  if (event.type !== 'issuesOpened') {
+    return userPrompt;
+  }
+
+  const contents = await getContentsData(octokit, repo, event);
+
+  let propmt = "[History]\n";
+  propmt += genContentsString(contents.content, userPrompt);
+  for (const comment of contents.comments) {
+    propmt += genContentsString(comment, userPrompt);
+  }
+
+  return propmt + "---\n\n" + userPrompt;
+}
+
+function genContentsString(content: { body: string; login: string }, userPrompt: string): string {
+  let body = content.body.trim();
+  const login = content.login.trim();
+  if (!body) {
+    return "";
+  }
+
+  // bodyの先頭に/claudeがついている場合は削除する
+  if (body.startsWith("/claude")) {
+    body = body.substring(body.indexOf("\n") + 1).trim();
+  }
+
+  // bodyとuserPromptが同じ場合は、スキップする
+  if (body === userPrompt) {
+    return "";
+  }
+
+  if (login === 'github-actions') {
+    // bodyの先頭に「>」をつける、改行も考慮する
+    const lines = body.split('\n');
+    const quotedLines = lines.map(line => `> ${line}`);
+    return `> ${quotedLines.join('\n> ')}\n\n`;
+  }
+
+  return body + "\n\n";
+}
+
+
+export async function getContentsData(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: AgentEvent
+): Promise<GithubContentsData> {
+  
+  if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
+    return await getIssueData(octokit, repo, event.github.issue.number);
+  } else if (event.type === 'pullRequestCommentCreated') {
+    return await getPullRequestData(octokit, repo, event.github.issue.number);
+  }
+  throw new Error('Invalid event type for data retrieval');
+}
+
+/**
+ * Retrieves the body and all comment bodies for a specific issue.
+ */
+async function getIssueData(
+  octokit: Octokit,
+  repo: RepoContext,
+  issueNumber: number
+): Promise<GithubContentsData> {
+  core.info(`Fetching data for issue #${issueNumber}...`);
+  try {
+    // Get issue body
+    const issueResponse = await octokit.rest.issues.get({
+      ...repo,
+      issue_number: issueNumber,
+    });
+    const content = {
+      number: issueResponse.data.number,
+      title: issueResponse.data.title,
+      body: issueResponse.data.body ?? '',
+      login: issueResponse.data.user?.login ?? 'anonymous'
+    };
+
+    // Get the most recent 10 issue comments
+    const commentsResponse = await octokit.rest.issues.listComments({
+        ...repo,
+        issue_number: issueNumber,
+        per_page: 10,     // Limit to 10 comments
+        sort: 'created',  // Sort by creation time
+        direction: 'desc' // Get the newest first
+    });
+    const comments = commentsResponse.data.map(comment => ({
+      body: comment.body ?? '',
+      login: comment.user?.login ?? 'anonymous'
+    })); // Extract comment bodies and authors
+    core.info(`Fetched ${comments.length} most recent comments for issue #${issueNumber}.`);
+
+    return { content, comments };
+  } catch (error) {
+    core.error(`Failed to get data for issue #${issueNumber}: ${error}`);
+    throw new Error(`Could not retrieve data for issue #${issueNumber}: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+/**
+ * Retrieves the body and all comment bodies for a specific pull request.
+ * Note: PR comments are fetched via the issues API endpoint.
+ */
+async function getPullRequestData(
+  octokit: Octokit,
+  repo: RepoContext,
+  pullNumber: number
+): Promise<GithubContentsData> {
+  core.info(`Fetching data for pull request #${pullNumber}...`);
+  try {
+    // Get PR body
+    const prResponse = await octokit.rest.pulls.get({
+      ...repo,
+      pull_number: pullNumber,
+    });
+    const content = {
+      number: prResponse.data.number,
+      title: prResponse.data.title,
+      body: prResponse.data.body ?? '',
+      login: prResponse.data.user?.login ?? 'anonymous'
+    };
+
+    // Get the most recent 10 PR comments (using the issues API endpoint for the corresponding issue number)
+    const commentsResponse = await octokit.rest.issues.listComments({
+        ...repo,
+        issue_number: pullNumber, // Use pullNumber as issue_number for comments
+        per_page: 10,     // Limit to 10 comments
+        sort: 'created',  // Sort by creation time
+        direction: 'desc' // Get the newest first
+    });
+    const comments = commentsResponse.data.map(comment => ({
+      body: comment.body ?? '',
+      login: comment.user?.login ?? 'unknown'
+    }));
+    core.info(`Fetched ${comments.length} most recent comments for PR #${pullNumber}.`);
+
+    // Note: This fetches *issue comments* on the PR. To get *review comments* (comments on specific lines of code),
+    // you would use `octokit.paginate(octokit.rest.pulls.listReviewComments, { ... })`.
+    // The current request asks for "all comments written on the PR", which typically refers to the main conversation thread (issue comments).
+
+    return { content, comments };
+  } catch (error) {
+    core.error(`Failed to get data for pull request #${pullNumber}: ${error}`);
+    throw new Error(`Could not retrieve data for pull request #${pullNumber}: ${error instanceof Error ? error.message : error}`);
   }
 }

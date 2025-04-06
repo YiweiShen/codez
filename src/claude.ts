@@ -58,7 +58,7 @@ ${changedFiles.join('\n')}
     commitMessage = commitMessage.trim().split('\n')[0]; // Take the first line
 
     // Fallback if the message is empty or too long
-    if (!commitMessage || commitMessage.length > 50) {
+    if (!commitMessage || commitMessage.length > 100) {
         core.warning(`Generated commit message was empty or too long: "${commitMessage}". Falling back.`);
         throw new Error("Generated commit message invalid."); // Trigger fallback
     }

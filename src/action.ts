@@ -8,6 +8,7 @@ import {
   GitHubEventIssuesOpened,
   GitHubEventIssueCommentCreated,
   GitHubEventPullRequestCommentCreated,
+  generatePrompt,
 } from './github.js';
 import { generateCommitMessage } from './claude.js';
 import { runClaudeCode } from './claudecode.js';
@@ -90,11 +91,15 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   // Capture initial file state
   const originalFileState = captureFileState(workspace);
 
+  // generate Propmt
+  const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
+
   // Execute Claude CLI
   core.info('Executing Claude Code CLI...');
+  core.info(`Prompt: \n${prompt}`);
   let claudeOutput;
   try {
-    claudeOutput = runClaudeCode(workspace, anthropicApiKey, userPrompt, timeoutSeconds * 1000);
+    claudeOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
   } catch (error) {
     await postComment(
       octokit,

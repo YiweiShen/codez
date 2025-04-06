@@ -35,6 +35,7 @@ export function runClaudeCode(workspace: string, apiKey: string, prompt: string,
         if (claudeResult.stderr.includes('Credit balance is too low')) {
             throw new Error('Credit balance is too low');
         }
+        throw new Error(`${claudeResult.stderr}`);
       }
   
       if (claudeResult.failed || claudeResult.exitCode !== 0) {
