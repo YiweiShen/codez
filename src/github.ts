@@ -227,7 +227,7 @@ export async function createPullRequest(
       title: `Claude changes for #${issueNumber}: ${commitMessage}`,
       head: branchName,
       base: baseBranch, // Use the default branch as base
-      body: `Applied changes based on Issue #${issueNumber}.\n\n## Claude Output\n${claudeOutput}`,
+      body: `Applied changes based on Issue #${issueNumber}.\n\n${claudeOutput}`,
       maintainer_can_modify: true,
     });
 
@@ -291,7 +291,7 @@ export async function commitAndPush(
     if (!statusResult.stdout.trim()) {
         core.info('No changes to commit.');
         // Post a comment indicating no changes were made or Claude's output if relevant
-        await postComment(octokit, repo, event, `Claude processed the request, but no code changes were detected.\n\n## Claude Output\n${claudeOutput}`);
+        await postComment(octokit, repo, event, `${claudeOutput}`);
         return; // Exit early if no changes
     }
 
@@ -305,7 +305,7 @@ export async function commitAndPush(
     core.info('Changes committed and pushed.');
 
     // Post a comment confirming the changes
-    await postComment(octokit, repo, event, `Applied changes to this PR based on your comment.\n\n## Claude Output\n${claudeOutput}`);
+    await postComment(octokit, repo, event, `${claudeOutput}`);
 
   } catch (error) {
     core.error(`Error committing and pushing changes: ${error}`);
@@ -375,6 +375,8 @@ function genContentsString(content: { body: string; login: string }, userPrompt:
   }
 
   // Remove the first line if it contains the command
+  core.info(`[login]: ${login}`);
+  core.info(`[body]: ${body}`);
   if (!body.startsWith("/claude") || login !== 'github-actions[bot]') {
     return "";
   }

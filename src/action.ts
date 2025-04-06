@@ -68,8 +68,7 @@ async function handleResult(
     }
   } else {
     // No files changed, post Claude's output as a comment
-    core.info('No file changes detected. Posting Claude output as comment.');
-    await postComment(octokit, repo, agentEvent.github, `Claude processed the request, but no file changes were made.\n\n## Claude Output\n${claudeOutput}`);
+    await postComment(octokit, repo, agentEvent.github, `${claudeOutput}`);
   }
 }
 
@@ -109,7 +108,7 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
     );
     return;
   }
-  core.info('Claude Code  CLI execution finished.');
+  core.info('Claude Code CLI execution finished.');
 
   // Detect file changes
   const changedFiles = detectChanges(workspace, originalFileState);
