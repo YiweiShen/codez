@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
-import { genContentsString } from './contents';
+import { genContentsString } from './contents.js';
 
 // --- Type Definitions ---
 
