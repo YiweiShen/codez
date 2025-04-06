@@ -51,8 +51,8 @@ async function checkUserPermissionGithub(
     core.info(`User ${username} permission level: ${permission}`);
 
     // Determine based on permission level
-    // Permission levels include `pull, triage, push, maintain, admin`
-    return ['push', 'maintain', 'admin'].includes(permission);
+    // Permission levels include `admin, write, read, none`
+    return ['admin', 'write'].includes(permission);
   } catch (error) {
     // The API may return an error if the user is not a collaborator
     core.warning(`Error checking user permissions: ${error}`);
