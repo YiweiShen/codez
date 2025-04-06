@@ -1,4 +1,4 @@
-name: 'Code Agent'
+name: 'CodeAgent'
 description: 'AI Agent that operates Claude Code on GitHub'
 author: 'potproject'
 branding:
