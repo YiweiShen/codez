@@ -16,10 +16,7 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
     return false;
   }
 
-  core.info(`Checking permissions for actor ${actor}`);
-
   try {
-    core.info(`Checking permissions for user ${actor} on repository ${repo.owner}/${repo.repo}`);
     return await checkUserPermissionGithub(octokit, repo, actor);
   } catch (error) {
     core.warning(`Exception occurred during permission check: ${error}`);
@@ -48,14 +45,13 @@ async function checkUserPermissionGithub(
     });
 
     const permission = collaboratorPermission.permission;
-    core.info(`User ${username} permission level: ${permission}`);
+    core.info(`User Permission level: ${permission}`);
 
     // Determine based on permission level
     // Permission levels include `admin, write, read, none`
     return ['admin', 'write'].includes(permission);
   } catch (error) {
     // The API may return an error if the user is not a collaborator
-    core.warning(`Error checking user permissions: ${error}`);
     
     try {
       // Alternative method: check repository membership
