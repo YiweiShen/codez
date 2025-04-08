@@ -15,6 +15,7 @@ import { runClaudeCode } from './claudecode.js';
 import { captureFileState, detectChanges } from './file.js';
 import { ActionConfig } from './config.js';
 import { ProcessedEvent } from './event.js';
+import { maskSensitiveInfo } from './permission.js';
 
 /**
  * Handles the result of execution.
@@ -98,7 +99,8 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   core.info(`Prompt: \n${prompt}`);
   let output;
   try {
-    output = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
+    const rawOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
+    output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {
     await postComment(
       octokit,

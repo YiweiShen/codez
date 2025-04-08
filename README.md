@@ -8,6 +8,13 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 - Automatically create a Pull Request or commit changes if Claude modifies code
 - Post Claude's output as a comment if there are no changes
 
+## Security
+
+This action implements the following security measures:
+
+* **Permission Checks:** Before executing core logic, the action verifies if the triggering user (`github.context.actor`) has `write` or `admin` permissions for the repository.
+* **Sensitive Information Masking:** Any occurrences of the provided `github-token` and `anthropic-api-key` within the output posted to GitHub are automatically masked (replaced with `***`) to prevent accidental exposure.
+
 ## Usage
 
 ### Project Settings
@@ -49,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.sender.type != 'Bot' }}
     steps:
-      - uses: potproject/code-agent@v0
+      - uses: potproject/code-agent@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -51,24 +51,25 @@ async function checkUserPermissionGithub(
     // Permission levels include `admin, write, read, none`
     return ['admin', 'write'].includes(permission);
   } catch (error) {
-    // The API may return an error if the user is not a collaborator
-    
-    try {
-      // Alternative method: check repository membership
-      // This works for organization repositories
-      const { data: membership } = await octokit.rest.orgs.getMembershipForUser({
-        org: repo.owner,
-        username,
-      });
-      
-      core.info(`User ${username} membership status in organization ${repo.owner}: ${membership.state}`);
-      
-      // Only allow users with active membership
-      return membership.state === 'active';
-    } catch (membershipError) {
-      // User is not a member of the organization, or the repository is personal
-      core.warning(`Error checking organization membership: ${membershipError}`);
-      return false;
-    }
+    core.warning(`Error checking user permission: ${error}`);
+    return false;
   }
+}
+
+/**
+ * Masks sensitive information (GitHub token and Anthropic API key) in a given string.
+ * @param text The text to mask.
+ * @param config Action configuration containing sensitive keys.
+ * @returns The masked text.
+ */
+export function maskSensitiveInfo(text: string, config: ActionConfig): string {
+  let maskedText = text;
+
+  if (config.githubToken) {
+    maskedText = maskedText.replaceAll(config.githubToken, '***');
+  }
+  if (config.anthropicApiKey) {
+    maskedText = maskedText.replaceAll(config.anthropicApiKey, '***');
+  }
+  return maskedText;
 }
