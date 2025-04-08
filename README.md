@@ -47,9 +47,9 @@ on:
 jobs:
   code-agent:
     runs-on: ubuntu-latest
+    if: ${{ github.event.sender.type != 'Bot' }}
     steps:
-      - name: Run Code Agent
-        uses: potproject/code-agent@v0
+      - uses: potproject/code-agent@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
