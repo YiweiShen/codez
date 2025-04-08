@@ -242,7 +242,7 @@ export async function createPullRequest(
     await octokit.rest.issues.createComment({
       ...repo,
       issue_number: issueNumber,
-      body: `Created Pull Request #${pr.data.number} for your issue: ${pr.data.html_url}`,
+      body: `Created Pull Request #${pr.data.number}`,
     });
 
   } catch (error) {
@@ -360,16 +360,45 @@ export async function generatePrompt(
 
   const contents = await getContentsData(octokit, repo, event);
 
+  let prFiles: string[] = [];
+
+  if (event.type === 'pullRequestCommentCreated') {
+    // Get the changed files in the PR
+    prFiles = await getChangedFiles(octokit, repo, event);
+  }
+
   let historyPropmt = genContentsString(contents.content, userPrompt);
   for (const comment of contents.comments) {
     historyPropmt += genContentsString(comment, userPrompt);
   }
 
+  let prompt = "";
   if (historyPropmt) {
-    return `[History]\n${historyPropmt}---\n\n${userPrompt}`;
+    prompt += `[History]\n${historyPropmt}\n\n`;
+  }
+  if (prFiles.length > 0) {
+    prompt += `[Changed Files]\n${prFiles.join('\n')}\n\n`;
   }
 
-  return userPrompt;
+  if (prompt) {
+    prompt += `---\n\n${userPrompt}`;
+  } else {
+    prompt = userPrompt;
+  }
+
+  return prompt;
+}
+
+export async function getChangedFiles(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: AgentEvent
+): Promise<string[]> {
+  const prFilesResponse = await octokit.rest.pulls.listFiles({
+    ...repo,
+    pull_number: event.github.issue.number,
+  });
+  return prFilesResponse.data.map(file => file.filename);
 }
 
 export async function getContentsData(
