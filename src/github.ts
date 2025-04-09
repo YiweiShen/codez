@@ -3,7 +3,6 @@ import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
 import { genContentsString } from './contents.js';
-import { eventNames } from 'process';
 
 // --- Type Definitions ---
 
@@ -11,12 +10,14 @@ export type AgentEvent =
   | { type: 'issuesOpened', github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated', github: GitHubEventIssueCommentCreated }
   | { type: 'pullRequestCommentCreated', github: GitHubEventPullRequestCommentCreated }
+  | { type: 'pullRequestReviewCommentCreated', github: GitHubEventPullRequestReviewCommentCreated }
   ;
 
 export type GitHubEvent =
   | GitHubEventIssuesOpened
   | GitHubEventIssueCommentCreated
-  | GitHubEventPullRequestCommentCreated;
+  | GitHubEventPullRequestCommentCreated
+  | GitHubEventPullRequestReviewCommentCreated;
 
 export type GitHubEventIssuesOpened = {
   action: 'opened';
@@ -33,6 +34,23 @@ export type GitHubEventPullRequestCommentCreated = {
   action: 'created';
   issue: GitHubPullRequest;
   comment: GithubComment;
+}
+
+export type GitHubEventPullRequestReviewCommentCreated = {
+  action: 'created';
+  pull_request: {
+    number: number;
+    title?: string;
+    body?: string;
+  };
+  comment: {
+    id: number;
+    body: string;
+    path: string;
+    in_reply_to_id?: number;
+    position?: number;
+    line?: number;
+  };
 }
 
 export type GithubComment = {
@@ -84,9 +102,9 @@ export async function cloneRepository(
 
   // Determine branch to clone
   let branchToClone: string;
-  if (event.type === 'pullRequestCommentCreated') {
+  if (event.type === 'pullRequestCommentCreated' || event.type === 'pullRequestReviewCommentCreated') {
     // For PR comments, clone the PR's head branch
-    const prNumber = event.github.issue.number;
+    const prNumber = event.type === 'pullRequestCommentCreated' ? event.github.issue.number : event.github.pull_request.number;
     try {
       const prData = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
       branchToClone = prData.data.head.ref;
@@ -136,6 +154,10 @@ export function getEventType(payload: any): AgentEvent | null {
   if (payload.action === 'created' && payload.issue && payload.issue.pull_request && payload.comment) {
     return { type: 'pullRequestCommentCreated', github: payload };
   }
+  // Check for Pull Request Review Comment (comment on a specific line of code)
+  if (payload.action === 'created' && payload.pull_request && payload.comment && payload.comment.path) {
+    return { type: 'pullRequestReviewCommentCreated', github: payload };
+  }
   return null;
 }
 
@@ -157,14 +179,22 @@ export async function addEyeReaction(
         content: 'eyes'
       });
       core.info(`Added eye reaction to issue #${event.issue.number}`);
-    } else if (event.action === 'created' && 'comment' in event) {
-      // Add eye reaction to comment
+    } else if (event.action === 'created' && 'comment' in event && 'issue' in event) {
+      // Add eye reaction to comment on issue or PR conversation
       await octokit.rest.reactions.createForIssueComment({
         ...repo,
         comment_id: event.comment.id,
         content: 'eyes'
       });
       core.info(`Added eye reaction to comment on issue/PR #${event.issue.number}`);
+    } else if (event.action === 'created' && 'comment' in event && 'pull_request' in event) {
+      // Add eye reaction to PR review comment
+      await octokit.rest.reactions.createForPullRequestReviewComment({
+        ...repo,
+        comment_id: event.comment.id,
+        content: 'eyes'
+      });
+      core.info(`Added eye reaction to review comment on PR #${event.pull_request.number}`);
     }
   } catch (error) {
     core.warning(`Failed to add reaction: ${error instanceof Error ? error.message : error}`);
@@ -178,7 +208,7 @@ export function extractText(event: GitHubEvent): string | null {
     if (event.action === 'opened' && 'issue' in event) {
         return event.issue.body;
     }
-    // Ensure 'comment' exists before accessing 'body'
+    // Ensure 'comment' exists before accessing 'body' for issue/PR comments
     if (event.action === 'created' && 'comment' in event && event.comment) {
         return event.comment.body;
     }
@@ -258,11 +288,12 @@ export async function commitAndPush(
   workspace: string,
   octokit: Octokit,
   repo: RepoContext,
-  event: GitHubEventPullRequestCommentCreated,
+  event: GitHubEventPullRequestCommentCreated | GitHubEventPullRequestReviewCommentCreated,
   commitMessage: string,
   output: string
 ): Promise<void> {
-  const prNumber = event.issue.number; // In PR comments, issue.number is the PR number
+  // Get PR number from the event - different location based on event type
+  const prNumber = 'issue' in event ? event.issue.number : event.pull_request.number;
 
   try {
     // Get current branch name from the PR context
@@ -333,18 +364,46 @@ export async function postComment(
   event: GitHubEvent,
   body: string
 ): Promise<void> {
-  const issueNumber = event.issue.number;
-
   try {
+    if ('issue' in event) {
+      // For regular issues and PR conversation comments
+      const issueNumber = event.issue.number;
       await octokit.rest.issues.createComment({
         ...repo,
         issue_number: issueNumber,
         body: body,
       });
       core.info(`Comment posted to Issue/PR #${issueNumber}`);
+    } else if ('pull_request' in event) {
+      // For PR review comments
+      const prNumber = event.pull_request.number;
+      const commentId = event.comment.id;
+      const inReplyTo = event.comment.in_reply_to_id;
+      
+      try {
+        await octokit.rest.pulls.createReplyForReviewComment({
+          ...repo,
+          pull_number: prNumber,
+          comment_id: inReplyTo ?? commentId, // Use the original comment ID if no reply
+          body: body,
+        });
+        core.info(`Comment posted to PR #${prNumber} Reply to comment #${commentId}`);
+
+      } catch (commentError) {
+        // If we can't determine if it's a top-level comment, fall back to creating a regular PR comment
+        core.warning(`Failed to check if comment is top-level: ${commentError instanceof Error ? commentError.message : commentError}`);
+        core.info(`Falling back to creating a regular PR comment instead of a reply`);
+        await octokit.rest.issues.createComment({
+          ...repo,
+          issue_number: prNumber,
+          body: body,
+        });
+        core.info(`Regular comment posted to PR #${prNumber}`);
+      }
+    }
   } catch (error) {
-      core.error(`Failed to post comment to Issue/PR #${issueNumber}: ${error}`);
-      // Don't re-throw here, as posting a comment failure might not be critical
+    core.error(`Failed to post comment: ${error instanceof Error ? error.message : error}`);
+    // Don't re-throw here, as posting a comment failure might not be critical
   }
 }
 
@@ -361,10 +420,20 @@ export async function generatePrompt(
   const contents = await getContentsData(octokit, repo, event);
 
   let prFiles: string[] = [];
+  let contextInfo: string = '';
 
-  if (event.type === 'pullRequestCommentCreated') {
+  if (event.type === 'pullRequestCommentCreated' || event.type === 'pullRequestReviewCommentCreated') {
     // Get the changed files in the PR
     prFiles = await getChangedFiles(octokit, repo, event);
+  }
+
+  // For PR review comments, add information about the file path and line
+  if (event.type === 'pullRequestReviewCommentCreated') {
+    const comment = event.github.comment;
+    contextInfo = `Comment on file: ${comment.path}`;
+    if (comment.line) {
+      contextInfo += `, line: ${comment.line}`;
+    }
   }
 
   let historyPropmt = genContentsString(contents.content, userPrompt);
@@ -375,6 +444,9 @@ export async function generatePrompt(
   let prompt = "";
   if (historyPropmt) {
     prompt += `[History]\n${historyPropmt}\n\n`;
+  }
+  if (contextInfo) {
+    prompt += `[Context]\n${contextInfo}\n\n`;
   }
   if (prFiles.length > 0) {
     prompt += `[Changed Files]\n${prFiles.join('\n')}\n\n`;
@@ -394,9 +466,19 @@ export async function getChangedFiles(
   repo: RepoContext,
   event: AgentEvent
 ): Promise<string[]> {
+  let prNumber: number;
+  
+  if (event.type === 'pullRequestCommentCreated') {
+    prNumber = event.github.issue.number;
+  } else if (event.type === 'pullRequestReviewCommentCreated') {
+    prNumber = event.github.pull_request.number;
+  } else {
+    throw new Error(`Cannot get changed files for event type: ${event.type}`);
+  }
+  
   const prFilesResponse = await octokit.rest.pulls.listFiles({
     ...repo,
-    pull_number: event.github.issue.number,
+    pull_number: prNumber,
   });
   return prFilesResponse.data.map(file => file.filename);
 }
@@ -411,6 +493,8 @@ export async function getContentsData(
     return await getIssueData(octokit, repo, event.github.issue.number);
   } else if (event.type === 'pullRequestCommentCreated') {
     return await getPullRequestData(octokit, repo, event.github.issue.number);
+  } else if (event.type === 'pullRequestReviewCommentCreated') {
+    return await getPullRequestReviewCommentsData(octokit, repo, event.github.pull_request.number, event.github.comment.in_reply_to_id ?? event.github.comment.id);
   }
   throw new Error('Invalid event type for data retrieval');
 }
@@ -454,6 +538,51 @@ async function getIssueData(
   } catch (error) {
     core.error(`Failed to get data for issue #${issueNumber}: ${error}`);
     throw new Error(`Could not retrieve data for issue #${issueNumber}: ${error instanceof Error ? error.message : error}`);
+  }
+}
+
+/**
+ * Retrieves the body and all review comment bodies for a specific pull request.
+ * Note: PR review comments are fetched via the pulls API endpoint.
+ */
+async function getPullRequestReviewCommentsData(
+  octokit: Octokit,
+  repo: RepoContext,
+  pullNumber: number,
+  targetCommentId: number
+): Promise<GithubContentsData> {
+  core.info(`Fetching data for pull request review comments #${pullNumber}...`);
+  try {
+    // Get PR body
+    const prResponse = await octokit.rest.pulls.get({
+      ...repo,
+      pull_number: pullNumber,
+    });
+    const content = {
+      number: prResponse.data.number,
+      title: prResponse.data.title,
+      body: prResponse.data.body ?? '',
+      login: prResponse.data.user?.login ?? 'anonymous'
+    };
+
+    // Get PR review comments
+    const commentsData = await octokit.paginate(octokit.rest.pulls.listReviewComments, {
+        ...repo,
+        pull_number: pullNumber,
+        per_page: 100,    // Fetch 100 per page for efficiency
+    });
+
+    // Filter comments to include only those related to the target comment ID
+    const comments = commentsData.filter(comment => comment.id === targetCommentId || comment.in_reply_to_id === targetCommentId).map(comment => ({
+      body: comment.body ?? '',
+      login: comment.user?.login ?? 'anonymous'
+    }));
+    core.info(`Fetched ${commentsData.length} review comments for PR #${pullNumber}.`);
+
+    return { content, comments };
+  } catch (error) {
+    core.error(`Failed to get data for pull request review comments #${pullNumber}: ${error}`);
+    throw new Error(`Could not retrieve data for pull request review comments #${pullNumber}: ${error instanceof Error ? error.message : error}`);
   }
 }
 

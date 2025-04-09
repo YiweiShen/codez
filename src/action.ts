@@ -5,9 +5,6 @@ import {
   createPullRequest,
   commitAndPush,
   postComment,
-  GitHubEventIssuesOpened,
-  GitHubEventIssueCommentCreated,
-  GitHubEventPullRequestCommentCreated,
   generatePrompt,
 } from './github.js';
 import { generateCommitMessage } from './claude.js';
@@ -43,7 +40,11 @@ async function handleResult(
       userPrompt,
       {
         issueNumber: (agentEvent.type === 'issuesOpened' || agentEvent.type === 'issueCommentCreated') ? agentEvent.github.issue.number : undefined,
-        prNumber: agentEvent.type === 'pullRequestCommentCreated' ? agentEvent.github.issue.number : undefined,
+        prNumber: agentEvent.type === 'pullRequestCommentCreated' 
+                  ? agentEvent.github.issue.number 
+                  : agentEvent.type === 'pullRequestReviewCommentCreated'
+                  ? agentEvent.github.pull_request.number
+                  : undefined,
       }
     );
 
@@ -53,16 +54,16 @@ async function handleResult(
         workspace,
         octokit,
         repo,
-        agentEvent.github as GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
+        agentEvent.github,
         commitMessage,
         output
       );
-    } else if (agentEvent.type === 'pullRequestCommentCreated') {
+    } else if (agentEvent.type === 'pullRequestCommentCreated' || agentEvent.type === 'pullRequestReviewCommentCreated') {
       await commitAndPush(
         workspace,
         octokit,
         repo,
-        agentEvent.github as GitHubEventPullRequestCommentCreated,
+        agentEvent.github,
         commitMessage,
         output
       );
