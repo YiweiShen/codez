@@ -111,7 +111,7 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
     );
     return;
   }
-  core.info('Claude Code CLI execution finished.');
+  core.info(`Output: \n${output}`);
 
   // Detect file changes
   const changedFiles = detectChanges(workspace, originalFileState);
