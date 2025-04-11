@@ -63,7 +63,7 @@ jobs:
           # anthropic-model: "claude-3-7-sonnet-20250219"
           # anthropic-small-fast-model: "claude-3-5-haiku-20241022"
           # claude-code-use-bedrock: "1"
-          # anthropic-bedrock-base-url: "https://bedrock-runtime.us-east-1.amazonaws.com"
+          # anthropic-bedrock-base-url: "https://bedrock.us-east-1.amazonaws.com"
           # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           # aws-region: "us-east-1"
