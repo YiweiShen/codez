@@ -12,6 +12,33 @@ inputs:
   anthropic-api-key:
     description: 'Specify the Anthropic API Key'
     required: true
+  anthropic-base-url:
+    description: 'Specify the Anthropic API base URL'
+    required: false
+  anthropic-model:
+    description: 'Specify the Anthropic model to use'
+    required: false
+  anthropic-small-fast-model:
+    description: 'Specify the Anthropic small and fast model to use'
+    required: false
+  claude-code-use-bedrock:
+    description: 'Use AWS Bedrock for Claude Code (0 or 1)'
+    required: false
+  anthropic-bedrock-base-url:
+    description: 'Specify the Anthropic Bedrock API base URL'
+    required: false
+  aws-access-key-id:
+    description: 'Specify the AWS Access Key ID for Bedrock'
+    required: false
+  aws-secret-access-key:
+    description: 'Specify the AWS Secret Access Key for Bedrock'
+    required: false
+  aws-region:
+    description: 'Specify the AWS region for Bedrock'
+    required: false
+  disable-prompt-caching:
+    description: 'Disable prompt caching (0 or 1)'
+    required: false
   event-path:
     description: 'Specify the path to the GitHub Event JSON file'
     default: ${{ github.event_path }}
@@ -24,5 +51,4 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile.github_action_dockerhub'
-  env:
-    ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+

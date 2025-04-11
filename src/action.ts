@@ -45,7 +45,8 @@ async function handleResult(
                   : agentEvent.type === 'pullRequestReviewCommentCreated'
                   ? agentEvent.github.pull_request.number
                   : undefined,
-      }
+      },
+      config
     );
 
     // Handle changes based on event type
@@ -100,7 +101,7 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   core.info(`Prompt: \n${prompt}`);
   let output;
   try {
-    const rawOutput = runClaudeCode(workspace, anthropicApiKey, prompt, timeoutSeconds * 1000);
+    const rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000);
     output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {
     await postComment(

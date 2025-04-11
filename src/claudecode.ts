@@ -1,27 +1,71 @@
 import { execaSync } from 'execa';
 import * as core from '@actions/core';
+import { ActionConfig } from './config.js';
 
 /**
  * Executes the Claude Code CLI command.
  * @param workspace The directory to run the command in.
- * @param apiKey Anthropic API Key.
+ * @param config The ActionConfig object containing API keys and configuration.
  * @param prompt The user prompt for Claude Code.
  * @param timeout Timeout in milliseconds.
  * @returns The stdout from the Claude Code CLI.
  */
-export function runClaudeCode(workspace: string, apiKey: string, prompt: string, timeout: number): string {
+export function runClaudeCode(workspace: string, config: ActionConfig, prompt: string, timeout: number): string {
     core.info(`Executing Claude Code CLI in ${workspace} with timeout ${timeout}ms`);
     try {
-      // Ensure API key and prompt are securely passed and handled
-      // Consider security implications of passing prompts directly if they contain sensitive info.
+      const cliArgs = ['-p', prompt, '--allowedTools', 'Bash,Edit,Write,Replace'];
+      
+      // Set up environment variables
+      const envVars: Record<string, string> = { 
+        ...process.env, 
+        ANTHROPIC_API_KEY: config.anthropicApiKey 
+      };
+      
+      if (config.anthropicBaseUrl) {
+        envVars.ANTHROPIC_BASE_URL = config.anthropicBaseUrl;
+      }
+      
+      if (config.anthropicModel) {
+        envVars.ANTHROPIC_MODEL = config.anthropicModel;
+      }
+      
+      if (config.anthropicSmallFastModel) {
+        envVars.ANTHROPIC_SMALL_FAST_MODEL = config.anthropicSmallFastModel;
+      }
+      
+      if (config.disablePromptCaching) {
+        envVars.DISABLE_PROMPT_CACHING = '1';
+      }
+      
+      if (config.claudeCodeUseBedrock) {
+        envVars.CLAUDE_CODE_USE_BEDROCK = '1';
+        
+        if (config.anthropicBedrockBaseUrl) {
+          envVars.ANTHROPIC_BEDROCK_BASE_URL = config.anthropicBedrockBaseUrl;
+        }
+        
+        if (config.awsAccessKeyId) {
+          envVars.AWS_ACCESS_KEY_ID = config.awsAccessKeyId;
+        }
+        
+        if (config.awsSecretAccessKey) {
+          envVars.AWS_SECRET_ACCESS_KEY = config.awsSecretAccessKey;
+        }
+
+        if (config.awsRegion) {
+          envVars.AWS_REGION = config.awsRegion;
+        }
+        
+        core.info('Running Claude Code with AWS Bedrock configuration');
+      }
+
       const result = execaSync(
           'claude', // Assuming 'claude' is in the PATH
-          ['-p', prompt, '--allowedTools', 'Bash,Edit,Write,Replace'],
+          cliArgs,
           {
-              // shell: '/bin/zsh', // Avoid specifying shell unless necessary; execa handles PATH resolution
               timeout: timeout,
               cwd: workspace,
-              env: { ...process.env, ANTHROPIC_API_KEY: apiKey }, // Pass API key via environment variable
+              env: envVars,
               stdio: 'pipe', // Capture stdout/stderr
               reject: false // Don't throw on non-zero exit code, handle it below
           }
@@ -59,4 +103,3 @@ export function runClaudeCode(workspace: string, apiKey: string, prompt: string,
       }
     }
   }
-  

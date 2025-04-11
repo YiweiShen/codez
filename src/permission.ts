@@ -71,5 +71,17 @@ export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   if (config.anthropicApiKey) {
     maskedText = maskedText.replaceAll(config.anthropicApiKey, '***');
   }
+  if (config.awsAccessKeyId) {
+    maskedText = maskedText.replaceAll(config.awsAccessKeyId, '***');
+  }
+  if (config.awsSecretAccessKey) {
+    maskedText = maskedText.replaceAll(config.awsSecretAccessKey, '***');
+  }
+  if (config.anthropicBaseUrl) {
+    maskedText = maskedText.replaceAll(config.anthropicBaseUrl, '***');
+  }
+  if (config.anthropicBedrockBaseUrl) {
+    maskedText = maskedText.replaceAll(config.anthropicBedrockBaseUrl, '***');
+  }
   return maskedText;
 }

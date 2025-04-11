@@ -5,14 +5,23 @@ import { ActionConfig } from '../config'; // Assuming ActionConfig is exported f
 const createMockConfig = (githubToken?: string, anthropicApiKey?: string): ActionConfig => ({
     githubToken: githubToken ?? '',
     anthropicApiKey: anthropicApiKey ?? '',
-    // Add other required ActionConfig properties with minimal dummy values
-    // These are needed to satisfy the ActionConfig type but not used by maskSensitiveInfo
+    anthropicBaseUrl: '',
+    anthropicModel: '',
+    anthropicSmallFastModel: '',
+    claudeCodeUseBedrock: '',
+    anthropicBedrockBaseUrl: '',
+    awsAccessKeyId: '',
+    awsSecretAccessKey: '',
+    awsRegion: '',
+    disablePromptCaching: '',
     eventPath: 'dummy/path',
     workspace: '/dummy/workspace',
     timeoutSeconds: 300,
     octokit: {} as any, // Mocked Octokit - not used by maskSensitiveInfo
     context: {} as any, // Mocked context - not used by maskSensitiveInfo
     repo: { owner: 'test-owner', repo: 'test-repo' }, // Mocked repo info
+
+
 });
 
 describe('maskSensitiveInfo', () => {

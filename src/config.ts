@@ -5,6 +5,15 @@ import { Octokit } from 'octokit';
 export interface ActionConfig {
   githubToken: string;
   anthropicApiKey: string;
+  anthropicBaseUrl: string;
+  anthropicModel: string;
+  anthropicSmallFastModel: string;
+  claudeCodeUseBedrock: string;
+  anthropicBedrockBaseUrl: string;
+  awsAccessKeyId: string;
+  awsSecretAccessKey: string;
+  awsRegion: string;
+  disablePromptCaching: string;
   eventPath: string;
   workspace: string;
   timeoutSeconds: number;
@@ -24,6 +33,17 @@ export function getConfig(): ActionConfig {
   const eventPath = core.getInput('event-path');
   const workspace = '/workspace/app';
   const timeoutSeconds = core.getInput('timeout') ? parseInt(core.getInput('timeout'), 10) : 300;
+  
+  // Additional environment variables (all optional)
+  const anthropicBaseUrl = core.getInput('anthropic-base-url') || '';
+  const anthropicModel = core.getInput('anthropic-model') || '';
+  const anthropicSmallFastModel = core.getInput('anthropic-small-fast-model') || '';
+  const claudeCodeUseBedrock = core.getInput('claude-code-use-bedrock') || '';
+  const anthropicBedrockBaseUrl = core.getInput('anthropic-bedrock-base-url') || '';
+  const awsAccessKeyId = core.getInput('aws-access-key-id') || '';
+  const awsSecretAccessKey = core.getInput('aws-secret-access-key') || '';
+  const awsRegion = core.getInput('aws-region') || '';
+  const disablePromptCaching = core.getInput('disable-prompt-caching') || '';
 
   if (!anthropicApiKey) {
     throw new Error('Anthropic API Key is required.');
@@ -45,6 +65,15 @@ export function getConfig(): ActionConfig {
   return {
     githubToken,
     anthropicApiKey,
+    anthropicBaseUrl,
+    anthropicModel,
+    anthropicSmallFastModel,
+    claudeCodeUseBedrock,
+    anthropicBedrockBaseUrl,
+    awsAccessKeyId,
+    awsSecretAccessKey,
+    awsRegion,
+    disablePromptCaching,
     eventPath,
     workspace,
     timeoutSeconds,

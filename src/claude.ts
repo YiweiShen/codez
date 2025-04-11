@@ -1,7 +1,30 @@
 import * as core from '@actions/core';
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic, { ClientOptions } from '@anthropic-ai/sdk';
+import AnthropicBedrock from '@anthropic-ai/bedrock-sdk';
+import { ActionConfig } from './config.js';
 
-const claudeTinyModel = 'claude-3-5-haiku-20241022';
+const defaultSmallFastModel = 'claude-3-5-haiku-20241022';
+const defaultSmallFastModelBedrock = 'anthropic.claude-3-5-haiku-20241022-v1:0';
+
+function getAnthropicClient(apiKey: string, config: ActionConfig): Anthropic {
+  const anthropicOptions: ClientOptions = {
+    apiKey: apiKey,
+  };
+  // Set base URL if provided
+  if (config.anthropicBaseUrl) {
+    anthropicOptions.baseURL = config.anthropicBaseUrl;
+  }
+  return new Anthropic(anthropicOptions);
+}
+
+function getAnthropicBedrockClient(apiKey: string, config: ActionConfig): AnthropicBedrock {
+  return new AnthropicBedrock({
+    awsAccessKey: config.awsAccessKeyId,
+    awsSecretKey: config.awsSecretAccessKey,
+    awsRegion: config.awsRegion || 'us-east-1',
+    baseURL: config.anthropicBedrockBaseUrl,
+  });
+}
 
 /**
  * Function to generate Git commit messages using Anthropic API
@@ -9,13 +32,15 @@ const claudeTinyModel = 'claude-3-5-haiku-20241022';
  * @param changedFiles List of changed files
  * @param userPrompt User's original prompt to Claude
  * @param context Context information (PR number, Issue number, etc.)
+ * @param config Optional ActionConfig for additional settings
  * @returns Generated commit message
  */
 export async function generateCommitMessage(
   apiKey: string,
   changedFiles: string[],
   userPrompt: string,
-  context: { prNumber?: number; issueNumber?: number; }
+  context: { prNumber?: number; issueNumber?: number; },
+  config: ActionConfig
 ): Promise<string> {
   try {
     // Create prompt
@@ -39,13 +64,13 @@ ${changedFiles.join('\n')}
       prompt += `\n\nThis change is related to Issue #${context.issueNumber}.`;
     }
 
-    // Call Anthropic API
-    const anthropic = new Anthropic({
-      apiKey: apiKey,
-    });
+    const anthropic = config.claudeCodeUseBedrock ? getAnthropicBedrockClient(apiKey, config) : getAnthropicClient(apiKey, config);
+    const model = config.claudeCodeUseBedrock
+      ? config.anthropicSmallFastModel || defaultSmallFastModelBedrock
+      : config.anthropicSmallFastModel || defaultSmallFastModel;
 
     const response = await anthropic.messages.create({
-      model: claudeTinyModel,
+      model: model,
       max_tokens: 256,
       messages: [{ role: "user", content: prompt }],
     });
@@ -53,14 +78,14 @@ ${changedFiles.join('\n')}
     // Extract commit message from response
     let commitMessage = '';
     if (response.content.length > 0 && response.content[0].type === 'text') {
-        commitMessage = response.content[0].text;
+      commitMessage = response.content[0].text;
     }
     commitMessage = commitMessage.trim().split('\n')[0]; // Take the first line
 
     // Fallback if the message is empty or too long
     if (!commitMessage || commitMessage.length > 100) {
-        core.warning(`Generated commit message was empty or too long: "${commitMessage}". Falling back.`);
-        throw new Error("Generated commit message invalid."); // Trigger fallback
+      core.warning(`Generated commit message was empty or too long: "${commitMessage}". Falling back.`);
+      throw new Error("Generated commit message invalid."); // Trigger fallback
     }
 
 
