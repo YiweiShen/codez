@@ -3,6 +3,7 @@ import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
 import { genContentsString } from './contents.js';
+import { Octokit } from 'octokit';
 
 // --- Type Definitions ---
 
@@ -79,7 +80,6 @@ export type GithubContentsData = {
   comments: { body: string; login: string }[];
 };
 
-type Octokit = ReturnType<typeof github.getOctokit>;
 type RepoContext = { owner: string; repo: string };
 
 // --- Functions ---

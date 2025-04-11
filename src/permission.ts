@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
 import { ActionConfig } from './config.js';
+import { Octokit } from 'octokit';
 
 /**
  * Checks if the user has appropriate permissions.
@@ -33,7 +33,7 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
  * @returns true if the user has permissions, false otherwise
  */
 async function checkUserPermissionGithub(
-  octokit: ReturnType<typeof github.getOctokit>,
+  octokit: Octokit,
   repo: { owner: string; repo: string },
   username: string
 ): Promise<boolean> {

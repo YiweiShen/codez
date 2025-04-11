@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import { Octokit } from 'octokit';
 
 export interface ActionConfig {
   githubToken: string;
@@ -7,7 +8,7 @@ export interface ActionConfig {
   eventPath: string;
   workspace: string;
   timeoutSeconds: number;
-  octokit: ReturnType<typeof github.getOctokit>;
+  octokit: Octokit;
   context: typeof github.context;
   repo: { owner: string; repo: string };
 }
@@ -37,7 +38,7 @@ export function getConfig(): ActionConfig {
     throw new Error('GitHub workspace path is missing.');
   }
 
-  const octokit = github.getOctokit(githubToken);
+  const octokit = new Octokit({ auth: githubToken });
   const context = github.context;
   const repo = context.repo;
 
