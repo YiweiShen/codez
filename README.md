@@ -8,11 +8,6 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 - Automatically create a Pull Request or commit changes if Claude Code modifies code
 - Post Claude Code's output as a comment if there are no changes
 
-## Security
-
-* **Permission Checks:** Before executing core logic, the action verifies if the triggering user (`github.context.actor`) has `write` or `admin` permissions for the repository.
-* **Sensitive Information Masking:** Any occurrences of the provided `github-token` and `anthropic-api-key`, `AWS Credentials` within the output posted to GitHub are automatically masked (replaced with `***`) to prevent accidental exposure.
-
 ## Usage
 
 ### Project Settings
@@ -94,8 +89,17 @@ Comment on an existing Pull Request to request code modifications:
 
 Claude will analyze the comment and add test code to the existing PR branch.
 
+## Inputs Settings
+### Basic Configuration
 
-## Advanced Configuration
+| Input Name | Description |
+|------------|-------------|
+| `github-token` | **Required** GitHub token for authentication |
+| `anthropic-api-key` | **Required** Anthropic API key for authentication |
+| `event-path` | Path to the event file (default: `${{ github.event_path }}`) |
+| `timeout` | Timeout for Claude Code in seconds (default: 300) |
+
+### Advanced Configuration
 
 You can customize the behavior of Claude Code using the following environment variables:
 
@@ -110,3 +114,8 @@ You can customize the behavior of Claude Code using the following environment va
 | `aws-secret-access-key` | AWS Secret Access Key (when using Bedrock) |
 | `aws-region` | AWS region (when using Bedrock) |
 | `disable-prompt-caching` | Disable prompt caching (0 or 1) |
+
+## Security
+
+* **Permission Checks:** Before executing core logic, the action verifies if the triggering user (`github.context.actor`) has `write` or `admin` permissions for the repository.
+* **Sensitive Information Masking:** Any occurrences of the provided `github-token` and `anthropic-api-key`, `AWS Credentials` within the output posted to GitHub are automatically masked (replaced with `***`) to prevent accidental exposure.
