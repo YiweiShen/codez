@@ -4,6 +4,7 @@ import { AgentEvent, getEventType, extractText } from './github.js';
 import { ActionConfig } from './config.js';
 
 export interface ProcessedEvent {
+  type: "claude" | "codex";
   agentEvent: AgentEvent;
   userPrompt: string;
 }
@@ -25,7 +26,7 @@ function loadEventPayload(eventPath: string): any {
 /**
  * Processes the GitHub event to determine the type and extract the user prompt.
  * @param config Action configuration.
- * @returns ProcessedEvent object containing the agent event and user prompt, or null if the event is unsupported or lacks the command.
+ * @returns ProcessedEvent
  */
 export function processEvent(config: ActionConfig): ProcessedEvent | null {
   const eventPayload = loadEventPayload(config.eventPath);
@@ -37,19 +38,26 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
   core.info(`Detected event type: ${agentEvent.type}`);
 
-  // Check for /claude command
+  // Check for /claude and /codex command
   const text = extractText(agentEvent.github);
-  if (!text || !text.includes('/claude')) {
-    core.info('Command "/claude" not found in the event text.');
+  if (!text || (!text.startsWith('/claude') && !text.startsWith('/codex'))) {
+    core.info('Command "/claude" or "/codex" not found in the event text.');
     return null; // Exit gracefully if command is not present
   }
 
-  // Extract user prompt
-  const userPrompt = text.substring(text.indexOf('/claude') + '/claude'.length).trim();
+  let userPrompt = "";
+  let type: "claude" | "codex" = "claude";
+  if (text.startsWith('/claude')) {
+    userPrompt = text.replace('/claude', '').trim();
+  } else if (text.startsWith('/codex')) {
+    userPrompt = text.replace('/codex', '').trim();
+    type = "codex";
+  }
+
   if (!userPrompt) {
-    core.info('No prompt found after "/claude" command.');
+    core.info('No prompt found after "/claude"or "/codex" command.');
     return null; // Indicate missing prompt
   }
 
-  return { agentEvent, userPrompt };
+  return { type, agentEvent, userPrompt };
 }

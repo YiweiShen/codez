@@ -1,6 +1,6 @@
 import { execaSync } from 'execa';
 import * as core from '@actions/core';
-import { ActionConfig } from './config.js';
+import { ActionConfig } from '../config.js';
 
 /**
  * Executes the Claude Code CLI command.

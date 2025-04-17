@@ -7,12 +7,14 @@ import {
   postComment,
   generatePrompt,
 } from './github.js';
-import { generateCommitMessage } from './claude.js';
-import { runClaudeCode } from './claudecode.js';
+import { generateCommitMessage as generateCommitMessageAnthropic } from './api/claude.js';
+import { generateCommitMessage as generateCommitMessageOpenAI } from './api/openai.js';
+import { runClaudeCode } from './client/claudecode.js';
 import { captureFileState, detectChanges } from './file.js';
 import { ActionConfig } from './config.js';
 import { ProcessedEvent } from './event.js';
 import { maskSensitiveInfo } from './permission.js';
+import { runCodex } from './client/codex.js';
 
 /**
  * Handles the result of execution.
@@ -27,15 +29,17 @@ async function handleResult(
   output: string,
   changedFiles: string[]
 ): Promise<void> {
-  const { octokit, repo, workspace, anthropicApiKey } = config;
+  const { octokit, repo, workspace } = config;
   const { agentEvent, userPrompt } = processedEvent;
 
   if (changedFiles.length > 0) {
     core.info(`Detected changes in ${changedFiles.length} files:\n${changedFiles.join('\n')}`);
 
+    const generateCommitMessage = processedEvent.type === 'codex'
+      ? generateCommitMessageOpenAI
+      : generateCommitMessageAnthropic;
     // Generate commit message
     const commitMessage = await generateCommitMessage(
-      anthropicApiKey,
       changedFiles,
       userPrompt,
       {
@@ -96,12 +100,15 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   // generate Propmt
   const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
 
-  // Execute Claude CLI
-  core.info('Executing Claude Code CLI...');
   core.info(`Prompt: \n${prompt}`);
   let output;
   try {
-    const rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000);
+    let rawOutput;
+    if (processedEvent.type === 'codex') {
+      rawOutput = runCodex(workspace, config, prompt, timeoutSeconds * 1000);
+    } else {
+      rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000);
+    }
     output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {
     await postComment(

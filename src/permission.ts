@@ -83,5 +83,13 @@ export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   if (config.anthropicBedrockBaseUrl) {
     maskedText = maskedText.replaceAll(config.anthropicBedrockBaseUrl, '***');
   }
+
+  if (config.openaiApiKey) {
+    maskedText = maskedText.replaceAll(config.openaiApiKey, '***');
+  }
+  if (config.openaiBaseUrl) {
+    maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
+  }
+
   return maskedText;
 }

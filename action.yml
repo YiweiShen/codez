@@ -9,9 +9,18 @@ inputs:
   github-token:
     description: 'Specify the GitHub Token'
     required: true
+  event-path:
+    description: 'Specify the path to the GitHub Event JSON file'
+    default: ${{ github.event_path }}
+    required: false
+  timeout:
+    description: 'Specify timeout duration (seconds)'
+    default: '300'
+    required: false
+
   anthropic-api-key:
     description: 'Specify the Anthropic API Key'
-    required: true
+    required: false
   anthropic-base-url:
     description: 'Specify the Anthropic API base URL'
     required: false
@@ -39,13 +48,12 @@ inputs:
   disable-prompt-caching:
     description: 'Disable prompt caching (0 or 1)'
     required: false
-  event-path:
-    description: 'Specify the path to the GitHub Event JSON file'
-    default: ${{ github.event_path }}
+
+  openai-api-key:
+    description: 'Specify the OpenAI API Key'
     required: false
-  timeout:
-    description: 'Specify timeout duration (seconds)'
-    default: '300'
+  openai-base-url:
+    description: 'Specify the OpenAI API base URL'
     required: false
 
 runs:
