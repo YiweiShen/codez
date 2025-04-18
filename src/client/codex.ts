@@ -1,6 +1,6 @@
 import { execaSync } from 'execa';
 import * as core from '@actions/core';
-import { ActionConfig } from '../config.js';
+import { ActionConfig } from '../config/config.js';
 
 /**
  * Executes the Codex CLI command.

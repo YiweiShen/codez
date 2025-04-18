@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import OpenAI, { ClientOptions } from 'openai';
-import { ActionConfig } from '../config.js';
+import { ActionConfig } from '../config/config.js';
 
 const defaultModel = 'o4-mini';
 

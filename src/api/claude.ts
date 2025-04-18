@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import Anthropic, { ClientOptions } from '@anthropic-ai/sdk';
 import AnthropicBedrock from '@anthropic-ai/bedrock-sdk';
-import { ActionConfig } from '../config.js';
+import { ActionConfig } from '../config/config.js';
 
 const defaultSmallFastModel = 'claude-3-5-haiku-20241022';
 const defaultSmallFastModelBedrock = 'anthropic.claude-3-5-haiku-20241022-v1:0';

@@ -7,14 +7,14 @@ import {
   postComment,
   generatePrompt,
 } from './github.js';
-import { generateCommitMessage as generateCommitMessageAnthropic } from './api/claude.js';
-import { generateCommitMessage as generateCommitMessageOpenAI } from './api/openai.js';
-import { runClaudeCode } from './client/claudecode.js';
-import { captureFileState, detectChanges } from './file.js';
-import { ActionConfig } from './config.js';
+import { generateCommitMessage as generateCommitMessageAnthropic } from '../api/claude.js';
+import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
+import { runClaudeCode } from '../client/claudecode.js';
+import { captureFileState, detectChanges } from '../file/file.js';
+import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
-import { maskSensitiveInfo } from './permission.js';
-import { runCodex } from './client/codex.js';
+import { maskSensitiveInfo } from '../security/security.js';
+import { runCodex } from '../client/codex.js';
 
 /**
  * Handles the result of execution.

@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
 import { AgentEvent, getEventType, extractText } from './github.js';
-import { ActionConfig } from './config.js';
+import { ActionConfig } from '../config/config.js';
 
 export interface ProcessedEvent {
   type: "claude" | "codex";
