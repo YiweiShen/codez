@@ -115,7 +115,7 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
       octokit,
       repo,
       agentEvent.github,
-      `Claude Code CLI execution failed: ${error instanceof Error ? error.message : String(error)}`
+      `CLI execution failed: ${error instanceof Error ? error.message : String(error)}`
     );
     return;
   }

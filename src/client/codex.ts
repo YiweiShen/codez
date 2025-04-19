@@ -13,15 +13,18 @@ import { ActionConfig } from '../config/config.js';
 export function runCodex(workspace: string, config: ActionConfig, prompt: string, timeout: number): string {
     core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
     try {
-      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet', prompt];
+      prompt = prompt.replace(/"/g, '\\"');
+      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet', '"' + prompt + '"'];
       
       // Set up environment variables
       const envVars: Record<string, string> = { 
         ...process.env, 
         OPENAI_API_KEY: config.openaiApiKey,
         OPENAI_API_BASE_URL: config.openaiBaseUrl,
+        CODEX_QUIET_MODE: '1',
       };
-        
+      
+      core.info(`Run command: codex ${cliArgs.join(' ')}`);
       const result = execaSync(
           'codex', // Assuming 'codex' is in the PATH
           cliArgs,
@@ -51,6 +54,6 @@ export function runCodex(workspace: string, config: ActionConfig, prompt: string
     } catch (error) {
       // Log the full error for debugging
       core.error(`Error executing Codex command: ${error instanceof Error ? error.stack : String(error)}`);
-      throw new Error(`Failed to execute Claude Code command: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Failed to execute Codex command: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
