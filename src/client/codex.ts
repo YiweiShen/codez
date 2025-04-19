@@ -13,9 +13,8 @@ import { ActionConfig } from '../config/config.js';
 export function runCodex(workspace: string, config: ActionConfig, prompt: string, timeout: number): string {
     core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
     try {
-      prompt = prompt.replace(/"/g, '\\"');
-      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet', '"' + prompt + '"'];
-      
+      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet'];
+
       // Set up environment variables
       const envVars: Record<string, string> = { 
         ...process.env, 
@@ -33,6 +32,7 @@ export function runCodex(workspace: string, config: ActionConfig, prompt: string
               cwd: workspace,
               env: envVars,
               stdio: 'pipe', // Capture stdout/stderr
+              input: prompt, // Pass prompt via stdin
               reject: false // Don't throw on non-zero exit code, handle it below
           }
       );
