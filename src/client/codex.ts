@@ -20,9 +20,12 @@ export async function runCodex(workspace: string, config: ActionConfig, prompt: 
     const envVars: Record<string, string> = {
       ...process.env,
       OPENAI_API_KEY: config.openaiApiKey,
-      OPENAI_API_BASE_URL: config.openaiBaseUrl,
       CODEX_QUIET_MODE: '1',
     };
+
+    if (config.openaiBaseUrl) {
+      envVars.OPENAI_API_BASE_URL = config.openaiBaseUrl;
+    }
 
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
     // Changed execaSync to await execa
@@ -69,7 +72,7 @@ export async function runCodex(workspace: string, config: ActionConfig, prompt: 
       textResult = jsonResult.content[0].text + '\n\n';
     }
 
-    return textResult + "<details><summary>Codex Result</summary>\n" + codeResult + "\n</details>";
+    return textResult + "<details><summary>Codex Result</summary>\n\n" + codeResult + "\n</details>";
 
   } catch (error) {
     // Log the full error for debugging, check for timeout

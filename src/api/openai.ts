@@ -55,7 +55,7 @@ ${changedFiles.join('\n')}
 
     const response = await openai.chat.completions.create({
       model: defaultModel,
-      max_tokens: 256,
+      max_completion_tokens: 1024,
       temperature: 0.7, // Standard temperature
       messages: [
         { role: "system", content: systemPrompt },
