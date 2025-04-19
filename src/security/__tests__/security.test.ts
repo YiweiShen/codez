@@ -25,7 +25,7 @@ const createMockConfig = (
     disablePromptCaching: '',
     eventPath: 'dummy/path',
     workspace: '/dummy/workspace',
-    timeoutSeconds: 300,
+    timeoutSeconds: 600,
     octokit: {} as any, // Mocked Octokit - not used by maskSensitiveInfo
     context: {} as any, // Mocked context - not used by maskSensitiveInfo
     repo: { owner: 'test-owner', repo: 'test-repo' },

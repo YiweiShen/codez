@@ -115,7 +115,7 @@ Claude Code or Codex will analyze the request and create a new Pull Request with
 |------------|-------------|
 | `github-token` | **Required** GitHub token for authentication |
 | `event-path` | Path to the event file (default: `${{ github.event_path }}`) |
-| `timeout` | Timeout for AI processing in seconds (default: 300) |
+| `timeout` | Timeout for AI processing in seconds (default: 600) |
 
 ### Claude Code Configuration
 

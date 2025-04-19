@@ -40,7 +40,7 @@ export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const eventPath = core.getInput('event-path');
   const workspace = '/workspace/app';
-  const timeoutSeconds = core.getInput('timeout') ? parseInt(core.getInput('timeout'), 10) : 300;
+  const timeoutSeconds = core.getInput('timeout') ? parseInt(core.getInput('timeout'), 10) : 600;
   const octokit = new Octokit({ auth: githubToken });
   const context = github.context;
   const repo = context.repo;
