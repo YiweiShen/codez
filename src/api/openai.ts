@@ -56,7 +56,6 @@ ${changedFiles.join('\n')}
     const response = await openai.chat.completions.create({
       model: defaultModel,
       max_completion_tokens: 1024,
-      temperature: 0.7, // Standard temperature
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userContent }
@@ -77,7 +76,6 @@ ${changedFiles.join('\n')}
     return commitMessage;
   } catch (error) {
     core.warning(`Error generating commit message with OpenAI: ${error instanceof Error ? error.message : String(error)}. Using fallback.`);
-    // Return default message in case of error (same fallback logic as claude.ts)
     if (context.prNumber) {
       return `Apply changes for PR #${context.prNumber}`;
     } else if (context.issueNumber) {

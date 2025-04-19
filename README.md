@@ -69,7 +69,7 @@ jobs:
           # disable-prompt-caching: "1"
           
           # [Codex Settings]
-          # openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
 
           # [Optional Codex Settings]
           # openai-base-url: "https://api.openai.com"
