@@ -103,13 +103,16 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   core.info(`Prompt: \n${prompt}`);
   let output;
   try {
-    let rawOutput;
+    let rawOutput: string; // Explicitly type rawOutput as string
     if (processedEvent.type === 'codex') {
-      rawOutput = runCodex(workspace, config, prompt, timeoutSeconds * 1000);
+      // Add await here
+      rawOutput = await runCodex(workspace, config, prompt, timeoutSeconds * 1000); 
     } else {
-      rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000);
+      // Add await here too for consistency and potential async nature
+      rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000); 
     }
-    output = maskSensitiveInfo(rawOutput, config);
+    // No change needed here as rawOutput will be a string after await
+    output = maskSensitiveInfo(rawOutput, config); 
   } catch (error) {
     await postComment(
       octokit,

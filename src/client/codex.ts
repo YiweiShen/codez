@@ -1,4 +1,4 @@
-import { execaSync } from 'execa';
+import { execa } from 'execa'; // Changed from execaSync
 import * as core from '@actions/core';
 import { ActionConfig } from '../config/config.js';
 
@@ -8,12 +8,13 @@ import { ActionConfig } from '../config/config.js';
  * @param config The ActionConfig object containing API keys and configuration.
  * @param prompt The user prompt
  * @param timeout Timeout in milliseconds.
- * @returns The stdout from the Codex CLI.
+ * @returns A promise resolving to the stdout from the Codex CLI. // Changed return type description
  */
-export function runCodex(workspace: string, config: ActionConfig, prompt: string, timeout: number): string {
+export async function runCodex(workspace: string, config: ActionConfig, prompt: string, timeout: number): Promise<string> { // Added async and Promise<>
     core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
     try {
-      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet'];
+      prompt = prompt.replace(/"/g, '\\"');
+      const cliArgs = ['--full-auto', '--dangerously-auto-approve-everything', '--quiet', '"' + prompt + '"'];
 
       // Set up environment variables
       const envVars: Record<string, string> = { 
@@ -24,7 +25,8 @@ export function runCodex(workspace: string, config: ActionConfig, prompt: string
       };
       
       core.info(`Run command: codex ${cliArgs.join(' ')}`);
-      const result = execaSync(
+      // Changed execaSync to await execa
+      const result = await execa( 
           'codex', // Assuming 'codex' is in the PATH
           cliArgs,
           {
@@ -32,28 +34,38 @@ export function runCodex(workspace: string, config: ActionConfig, prompt: string
               cwd: workspace,
               env: envVars,
               stdio: 'pipe', // Capture stdout/stderr
-              input: prompt, // Pass prompt via stdin
               reject: false // Don't throw on non-zero exit code, handle it below
           }
       );
   
       core.info(`Codex CLI exited with code ${result.exitCode}`);
   
+      // Adjusted error handling for async execa and stderr presence
       if (result.stderr) {
-        throw new Error(`${result.stderr}`);
+        // Log stderr even if exit code is 0, but only throw if non-zero
+        if (result.exitCode !== 0) {
+            core.error(`Codex command failed with stderr. Exit code: ${result.exitCode}, stderr: ${result.stderr}`);
+            throw new Error(`Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`);
+        } else {
+            core.warning(`Codex command exited successfully but produced stderr: ${result.stderr}`);
+        }
       }
   
       if (result.failed || result.exitCode !== 0) {
-          core.error(`Codex command failed. Exit code: ${result.exitCode}, stdout: ${result.stdout}, stderr: ${result.stderr}`);
-          throw new Error(`Codex command failed with exit code ${result.exitCode}. Check logs for details.`);
+          core.error(`Codex command failed. Exit code: ${result.exitCode}, stdout: ${result.stdout}`);
+          const errorMessage = result.stderr ? `Stderr: ${result.stderr}` : `Stdout: ${result.stdout}`; // Use already captured stderr if available
+          throw new Error(`Codex command failed with exit code ${result.exitCode}. ${errorMessage}`);
       }
   
       core.info('Codex command executed successfully.');
       return result.stdout || ''; // Return stdout, ensuring it's a string
   
     } catch (error) {
-      // Log the full error for debugging
+      // Log the full error for debugging, check for timeout
       core.error(`Error executing Codex command: ${error instanceof Error ? error.stack : String(error)}`);
+      if (error instanceof Error && 'timedOut' in error && (error as any).timedOut) {
+          throw new Error(`Codex command timed out after ${timeout}ms.`);
+      }
       throw new Error(`Failed to execute Codex command: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
+}
