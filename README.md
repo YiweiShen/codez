@@ -24,8 +24,7 @@ An AI Agent that operates [Claude Code](https://github.com/anthropics/claude-cod
 
 * Repository secrets: Set `ANTHROPIC_API_KEY` (for Claude Code) or `OPENAI_API_KEY` (for Codex)
 
-![image](https://github.com/user-attachments/assets/8ae22808-9df5-4709-adaa-1e9d8c634f51)
-
+![image](https://github.com/user-attachments/assets/fdfb1d5a-9605-4d2d-9f7b-0bd65bc7a3fd)
 
 ### Workflow Configuration
 
