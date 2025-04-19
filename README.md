@@ -1,12 +1,13 @@
 #  Code Agent
 
-An AI Agent that operates Claude Code on GitHub Actions. By using this action, you can directly invoke Claude Code from GitHub Issues or Pull Request comments and automate code changes.
+An AI Agent that operates [Claude Code](https://github.com/anthropics/claude-code) and [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Claude Code or Codex from GitHub Issues or Pull Request comments and automate code changes.
 
 ## Features
 
 - Start Claude Code with the `/claude` command from GitHub Issues or PR comments
-- Automatically create a Pull Request or commit changes if Claude Code modifies code
-- Post Claude Code's output as a comment if there are no changes
+- Start Codex with the `/codex` command from GitHub Issues or PR comments
+- Automatically create a Pull Request or commit changes if the AI modifies code
+- Post AI output as a comment if there are no changes
 
 ## Usage
 
@@ -21,10 +22,9 @@ An AI Agent that operates Claude Code on GitHub Actions. By using this action, y
 
 #### Settings -> Secrets and variables -> Actions -> Secrets
 
-* Repository secrets Set `ANTHROPIC_API_KEY`
+* Repository secrets: Set `ANTHROPIC_API_KEY` (for Claude Code) or `OPENAI_API_KEY` (for Codex)
 
-![image](https://github.com/user-attachments/assets/8ae22808-9df5-4709-adaa-1e9d8c634f51)
-
+![image](https://github.com/user-attachments/assets/fdfb1d5a-9605-4d2d-9f7b-0bd65bc7a3fd)
 
 ### Workflow Configuration
 
@@ -52,8 +52,11 @@ jobs:
       - uses: potproject/code-agent@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # [Claude Code Settings]
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Optional settings
+
+          # [Optional Claude Code Settings]
           # anthropic-base-url: "https://api.anthropic.com"
           # anthropic-model: "claude-3-7-sonnet-20250219"
           # anthropic-small-fast-model: "claude-3-5-haiku-20241022"
@@ -63,6 +66,12 @@ jobs:
           # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           # aws-region: "us-east-1"
           # disable-prompt-caching: "1"
+          
+          # [Codex Settings]
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+
+          # [Optional Codex Settings]
+          # openai-base-url: "https://api.openai.com"
 ```
 
 ## Example
@@ -77,9 +86,14 @@ Create a new Issue and add the following to the body:
 /claude Please create a new API endpoint. This should be an endpoint that handles GET requests to retrieve user information.
 ```
 
-Claude will then generate the necessary code according to the instructions and propose it as a Pull Request.
+```
+/codex Please create a new API endpoint. This should be an endpoint that handles GET requests to retrieve user information.
+```
+
+Claude Code or Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage in PRs
+
 
 Comment on an existing Pull Request to request code modifications:
 
@@ -87,7 +101,11 @@ Comment on an existing Pull Request to request code modifications:
 /claude Please add unit tests to this code.
 ```
 
-Claude will analyze the comment and add test code to the existing PR branch.
+```
+/codex Please add unit tests to this code.
+```
+
+Claude Code or Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ## Inputs Settings
 ### Basic Configuration
@@ -95,13 +113,16 @@ Claude will analyze the comment and add test code to the existing PR branch.
 | Input Name | Description |
 |------------|-------------|
 | `github-token` | **Required** GitHub token for authentication |
-| `anthropic-api-key` | **Required** Anthropic API key for authentication |
 | `event-path` | Path to the event file (default: `${{ github.event_path }}`) |
-| `timeout` | Timeout for Claude Code in seconds (default: 300) |
+| `timeout` | Timeout for AI processing in seconds (default: 600) |
 
-### Advanced Configuration
+### Claude Code Configuration
 
-You can customize the behavior of Claude Code using the following environment variables:
+| Input Name | Description |
+|------------|-------------|
+| `anthropic-api-key` | **Required for Claude Code** Anthropic API key for authentication |
+
+### Advanced Claude Code Configuration
 
 | Input Name | Description |
 |------------|-------------|
@@ -114,6 +135,19 @@ You can customize the behavior of Claude Code using the following environment va
 | `aws-secret-access-key` | AWS Secret Access Key (when using Bedrock) |
 | `aws-region` | AWS region (when using Bedrock) |
 | `disable-prompt-caching` | Disable prompt caching (0 or 1) |
+
+### Codex Configuration
+
+| Input Name | Description |
+|------------|-------------|
+| `openai-api-key` | **Required for Codex** OpenAI API key for authentication |
+
+
+### Advanced Claude Code Configuration
+
+| Input Name | Description |
+|------------|-------------|
+| `openai-base-url` | OpenAI API base URL |
 
 ## Security
 

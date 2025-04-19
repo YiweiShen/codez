@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
-import { getConfig } from './config.js';
-import { processEvent } from './event.js';
-import { runAction } from './action.js';
-import { checkPermission } from './permission.js';
+import { getConfig } from './config/config.js';
+import { processEvent } from './github/event.js';
+import { runAction } from './github/action.js';
+import { checkPermission } from './security/security.js';
 
 /**
  * Main function for the GitHub Action.

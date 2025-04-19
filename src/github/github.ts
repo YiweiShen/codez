@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execaSync } from 'execa';
 import * as fs from 'fs';
-import { genContentsString } from './contents.js';
+import { genContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
 
 // --- Type Definitions ---
@@ -259,7 +259,7 @@ export async function createPullRequest(
     core.info('Creating Pull Request...');
     const pr = await octokit.rest.pulls.create({
       ...repo,
-      title: `Code Agent changes for #${issueNumber}: ${commitMessage}`,
+      title: `${commitMessage}`,
       head: branchName,
       base: baseBranch, // Use the default branch as base
       body: `Applied changes based on Issue #${issueNumber}.\n\n${output}`,

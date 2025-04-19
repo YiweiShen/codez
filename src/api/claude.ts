@@ -1,14 +1,14 @@
 import * as core from '@actions/core';
 import Anthropic, { ClientOptions } from '@anthropic-ai/sdk';
 import AnthropicBedrock from '@anthropic-ai/bedrock-sdk';
-import { ActionConfig } from './config.js';
+import { ActionConfig } from '../config/config.js';
 
 const defaultSmallFastModel = 'claude-3-5-haiku-20241022';
 const defaultSmallFastModelBedrock = 'anthropic.claude-3-5-haiku-20241022-v1:0';
 
-function getAnthropicClient(apiKey: string, config: ActionConfig): Anthropic {
+function getAnthropicClient(config: ActionConfig): Anthropic {
   const anthropicOptions: ClientOptions = {
-    apiKey: apiKey,
+    apiKey: config.anthropicApiKey,
   };
   // Set base URL if provided
   if (config.anthropicBaseUrl) {
@@ -17,7 +17,7 @@ function getAnthropicClient(apiKey: string, config: ActionConfig): Anthropic {
   return new Anthropic(anthropicOptions);
 }
 
-function getAnthropicBedrockClient(apiKey: string, config: ActionConfig): AnthropicBedrock {
+function getAnthropicBedrockClient(config: ActionConfig): AnthropicBedrock {
   return new AnthropicBedrock({
     awsAccessKey: config.awsAccessKeyId,
     awsSecretKey: config.awsSecretAccessKey,
@@ -28,7 +28,6 @@ function getAnthropicBedrockClient(apiKey: string, config: ActionConfig): Anthro
 
 /**
  * Function to generate Git commit messages using Anthropic API
- * @param apiKey Anthropic API Key
  * @param changedFiles List of changed files
  * @param userPrompt User's original prompt to Claude
  * @param context Context information (PR number, Issue number, etc.)
@@ -36,7 +35,6 @@ function getAnthropicBedrockClient(apiKey: string, config: ActionConfig): Anthro
  * @returns Generated commit message
  */
 export async function generateCommitMessage(
-  apiKey: string,
   changedFiles: string[],
   userPrompt: string,
   context: { prNumber?: number; issueNumber?: number; },
@@ -64,7 +62,7 @@ ${changedFiles.join('\n')}
       prompt += `\n\nThis change is related to Issue #${context.issueNumber}.`;
     }
 
-    const anthropic = config.claudeCodeUseBedrock ? getAnthropicBedrockClient(apiKey, config) : getAnthropicClient(apiKey, config);
+    const anthropic = config.claudeCodeUseBedrock ? getAnthropicBedrockClient(config) : getAnthropicClient(config);
     const model = config.claudeCodeUseBedrock
       ? config.anthropicSmallFastModel || defaultSmallFastModelBedrock
       : config.anthropicSmallFastModel || defaultSmallFastModel;
