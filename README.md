@@ -143,7 +143,7 @@ Claude Code or Codex will analyze the request and create a new Pull Request with
 | `openai-api-key` | **Required for Codex** OpenAI API key for authentication |
 
 
-### Advanced Claude Code Configuration
+### Advanced Codex Configuration
 
 | Input Name | Description |
 |------------|-------------|
