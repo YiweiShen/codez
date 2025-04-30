@@ -262,7 +262,7 @@ export async function createPullRequest(
       title: `${commitMessage}`,
       head: branchName,
       base: baseBranch, // Use the default branch as base
-      body: `Applied changes based on Issue #${issueNumber}.\n\n${output}`,
+      body: `Applied changes based on Issue #${issueNumber}.\n\n${truncateOutput(output)}`,
       maintainer_can_modify: true,
     });
 
@@ -371,7 +371,7 @@ export async function postComment(
       await octokit.rest.issues.createComment({
         ...repo,
         issue_number: issueNumber,
-        body: body,
+        body: truncateOutput(body),
       });
       core.info(`Comment posted to Issue/PR #${issueNumber}`);
     } else if ('pull_request' in event) {
@@ -385,7 +385,7 @@ export async function postComment(
           ...repo,
           pull_number: prNumber,
           comment_id: inReplyTo ?? commentId, // Use the original comment ID if no reply
-          body: body,
+          body: truncateOutput(body),
         });
         core.info(`Comment posted to PR #${prNumber} Reply to comment #${commentId}`);
 
@@ -396,7 +396,7 @@ export async function postComment(
         await octokit.rest.issues.createComment({
           ...repo,
           issue_number: prNumber,
-          body: body,
+          body: truncateOutput(body),
         });
         core.info(`Regular comment posted to PR #${prNumber}`);
       }
@@ -630,4 +630,15 @@ async function getPullRequestData(
     core.error(`Failed to get data for pull request #${pullNumber}: ${error}`);
     throw new Error(`Could not retrieve data for pull request #${pullNumber}: ${error instanceof Error ? error.message : error}`);
   }
+}
+
+
+// Truncate the output if it exceeds 60000 characters
+// GitHub API has a limit of 65536 characters for the body of a PR
+function truncateOutput(output: string): string {
+  if (output.length > 60000) {
+    core.warning(`Output exceeds 60000 characters, truncating...`);
+    return output.substring(0, 60000);
+  }
+  return output;
 }
