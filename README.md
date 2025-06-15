@@ -1,27 +1,27 @@
-# 🚀 Codez
+# Codez
 
-An AI Agent 🤖 that operates [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Codex from GitHub Issues or Pull Request comments and automate code changes.
+An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Codex from GitHub Issues or Pull Request comments and automate code changes.
 
-## 🛠️ Features
+## Features
 
-- 🚀 Start Codex with the `/codex` command from GitHub Issues or PR comments
-- 🔀 Automatically create a Pull Request or commit changes if the AI modifies code
-- 💬 Post AI output as a comment if there are no changes
+- Start Codex with the `/codex` command from GitHub Issues or PR comments
+- Automatically create a Pull Request or commit changes if the AI modifies code
+- Post AI output as a comment if there are no changes
 
-## 💡 Usage
+## Usage
 
-### ⚙️ Project Settings
+### Project Settings
 
-#### 🔒 Settings -> Actions -> General -> Workflow permissions
+#### Settings -> Actions -> General -> Workflow permissions
 
-- ✔️ Read and write permissions
-- ✅ Allow GitHub Actions to create and approve pull requests
+- Read and write permissions
+- Allow GitHub Actions to create and approve pull requests
 
-#### 🔑 Settings -> Secrets and variables -> Actions -> Secrets
+#### Settings -> Secrets and variables -> Actions -> Secrets
 
-- 🔑 Repository secrets: Set `OPENAI_API_KEY` (for Codex)
+- Repository secrets: Set `OPENAI_API_KEY` (for Codex)
 
-### ⚙️ Workflow Configuration
+### Workflow Configuration
 
 ```yaml
 name: Codez
@@ -55,7 +55,7 @@ jobs:
           # openai-base-url: "https://api.openai.com"
 ```
 
-### 💬 Example Usage in Issues
+### Example Usage in Issues
 
 Create a new Issue and add the following to the body:
 
@@ -65,7 +65,7 @@ Create a new Issue and add the following to the body:
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
-### 💬 Example Usage in PRs
+### Example Usage in PRs
 
 Comment on an existing Pull Request to request code modifications:
 
@@ -75,9 +75,9 @@ Comment on an existing Pull Request to request code modifications:
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
-## 📥 Inputs Settings
+## Inputs Settings
 
-### 🛠️ Basic Configuration
+### Basic Configuration
 
 | Input Name     | Description                                                  |
 | -------------- | ------------------------------------------------------------ |
@@ -85,19 +85,19 @@ Codex will analyze the request and create a new Pull Request with the code chang
 | `event-path`   | Path to the event file (default: `${{ github.event_path }}`) |
 | `timeout`      | Timeout for AI processing in seconds (default: 600)          |
 
-### 🤖 Codex Configuration
+### Codex Configuration
 
 | Input Name       | Description                                              |
 | ---------------- | -------------------------------------------------------- |
 | `openai-api-key` | **Required for Codex** OpenAI API key for authentication |
 
-### 🔧 Advanced Codex Configuration
+### Advanced Codex Configuration
 
 | Input Name        | Description         |
 | ----------------- | ------------------- |
 | `openai-base-url` | OpenAI API base URL |
 
-## 🔒 Security
+## Security
 
-- 🔒 **Permission Checks:** Before executing core logic, the action verifies if the triggering user (`github.context.actor`) has `write` or `admin` permissions for the repository.
-- 🛡️ **Sensitive Information Masking:** Any occurrences of the provided `github-token` and `openai-api-key` within the output posted to GitHub are automatically masked (replaced with `***`) to prevent accidental exposure.
+- **Permission Checks:** Before executing core logic, the action verifies if the triggering user (`github.context.actor`) has `write` or `admin` permissions for the repository.
+- **Sensitive Information Masking:** Any occurrences of the provided `github-token` and `openai-api-key` within the output posted to GitHub are automatically masked (replaced with `***`) to prevent accidental exposure.
