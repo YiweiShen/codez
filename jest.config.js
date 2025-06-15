@@ -8,14 +8,15 @@ export default {
   coverageDirectory: 'coverage',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-    }]
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true
+      }
+    ]
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(execa|@actions|@anthropic-ai)/)'
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(execa|@actions)/)'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-};
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  }
+}

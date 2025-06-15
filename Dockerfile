@@ -28,8 +28,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
   && mkdir /commandhistory \
   && touch /commandhistory/.bash_history
 
-# Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /github/home/.claude
+# Create workspace
+RUN mkdir -p /workspace
 
 WORKDIR /workspace
 
@@ -54,24 +54,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
-# Install Claude Code and Codex
-RUN npm install -g @anthropic-ai/claude-code @openai/codex
+
+RUN npm install -g @openai/codex
 
 RUN rm -rf /workspace/*
 
-# アプリケーションディレクトリを作成
 WORKDIR /app
 
-# package.jsonとpackage-lock.jsonをコピー
 COPY package*.json ./
 
-# 依存パッケージをインストール
 RUN npm ci
 
-# ソースコードをコピー
 COPY . .
 
 RUN npm run build
 
-# エントリポイントの設定
 ENTRYPOINT ["node", "/app/dist/index.js"]
