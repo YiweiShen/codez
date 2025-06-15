@@ -413,9 +413,6 @@ export async function generatePrompt(
   event: AgentEvent,
   userPrompt: string
 ): Promise<string> {
-  if (event.type === 'issuesOpened') {
-    return userPrompt;
-  }
 
   const contents = await getContentsData(octokit, repo, event);
 
@@ -442,6 +439,9 @@ export async function generatePrompt(
   }
 
   let prompt = "";
+  if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
+    prompt += `[Title]\n${contents.content.title}\n\n`;
+  }
   if (historyPropmt) {
     prompt += `[History]\n${historyPropmt}\n\n`;
   }
