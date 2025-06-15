@@ -241,9 +241,10 @@ export async function createPullRequest(
   output: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
-  let branchName = `codez-changes-${issueNumber}`;
-  if (event.action == "created") {
-    branchName = `codez-changes-${issueNumber}-${event.comment.id}`;
+  const baseBranchName = `codez-changes-${issueNumber}`;
+  let branchName = `${issueNumber}-${baseBranchName}`;
+  if (event.action === "created") {
+    branchName = `${issueNumber}-${baseBranchName}-${event.comment.id}`;
   }
   const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
@@ -281,12 +282,52 @@ export async function createPullRequest(
 
     core.info(`Pull Request created: ${pr.data.html_url}`);
 
-    // Optionally, post a comment linking to the PR in the original issue
+    const prCommentBody = `Created Pull Request #${pr.data.number}: ${pr.data.html_url}`;
     await octokit.rest.issues.createComment({
       ...repo,
       issue_number: issueNumber,
-      body: `Created Pull Request #${pr.data.number}`,
+      body: prCommentBody,
     });
+
+    // Link PR to issue in development panel via GraphQL
+    try {
+      const {
+        repository: {
+          issue: { id: issueId },
+          pullRequest: { id: pullRequestId },
+        },
+      } = await octokit.graphql<{
+        repository: { issue: { id: string }; pullRequest: { id: string } };
+      }>(
+        `
+        query($owner: String!, $repo: String!, $issueNumber: Int!, $prNumber: Int!) {
+          repository(owner: $owner, name: $repo) {
+            issue(number: $issueNumber) { id }
+            pullRequest(number: $prNumber) { id }
+          }
+        }
+        `,
+        {
+          owner: repo.owner,
+          repo: repo.repo,
+          issueNumber,
+          prNumber: pr.data.number,
+        }
+      );
+      await octokit.graphql(
+        `
+        mutation($issueId: ID!, $pullRequestId: ID!) {
+          linkPullRequest(input: { issueId: $issueId, pullRequestId: $pullRequestId }) {
+            clientMutationId
+          }
+        }
+        `,
+        { issueId, pullRequestId }
+      );
+      core.info(`Linked PR #${pr.data.number} to Issue #${issueNumber} in development panel`);
+    } catch (linkError) {
+      core.warning(`Failed to link PR to development panel: ${linkError instanceof Error ? linkError.message : linkError}`);
+    }
 
   } catch (error) {
     core.error(`Error creating Pull Request: ${error}`);
