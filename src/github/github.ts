@@ -228,9 +228,9 @@ export async function createPullRequest(
   output: string
 ): Promise<void> {
   const issueNumber = event.issue.number;
-  let branchName = `code-agent-changes-${issueNumber}`;
+  let branchName = `codez-changes-${issueNumber}`;
   if (event.action == "created") {
-    branchName = `code-agent-changes-${issueNumber}-${event.comment.id}`;
+    branchName = `codez-changes-${issueNumber}-${event.comment.id}`;
   }
   const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
