@@ -30,7 +30,7 @@ export async function runCodex(
     // Set up environment variables
     const envVars: Record<string, string> = {
       ...process.env,
-      OPENAI_API_KEY: config.openaiApiKey
+      OPENAI_API_KEY: config.openaiApiKey,
       CODEX_QUIET_MODE: '1'
     }
 
