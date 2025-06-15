@@ -45,10 +45,20 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
     return null;
   }
 
-  const userPrompt = text.replace('/codex', '').trim();
+  let userPrompt = text.replace('/codex', '').trim();
   if (!userPrompt) {
     core.info('No prompt found after "/codex" command.');
     return null;
+  }
+
+  let title: string | undefined;
+  if ('issue' in agentEvent.github) {
+    title = agentEvent.github.issue.title;
+  } else if ('pull_request' in agentEvent.github) {
+    title = agentEvent.github.pull_request.title;
+  }
+  if (title) {
+    userPrompt = `${title.trim()}\n\n${userPrompt}`;
   }
 
   const type: "codex" = "codex";
