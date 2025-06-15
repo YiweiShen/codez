@@ -57,7 +57,7 @@ async function checkUserPermissionGithub(
 }
 
 /**
- * Masks sensitive information (GitHub token and Anthropic API key) in a given string.
+ * Masks sensitive information (GitHub token and OpenAI API key) in a given string.
  * @param text The text to mask.
  * @param config Action configuration containing sensitive keys.
  * @returns The masked text.
@@ -67,21 +67,6 @@ export function maskSensitiveInfo(text: string, config: ActionConfig): string {
 
   if (config.githubToken) {
     maskedText = maskedText.replaceAll(config.githubToken, '***');
-  }
-  if (config.anthropicApiKey) {
-    maskedText = maskedText.replaceAll(config.anthropicApiKey, '***');
-  }
-  if (config.awsAccessKeyId) {
-    maskedText = maskedText.replaceAll(config.awsAccessKeyId, '***');
-  }
-  if (config.awsSecretAccessKey) {
-    maskedText = maskedText.replaceAll(config.awsSecretAccessKey, '***');
-  }
-  if (config.anthropicBaseUrl) {
-    maskedText = maskedText.replaceAll(config.anthropicBaseUrl, '***');
-  }
-  if (config.anthropicBedrockBaseUrl) {
-    maskedText = maskedText.replaceAll(config.anthropicBedrockBaseUrl, '***');
   }
 
   if (config.openaiApiKey) {
