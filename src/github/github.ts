@@ -202,11 +202,24 @@ export async function addEyeReaction(
 }
 
 /**
- * Extracts the relevant text (body or comment) from the event payload.
+ * Extracts the relevant text (body, title or comment) from the event payload.
+ * For issue-opened events:
+ *   - If the body starts with '/codex', returns the body and appends the title.
+ *   - Else if the title starts with '/codex', returns the title and appends the body.
+ *   - Otherwise, returns the body.
+ * Comment events remain unchanged.
  */
 export function extractText(event: GitHubEvent): string | null {
     if (event.action === 'opened' && 'issue' in event) {
-        return event.issue.body;
+        const title = event.issue.title.trim();
+        const body = event.issue.body.trim();
+        if (body.startsWith('/codex')) {
+            return body + (title ? '\n\n' + title : '');
+        }
+        if (title.startsWith('/codex')) {
+            return title + (body ? '\n\n' + body : '');
+        }
+        return body;
     }
     // Ensure 'comment' exists before accessing 'body' for issue/PR comments
     if (event.action === 'created' && 'comment' in event && event.comment) {
