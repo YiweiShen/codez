@@ -1,6 +1,6 @@
-import * as core from '@actions/core'
-import { ActionConfig } from '../config/config.js'
-import { Octokit } from 'octokit'
+import * as core from '@actions/core';
+import { ActionConfig } from '../config/config.js';
+import { Octokit } from 'octokit';
 
 /**
  * Checks if the user has appropriate permissions.
@@ -8,19 +8,19 @@ import { Octokit } from 'octokit'
  * @returns true if the user has permission, false otherwise
  */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
-  const { context, octokit, repo } = config
-  const actor = context.actor
+  const { context, octokit, repo } = config;
+  const actor = context.actor;
 
   if (!actor) {
-    core.warning('Actor not found. Permission check failed.')
-    return false
+    core.warning('Actor not found. Permission check failed.');
+    return false;
   }
 
   try {
-    return await checkUserPermissionGithub(octokit, repo, actor)
+    return await checkUserPermissionGithub(octokit, repo, actor);
   } catch (error) {
-    core.warning(`Exception occurred during permission check: ${error}`)
-    return false
+    core.warning(`Exception occurred during permission check: ${error}`);
+    return false;
   }
 }
 
@@ -39,43 +39,57 @@ async function checkUserPermissionGithub(
 ): Promise<boolean> {
   try {
     // Check user's permissions as a repository collaborator
-    const { data: collaboratorPermission } =
-      await octokit.rest.repos.getCollaboratorPermissionLevel({
-        ...repo,
-        username
-      })
+    const { data: collaboratorPermission } = await octokit.rest.repos.getCollaboratorPermissionLevel({
+      ...repo,
+      username,
+    });
 
-    const permission = collaboratorPermission.permission
-    core.info(`User Permission level: ${permission}`)
+    const permission = collaboratorPermission.permission;
+    core.info(`User Permission level: ${permission}`);
 
     // Determine based on permission level
     // Permission levels include `admin, write, read, none`
-    return ['admin', 'write'].includes(permission)
+    return ['admin', 'write'].includes(permission);
   } catch (error) {
-    core.warning(`Error checking user permission: ${error}`)
-    return false
+    core.warning(`Error checking user permission: ${error}`);
+    return false;
   }
 }
 
 /**
- * Masks sensitive information (GitHub token and API key) in a given string.
+ * Masks sensitive information (GitHub token and Anthropic API key) in a given string.
  * @param text The text to mask.
  * @param config Action configuration containing sensitive keys.
  * @returns The masked text.
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
-  let maskedText = text
+  let maskedText = text;
 
   if (config.githubToken) {
-    maskedText = maskedText.replaceAll(config.githubToken, '***')
+    maskedText = maskedText.replaceAll(config.githubToken, '***');
+  }
+  if (config.anthropicApiKey) {
+    maskedText = maskedText.replaceAll(config.anthropicApiKey, '***');
+  }
+  if (config.awsAccessKeyId) {
+    maskedText = maskedText.replaceAll(config.awsAccessKeyId, '***');
+  }
+  if (config.awsSecretAccessKey) {
+    maskedText = maskedText.replaceAll(config.awsSecretAccessKey, '***');
+  }
+  if (config.anthropicBaseUrl) {
+    maskedText = maskedText.replaceAll(config.anthropicBaseUrl, '***');
+  }
+  if (config.anthropicBedrockBaseUrl) {
+    maskedText = maskedText.replaceAll(config.anthropicBedrockBaseUrl, '***');
   }
 
   if (config.openaiApiKey) {
-    maskedText = maskedText.replaceAll(config.openaiApiKey, '***')
+    maskedText = maskedText.replaceAll(config.openaiApiKey, '***');
   }
   if (config.openaiBaseUrl) {
-    maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***')
+    maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
   }
 
-  return maskedText
+  return maskedText;
 }

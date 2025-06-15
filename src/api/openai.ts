@@ -9,7 +9,7 @@ function getOpenAIClient(config: ActionConfig): OpenAI {
     apiKey: config.openaiApiKey,
   };
   // Set base URL if provided
-  if (config.openaiBaseUrl) {
+  if (config.openaiBaseUrl) { 
     openaiOptions.baseURL = config.openaiBaseUrl;
   }
   return new OpenAI(openaiOptions);
@@ -26,7 +26,7 @@ function getOpenAIClient(config: ActionConfig): OpenAI {
 export async function generateCommitMessage(
   changedFiles: string[],
   userPrompt: string,
-  context: { prNumber?: number; issueNumber?: number },
+  context: { prNumber?: number; issueNumber?: number; },
   config: ActionConfig
 ): Promise<string> {
   try {
@@ -57,8 +57,8 @@ ${changedFiles.join('\n')}
       model: defaultModel,
       max_completion_tokens: 1024,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent }
       ],
     });
 
@@ -67,22 +67,15 @@ ${changedFiles.join('\n')}
     commitMessage = commitMessage.split('\n')[0]; // Take the first line
 
     // Fallback if the message is empty or too long (adjust length check if needed)
-    if (!commitMessage || commitMessage.length > 100) {
-      // Keep 100 char limit for safety
-      core.warning(
-        `Generated commit message was empty or too long: "${commitMessage}". Falling back.`
-      );
-      throw new Error('Generated commit message invalid.'); // Trigger fallback
+    if (!commitMessage || commitMessage.length > 100) { // Keep 100 char limit for safety
+      core.warning(`Generated commit message was empty or too long: "${commitMessage}". Falling back.`);
+      throw new Error("Generated commit message invalid."); // Trigger fallback
     }
 
     core.info(`Generated commit message: ${commitMessage}`);
     return commitMessage;
   } catch (error) {
-    core.warning(
-      `Error generating commit message with OpenAI: ${
-        error instanceof Error ? error.message : String(error)
-      }. Using fallback.`
-    );
+    core.warning(`Error generating commit message with OpenAI: ${error instanceof Error ? error.message : String(error)}. Using fallback.`);
     if (context.prNumber) {
       return `Apply changes for PR #${context.prNumber}`;
     } else if (context.issueNumber) {
