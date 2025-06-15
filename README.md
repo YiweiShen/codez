@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.sender.type != 'Bot' }}
     steps:
-      - uses: yiweishen/codez@main
+      - uses: yiweishen/codez@v0.0.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
