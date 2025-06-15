@@ -4,7 +4,7 @@ import { AgentEvent, getEventType, extractText } from './github.js';
 import { ActionConfig } from '../config/config.js';
 
 export interface ProcessedEvent {
-  type: "claude" | "codex";
+  type: "codex";
   agentEvent: AgentEvent;
   userPrompt: string;
 }
@@ -38,26 +38,19 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
   core.info(`Detected event type: ${agentEvent.type}`);
 
-  // Check for /claude and /codex command
+  // Check for /codex command only
   const text = extractText(agentEvent.github);
-  if (!text || (!text.startsWith('/claude') && !text.startsWith('/codex'))) {
-    core.info('Command "/claude" or "/codex" not found in the event text.');
-    return null; // Exit gracefully if command is not present
+  if (!text || !text.startsWith('/codex')) {
+    core.info('Command "/codex" not found in the event text.');
+    return null;
   }
 
-  let userPrompt = "";
-  let type: "claude" | "codex" = "claude";
-  if (text.startsWith('/claude')) {
-    userPrompt = text.replace('/claude', '').trim();
-  } else if (text.startsWith('/codex')) {
-    userPrompt = text.replace('/codex', '').trim();
-    type = "codex";
-  }
-
+  const userPrompt = text.replace('/codex', '').trim();
   if (!userPrompt) {
-    core.info('No prompt found after "/claude"or "/codex" command.');
-    return null; // Indicate missing prompt
+    core.info('No prompt found after "/codex" command.');
+    return null;
   }
 
+  const type: "codex" = "codex";
   return { type, agentEvent, userPrompt };
 }
