@@ -1,6 +1,6 @@
-name: 'Github Code Agent'
-description: 'AI Agent that operates Claude Code on GitHub'
-author: 'potproject'
+name: 'Codez'
+description: 'Codex in GitHub Actions'
+author: 'yiweishen'
 branding:
   icon: 'code'
   color: 'purple'
@@ -17,38 +17,6 @@ inputs:
     description: 'Specify timeout duration (seconds)'
     default: '600'
     required: false
-
-  anthropic-api-key:
-    description: 'Specify the Anthropic API Key'
-    required: false
-  anthropic-base-url:
-    description: 'Specify the Anthropic API base URL'
-    required: false
-  anthropic-model:
-    description: 'Specify the Anthropic model to use'
-    required: false
-  anthropic-small-fast-model:
-    description: 'Specify the Anthropic small and fast model to use'
-    required: false
-  claude-code-use-bedrock:
-    description: 'Use AWS Bedrock for Claude Code (0 or 1)'
-    required: false
-  anthropic-bedrock-base-url:
-    description: 'Specify the Anthropic Bedrock API base URL'
-    required: false
-  aws-access-key-id:
-    description: 'Specify the AWS Access Key ID for Bedrock'
-    required: false
-  aws-secret-access-key:
-    description: 'Specify the AWS Secret Access Key for Bedrock'
-    required: false
-  aws-region:
-    description: 'Specify the AWS region for Bedrock'
-    required: false
-  disable-prompt-caching:
-    description: 'Disable prompt caching (0 or 1)'
-    required: false
-
   openai-api-key:
     description: 'Specify the OpenAI API Key'
     required: false
@@ -59,4 +27,3 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile.github_action_dockerhub'
-
