@@ -18,6 +18,9 @@
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
+    "@anthropic-ai/bedrock-sdk": "^0.22.1",
+    "@anthropic-ai/claude-code": "^1.0.24",
+    "@anthropic-ai/sdk": "^0.54.0",
     "@types/glob": "^8.1.0",
     "execa": "^9.5.0",
     "glob": "^10.4.5",

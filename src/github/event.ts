@@ -1,12 +1,12 @@
-import * as core from '@actions/core'
-import * as fs from 'fs'
-import { AgentEvent, getEventType, extractText } from './github.js'
-import { ActionConfig } from '../config/config.js'
+import * as core from '@actions/core';
+import * as fs from 'fs';
+import { AgentEvent, getEventType, extractText } from './github.js';
+import { ActionConfig } from '../config/config.js';
 
 export interface ProcessedEvent {
-  type: 'codex'
-  agentEvent: AgentEvent
-  userPrompt: string
+  type: "claude" | "codex";
+  agentEvent: AgentEvent;
+  userPrompt: string;
 }
 
 /**
@@ -17,11 +17,9 @@ export interface ProcessedEvent {
  */
 function loadEventPayload(eventPath: string): any {
   try {
-    return JSON.parse(fs.readFileSync(eventPath, 'utf8'))
+    return JSON.parse(fs.readFileSync(eventPath, 'utf8'));
   } catch (error) {
-    throw new Error(
-      `Failed to read or parse event payload at ${eventPath}: ${error}`
-    )
+    throw new Error(`Failed to read or parse event payload at ${eventPath}: ${error}`);
   }
 }
 
@@ -31,33 +29,35 @@ function loadEventPayload(eventPath: string): any {
  * @returns ProcessedEvent
  */
 export function processEvent(config: ActionConfig): ProcessedEvent | null {
-  const eventPayload = loadEventPayload(config.eventPath)
-  const agentEvent = getEventType(eventPayload)
+  const eventPayload = loadEventPayload(config.eventPath);
+  const agentEvent = getEventType(eventPayload);
 
   if (!agentEvent) {
-    core.info('Unsupported event type or payload structure.')
-    return null // Exit gracefully for unsupported events
+    core.info('Unsupported event type or payload structure.');
+    return null; // Exit gracefully for unsupported events
   }
-  core.info(`Detected event type: ${agentEvent.type}`)
+  core.info(`Detected event type: ${agentEvent.type}`);
 
-  // Check for and /codex command
-  const text = extractText(agentEvent.github)
-  if (!text || !text.startsWith('/codex')) {
-    core.info('Command "/codex" not found in the event text.')
-    return null // Exit gracefully if command is not present
+  // Check for /claude and /codex command
+  const text = extractText(agentEvent.github);
+  if (!text || (!text.startsWith('/claude') && !text.startsWith('/codex'))) {
+    core.info('Command "/claude" or "/codex" not found in the event text.');
+    return null; // Exit gracefully if command is not present
   }
 
-  let userPrompt = ''
-  let type: 'codex' = 'codex'
-  if (text.startsWith('/codex')) {
-    userPrompt = text.replace('/codex', '').trim()
-    type = 'codex'
+  let userPrompt = "";
+  let type: "claude" | "codex" = "claude";
+  if (text.startsWith('/claude')) {
+    userPrompt = text.replace('/claude', '').trim();
+  } else if (text.startsWith('/codex')) {
+    userPrompt = text.replace('/codex', '').trim();
+    type = "codex";
   }
 
   if (!userPrompt) {
-    core.info('No prompt found after "/codex" command.')
-    return null // Indicate missing prompt
+    core.info('No prompt found after "/claude"or "/codex" command.');
+    return null; // Indicate missing prompt
   }
 
-  return { type, agentEvent, userPrompt }
+  return { type, agentEvent, userPrompt };
 }
