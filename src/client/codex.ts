@@ -23,15 +23,15 @@ export async function runCodex(
     const cliArgs = [
       '--full-auto',
       '--dangerously-auto-approve-everything',
-      '--quiet',
+      // '--quiet',
       '"' + prompt + '"'
     ]
 
     // Set up environment variables
     const envVars: Record<string, string> = {
       ...process.env,
-      OPENAI_API_KEY: config.openaiApiKey,
-      CODEX_QUIET_MODE: '1'
+      OPENAI_API_KEY: config.openaiApiKey
+      // CODEX_QUIET_MODE: '1'
     }
 
     if (config.openaiBaseUrl) {
