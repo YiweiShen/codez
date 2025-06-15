@@ -46,10 +46,6 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
 
   let userPrompt = text.replace('/codex', '').trim();
-  if (!userPrompt) {
-    core.info('No prompt found after "/codex" command.');
-    return null;
-  }
 
   let title: string | undefined;
   if ('issue' in agentEvent.github) {
@@ -59,6 +55,11 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
   if (title) {
     userPrompt = `${title.trim()}\n\n${userPrompt}`;
+  }
+
+  if (!userPrompt) {
+    core.info('No prompt found after "/codex" command.');
+    return null;
   }
 
   const type: "codex" = "codex";
