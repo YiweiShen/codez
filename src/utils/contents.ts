@@ -5,14 +5,6 @@ export function genContentsString(content: { body: string; login: string }, user
     return "";
   }
 
-  if (body.startsWith("/claude")) {
-    // Remove "/claude" from the beginning of the body
-    body = body.substring(body.indexOf('/claude') + '/claude'.length).trim();
-    if (body === userPrompt) {
-      return "";
-    }
-    return body + "\n\n";
-  }
 
   if (login === 'github-actions[bot]') {
     // Add ">" to the beginning of the body, considering line breaks

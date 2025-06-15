@@ -7,9 +7,7 @@ import {
   postComment,
   generatePrompt,
 } from './github.js';
-import { generateCommitMessage as generateCommitMessageAnthropic } from '../api/claude.js';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
-import { runClaudeCode } from '../client/claudecode.js';
 import { captureFileState, detectChanges } from '../file/file.js';
 import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
@@ -35,9 +33,7 @@ async function handleResult(
   if (changedFiles.length > 0) {
     core.info(`Detected changes in ${changedFiles.length} files:\n${changedFiles.join('\n')}`);
 
-    const generateCommitMessage = processedEvent.type === 'codex'
-      ? generateCommitMessageOpenAI
-      : generateCommitMessageAnthropic;
+    const generateCommitMessage = generateCommitMessageOpenAI;
     // Generate commit message
     const commitMessage = await generateCommitMessage(
       changedFiles,
@@ -74,7 +70,7 @@ async function handleResult(
       );
     }
   } else {
-    // No files changed, post Claude's output as a comment
+    // No files changed, post AI output as a comment
     await postComment(octokit, repo, agentEvent.github, `${output}`);
   }
 }
@@ -85,7 +81,7 @@ async function handleResult(
  * @param processedEvent Processed event data.
  */
 export async function runAction(config: ActionConfig, processedEvent: ProcessedEvent): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, anthropicApiKey, timeoutSeconds } = config;
+  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } = config;
   const { agentEvent, userPrompt } = processedEvent;
 
   // Add eyes reaction
@@ -103,16 +99,8 @@ export async function runAction(config: ActionConfig, processedEvent: ProcessedE
   core.info(`Prompt: \n${prompt}`);
   let output;
   try {
-    let rawOutput: string; // Explicitly type rawOutput as string
-    if (processedEvent.type === 'codex') {
-      // Add await here
-      rawOutput = await runCodex(workspace, config, prompt, timeoutSeconds * 1000); 
-    } else {
-      // Add await here too for consistency and potential async nature
-      rawOutput = runClaudeCode(workspace, config, prompt, timeoutSeconds * 1000); 
-    }
-    // No change needed here as rawOutput will be a string after await
-    output = maskSensitiveInfo(rawOutput, config); 
+    const rawOutput: string = await runCodex(workspace, config, prompt, timeoutSeconds * 1000);
+    output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {
     await postComment(
       octokit,
