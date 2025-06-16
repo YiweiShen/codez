@@ -329,6 +329,35 @@ export async function createPullRequest(
       core.warning(`Failed to link PR to development panel: ${linkError instanceof Error ? linkError.message : linkError}`);
     }
 
+    // Change eye reaction to thumb up for the original issue
+    try {
+      // List reactions on the original issue
+      const issueReactions = await octokit.rest.reactions.listForIssue({
+        ...repo,
+        issue_number: issueNumber
+      });
+      // Remove the eyes reaction added by the bot
+      for (const reaction of issueReactions.data) {
+        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+          await octokit.rest.reactions.deleteForIssue({
+            ...repo,
+            issue_number: issueNumber,
+            reaction_id: reaction.id
+          });
+          break;
+        }
+      }
+      // Add a thumbs up reaction to indicate PR creation
+      await octokit.rest.reactions.createForIssue({
+        ...repo,
+        issue_number: issueNumber,
+        content: '+1'
+      });
+      core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+    } catch (reactionError) {
+      core.warning(`Failed to update reaction on issue #${issueNumber}: ${reactionError instanceof Error ? reactionError.message : reactionError}`);
+    }
+
   } catch (error) {
     core.error(`Error creating Pull Request: ${error}`);
     throw new Error(`Failed to create Pull Request: ${error instanceof Error ? error.message : error}`);
