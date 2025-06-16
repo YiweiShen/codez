@@ -938,3 +938,61 @@ function truncateOutput(output: string): string {
   }
   return output;
 }
+
+/**
+ * Searches repositories on GitHub matching the specified query.
+ * @param octokit Octokit instance authenticated with a GitHub token.
+ * @param query Search query string (e.g., "language:TypeScript action codex").
+ * @param perPage Number of repositories to return (max 100).
+ * @returns Array of repository search result objects.
+ */
+export async function searchRepositories(
+  octokit: Octokit,
+  query: string,
+  perPage: number = 5,
+): Promise<
+  {
+    full_name: string;
+    description: string | null;
+    html_url: string;
+    stargazers_count: number;
+  }[]
+> {
+  const response = await octokit.rest.search.repos({
+    q: query,
+    per_page: perPage,
+  });
+  return response.data.items.map((item) => ({
+    full_name: item.full_name,
+    description: item.description,
+    html_url: item.html_url,
+    stargazers_count: item.stargazers_count,
+  }));
+}
+
+/**
+ * Retrieves the README content of a repository.
+ * @param octokit Octokit instance authenticated with a GitHub token.
+ * @param owner Repository owner.
+ * @param repo Repository name.
+ * @returns Decoded README content as string.
+ */
+export async function getRepositoryReadme(
+  octokit: Octokit,
+  owner: string,
+  repo: string,
+): Promise<string> {
+  try {
+    const response = await octokit.rest.repos.getReadme({
+      owner,
+      repo,
+      mediaType: {
+        format: 'raw',
+      },
+    });
+    return response.data as unknown as string;
+  } catch (error) {
+    core.warning(`Failed to retrieve README for ${owner}/${repo}: ${error}`);
+    return '';
+  }
+}
