@@ -31,9 +31,14 @@ export async function generateCommitMessage(
 ): Promise<string> {
   try {
     // Create prompt - System prompt + User prompt structure
-    const systemPrompt = `Based on the following file changed and User Request, generate a concise and clear git commit message.
-The commit message should follow this format:
-* Summary of changes (50 characters or less). Please do not include any other text.`;
+    const systemPrompt = `You are an AI assistant that generates Git commit messages following the Conventional Commits specification.
+Use the format: <type>(<scope>): <short description>
+
+- <type> must be one of: feat, fix, docs, style, refactor, perf, test, chore.
+- <scope> should be a relevant component or file (omit parentheses if no scope).
+- <short description> should be 50 characters or less.
+
+Only output the commit message without quotes or additional text.`;
 
     let userContent = `User Request:
 ${userPrompt}
