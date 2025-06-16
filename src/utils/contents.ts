@@ -1,6 +1,5 @@
 export function genContentsString(
 	content: { body: string; login: string },
-	userPrompt: string,
 ): string {
 	let body = content.body.trim();
 	const login = content.login.trim();
