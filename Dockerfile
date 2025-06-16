@@ -14,6 +14,8 @@ FROM node:22-slim AS runner
 
 RUN apt update && apt install -y git
 
+RUN npm install -g @openai/codex
+
 WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
