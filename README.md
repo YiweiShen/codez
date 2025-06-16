@@ -73,7 +73,17 @@ Comment on an existing Pull Request to request code modifications:
 /codex Please add unit tests to this code.
 ```
 
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
+
+
+## Running Tests
+
+Install dependencies and run all unit tests:
+
+```bash
+npm test
+```
 
 ## Formatting
 
