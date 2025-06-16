@@ -8,20 +8,20 @@ import { Octokit } from 'octokit';
  * @returns true if the user has permission, false otherwise
  */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
-  const { context, octokit, repo } = config;
-  const actor = context.actor;
+	const { context, octokit, repo } = config;
+	const actor = context.actor;
 
-  if (!actor) {
-    core.warning('Actor not found. Permission check failed.');
-    return false;
-  }
+	if (!actor) {
+		core.warning('Actor not found. Permission check failed.');
+		return false;
+	}
 
-  try {
-    return await checkUserPermissionGithub(octokit, repo, actor);
-  } catch (error) {
-    core.warning(`Exception occurred during permission check: ${error}`);
-    return false;
-  }
+	try {
+		return await checkUserPermissionGithub(octokit, repo, actor);
+	} catch (error) {
+		core.warning(`Exception occurred during permission check: ${error}`);
+		return false;
+	}
 }
 
 /**
@@ -33,27 +33,28 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
  * @returns true if the user has permissions, false otherwise
  */
 async function checkUserPermissionGithub(
-  octokit: Octokit,
-  repo: { owner: string; repo: string },
-  username: string
+	octokit: Octokit,
+	repo: { owner: string; repo: string },
+	username: string,
 ): Promise<boolean> {
-  try {
-    // Check user's permissions as a repository collaborator
-    const { data: collaboratorPermission } = await octokit.rest.repos.getCollaboratorPermissionLevel({
-      ...repo,
-      username,
-    });
+	try {
+		// Check user's permissions as a repository collaborator
+		const { data: collaboratorPermission } =
+			await octokit.rest.repos.getCollaboratorPermissionLevel({
+				...repo,
+				username,
+			});
 
-    const permission = collaboratorPermission.permission;
-    core.info(`User Permission level: ${permission}`);
+		const permission = collaboratorPermission.permission;
+		core.info(`User Permission level: ${permission}`);
 
-    // Determine based on permission level
-    // Permission levels include `admin, write, read, none`
-    return ['admin', 'write'].includes(permission);
-  } catch (error) {
-    core.warning(`Error checking user permission: ${error}`);
-    return false;
-  }
+		// Determine based on permission level
+		// Permission levels include `admin, write, read, none`
+		return ['admin', 'write'].includes(permission);
+	} catch (error) {
+		core.warning(`Error checking user permission: ${error}`);
+		return false;
+	}
 }
 
 /**
@@ -63,18 +64,18 @@ async function checkUserPermissionGithub(
  * @returns The masked text.
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
-  let maskedText = text;
+	let maskedText = text;
 
-  if (config.githubToken) {
-    maskedText = maskedText.replaceAll(config.githubToken, '***');
-  }
+	if (config.githubToken) {
+		maskedText = maskedText.replaceAll(config.githubToken, '***');
+	}
 
-  if (config.openaiApiKey) {
-    maskedText = maskedText.replaceAll(config.openaiApiKey, '***');
-  }
-  if (config.openaiBaseUrl) {
-    maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
-  }
+	if (config.openaiApiKey) {
+		maskedText = maskedText.replaceAll(config.openaiApiKey, '***');
+	}
+	if (config.openaiBaseUrl) {
+		maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
+	}
 
-  return maskedText;
+	return maskedText;
 }
