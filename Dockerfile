@@ -12,6 +12,8 @@ RUN npm run build
 
 FROM node:22-slim AS runner
 
+RUN apt update && apt install -y git
+
 WORKDIR /app
 
 COPY --from=builder /app/package*.json ./
