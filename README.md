@@ -107,10 +107,10 @@ codez-<type>-<issueNumber>-<short-description>
 
 ### Basic Configuration
 
-| Input Name     | Description                                                  |
-| -------------- | ------------------------------------------------------------ |
-| `github-token` | **Required** GitHub token for authentication                 |
-| `event-path`   | Path to the event file (default: `${{ github.event_path }}`) |
+| Input Name     | Description                                                                     |
+| -------------- | ------------------------------------------------------------------------------- |
+| `github-token` | **Required** GitHub token for authentication                                    |
+| `event-path`   | Path to the event file (default: `${{ github.event_path }}`)                    |
 | `timeout`      | Timeout for AI processing in seconds (default: 600, must be a positive integer) |
 
 ### Codex Configuration

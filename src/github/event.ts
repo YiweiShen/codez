@@ -4,9 +4,9 @@ import { AgentEvent, getEventType, extractText } from './github.js';
 import { ActionConfig } from '../config/config.js';
 
 export interface ProcessedEvent {
-	type: 'codex';
-	agentEvent: AgentEvent;
-	userPrompt: string;
+  type: 'codex';
+  agentEvent: AgentEvent;
+  userPrompt: string;
 }
 
 /**
@@ -16,13 +16,13 @@ export interface ProcessedEvent {
  * @throws Error if the file cannot be read or parsed.
  */
 function loadEventPayload(eventPath: string): any {
-	try {
-		return JSON.parse(fs.readFileSync(eventPath, 'utf8'));
-	} catch (error) {
-		throw new Error(
-			`Failed to read or parse event payload at ${eventPath}: ${error}`,
-		);
-	}
+  try {
+    return JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+  } catch (error) {
+    throw new Error(
+      `Failed to read or parse event payload at ${eventPath}: ${error}`,
+    );
+  }
 }
 
 /**
@@ -31,39 +31,39 @@ function loadEventPayload(eventPath: string): any {
  * @returns ProcessedEvent
  */
 export function processEvent(config: ActionConfig): ProcessedEvent | null {
-	const eventPayload = loadEventPayload(config.eventPath);
-	const agentEvent = getEventType(eventPayload);
+  const eventPayload = loadEventPayload(config.eventPath);
+  const agentEvent = getEventType(eventPayload);
 
-	if (!agentEvent) {
-		core.info('Unsupported event type or payload structure.');
-		return null; // Exit gracefully for unsupported events
-	}
-	core.info(`Detected event type: ${agentEvent.type}`);
+  if (!agentEvent) {
+    core.info('Unsupported event type or payload structure.');
+    return null; // Exit gracefully for unsupported events
+  }
+  core.info(`Detected event type: ${agentEvent.type}`);
 
-	// Check for /codex command only
-	const text = extractText(agentEvent.github);
-	if (!text || !text.startsWith('/codex')) {
-		core.info('Command "/codex" not found in the event text.');
-		return null;
-	}
+  // Check for /codex command only
+  const text = extractText(agentEvent.github);
+  if (!text || !text.startsWith('/codex')) {
+    core.info('Command "/codex" not found in the event text.');
+    return null;
+  }
 
-	let userPrompt = text.replace('/codex', '').trim();
+  let userPrompt = text.replace('/codex', '').trim();
 
-	let title: string | undefined;
-	if ('issue' in agentEvent.github) {
-		title = agentEvent.github.issue.title;
-	} else if ('pull_request' in agentEvent.github) {
-		title = agentEvent.github.pull_request.title;
-	}
-	if (title) {
-		userPrompt = `${title.trim()}\n\n${userPrompt}`;
-	}
+  let title: string | undefined;
+  if ('issue' in agentEvent.github) {
+    title = agentEvent.github.issue.title;
+  } else if ('pull_request' in agentEvent.github) {
+    title = agentEvent.github.pull_request.title;
+  }
+  if (title) {
+    userPrompt = `${title.trim()}\n\n${userPrompt}`;
+  }
 
-	if (!userPrompt) {
-		core.info('No prompt found after "/codex" command.');
-		return null;
-	}
+  if (!userPrompt) {
+    core.info('No prompt found after "/codex" command.');
+    return null;
+  }
 
-	const type: 'codex' = 'codex';
-	return { type, agentEvent, userPrompt };
+  const type: 'codex' = 'codex';
+  return { type, agentEvent, userPrompt };
 }
