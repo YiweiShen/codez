@@ -26,4 +26,4 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'ghcr.io/yiweishen/codez:latest'
+  image: 'docker://ghcr.io/yiweishen/codez:latest'
