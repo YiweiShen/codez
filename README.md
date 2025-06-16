@@ -76,13 +76,21 @@ Comment on an existing Pull Request to request code modifications:
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
+
 ## Running Tests
 
 Install dependencies and run all unit tests:
 
 ```bash
-npm install
 npm test
+```
+
+## Formatting
+
+This project uses [Prettier](https://prettier.io/) to format code consistently. To format all files, run:
+
+```bash
+npm run format
 ```
 
 ## Inputs Settings
