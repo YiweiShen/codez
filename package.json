@@ -8,7 +8,8 @@
     "format": "prettier --write .",
     "build": "tsc",
     "test": "jest",
-    "release": "npx bumpp"
+    "release": "npx bumpp",
+    "prepare": "husky install"
   },
   "keywords": [
     "github",
@@ -34,6 +35,9 @@
     "jest": "^29.7.0",
     "prettier": "^2.8.0",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "husky": "^8.0.0",
+    "@commitlint/cli": "^17.10.0",
+    "@commitlint/config-conventional": "^17.10.0"
   }
 }

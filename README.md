@@ -91,6 +91,10 @@ This project uses [Prettier](https://prettier.io/) to format code consistently. 
 npm run format
 ```
 
+## Commit Message Linting
+
+This repository uses [commitlint](https://github.com/conventional-changelog/commitlint) with a [commit-msg](https://typicode.github.io/husky/#/?id=commit-msg) Git hook to enforce the [Conventional Commits](https://www.conventionalcommits.org/) format (as described in `AGENTS.md`). The hook is installed automatically after running `npm install`.
+
 ## Branch Naming
 
 When creating pull request branches, this action uses the following naming convention:
