@@ -1,5 +1,7 @@
 # Codez
 
+![GitHub Release](https://img.shields.io/github/v/release/YiweiShen/codez) ![GitHub Release Date](https://img.shields.io/github/release-date/YiweiShen/codez) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/YiweiShen/codez/build-and-push.yml) ![GitHub Top Language](https://img.shields.io/github/languages/top/YiweiShen/codez) ![GitHub Last Commit](https://img.shields.io/github/last-commit/YiweiShen/codez)
+
 An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Codex from GitHub Issues or Pull Request comments and automate code changes.
 
 ## Features
