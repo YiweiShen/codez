@@ -16,7 +16,8 @@ function getOpenAIClient(config: ActionConfig): OpenAI {
 }
 
 /**
- * Function to generate Git commit messages using OpenAI API
+ * Function to generate Git commit messages using OpenAI API.
+ * The generated commit message will follow the Conventional Commits specification.
  * @param changedFiles List of changed files
  * @param userPrompt User's original prompt
  * @param context Context information (PR number, Issue number, etc.)
@@ -31,9 +32,11 @@ export async function generateCommitMessage(
 ): Promise<string> {
   try {
     // Create prompt - System prompt + User prompt structure
-    const systemPrompt = `Based on the following file changed and User Request, generate a concise and clear git commit message.
-The commit message should follow this format:
-* Summary of changes (50 characters or less). Please do not include any other text.`;
+    const systemPrompt = `Based on the following file changes and user request, generate a concise and clear Git commit message following the Conventional Commits format:
+<type>(<scope>): <short description>
+
+Where type is one of: feat, fix, docs, style, refactor, perf, test, chore.
+The summary (short description) should be 50 characters or less and should not include any additional text or line breaks.`;
 
     let userContent = `User Request:
 ${userPrompt}
@@ -84,12 +87,12 @@ ${changedFiles.join('\n')}
       }. Using fallback.`,
     );
     if (context.prNumber) {
-      return `Apply changes for PR #${context.prNumber}`;
+      return `chore: apply changes for PR #${context.prNumber}`;
     } else if (context.issueNumber) {
-      return `Apply changes for Issue #${context.issueNumber}`;
+      return `chore: apply changes for Issue #${context.issueNumber}`;
     } else {
       const fileCount = changedFiles.length;
-      return `Apply changes to ${fileCount} file${fileCount !== 1 ? 's' : ''}`;
+      return `chore: apply changes to ${fileCount} file${fileCount !== 1 ? 's' : ''}`;
     }
   }
 }
