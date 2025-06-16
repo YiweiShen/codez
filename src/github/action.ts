@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import {
-	cloneRepository,
-	addEyeReaction,
-	createPullRequest,
-	commitAndPush,
-	postComment,
-	generatePrompt,
+  cloneRepository,
+  addEyeReaction,
+  createPullRequest,
+  commitAndPush,
+  postComment,
+  generatePrompt,
 } from './github.js';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
@@ -22,72 +22,72 @@ import { runCodex } from '../client/codex.js';
  * @param changedFiles Array of changed file paths.
  */
 async function handleResult(
-	config: ActionConfig,
-	processedEvent: ProcessedEvent,
-	output: string,
-	changedFiles: string[],
+  config: ActionConfig,
+  processedEvent: ProcessedEvent,
+  output: string,
+  changedFiles: string[],
 ): Promise<void> {
-	const { octokit, repo, workspace } = config;
-	const { agentEvent, userPrompt } = processedEvent;
+  const { octokit, repo, workspace } = config;
+  const { agentEvent, userPrompt } = processedEvent;
 
-	if (changedFiles.length > 0) {
-		core.info(
-			`Detected changes in ${changedFiles.length} files:\n${changedFiles.join(
-				'\n',
-			)}`,
-		);
+  if (changedFiles.length > 0) {
+    core.info(
+      `Detected changes in ${changedFiles.length} files:\n${changedFiles.join(
+        '\n',
+      )}`,
+    );
 
-		const generateCommitMessage = generateCommitMessageOpenAI;
-		// Generate commit message
-		const commitMessage = await generateCommitMessage(
-			changedFiles,
-			userPrompt,
-			{
-				issueNumber:
-					agentEvent.type === 'issuesOpened' ||
-					agentEvent.type === 'issueCommentCreated'
-						? agentEvent.github.issue.number
-						: undefined,
-				prNumber:
-					agentEvent.type === 'pullRequestCommentCreated'
-						? agentEvent.github.issue.number
-						: agentEvent.type === 'pullRequestReviewCommentCreated'
-						? agentEvent.github.pull_request.number
-						: undefined,
-			},
-			config,
-		);
+    const generateCommitMessage = generateCommitMessageOpenAI;
+    // Generate commit message
+    const commitMessage = await generateCommitMessage(
+      changedFiles,
+      userPrompt,
+      {
+        issueNumber:
+          agentEvent.type === 'issuesOpened' ||
+          agentEvent.type === 'issueCommentCreated'
+            ? agentEvent.github.issue.number
+            : undefined,
+        prNumber:
+          agentEvent.type === 'pullRequestCommentCreated'
+            ? agentEvent.github.issue.number
+            : agentEvent.type === 'pullRequestReviewCommentCreated'
+            ? agentEvent.github.pull_request.number
+            : undefined,
+      },
+      config,
+    );
 
-		// Handle changes based on event type
-		if (
-			agentEvent.type === 'issuesOpened' ||
-			agentEvent.type === 'issueCommentCreated'
-		) {
-			await createPullRequest(
-				workspace,
-				octokit,
-				repo,
-				agentEvent.github,
-				commitMessage,
-				output,
-			);
-		} else if (
-			agentEvent.type === 'pullRequestCommentCreated' ||
-			agentEvent.type === 'pullRequestReviewCommentCreated'
-		) {
-			await commitAndPush(
-				workspace,
-				octokit,
-				repo,
-				agentEvent.github,
-				commitMessage,
-				output,
-			);
-		}
-	} else {
-		// No files changed, post AI output as a comment
-		await postComment(octokit, repo, agentEvent.github, `${output}`);
-	}
+    // Handle changes based on event type
+    if (
+      agentEvent.type === 'issuesOpened' ||
+      agentEvent.type === 'issueCommentCreated'
+    ) {
+      await createPullRequest(
+        workspace,
+        octokit,
+        repo,
+        agentEvent.github,
+        commitMessage,
+        output,
+      );
+    } else if (
+      agentEvent.type === 'pullRequestCommentCreated' ||
+      agentEvent.type === 'pullRequestReviewCommentCreated'
+    ) {
+      await commitAndPush(
+        workspace,
+        octokit,
+        repo,
+        agentEvent.github,
+        commitMessage,
+        output,
+      );
+    }
+  } else {
+    // No files changed, post AI output as a comment
+    await postComment(octokit, repo, agentEvent.github, `${output}`);
+  }
 }
 
 /**
@@ -96,60 +96,60 @@ async function handleResult(
  * @param processedEvent Processed event data.
  */
 export async function runAction(
-	config: ActionConfig,
-	processedEvent: ProcessedEvent,
+  config: ActionConfig,
+  processedEvent: ProcessedEvent,
 ): Promise<void> {
-	const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
-		config;
-	const { agentEvent, userPrompt } = processedEvent;
+  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
+    config;
+  const { agentEvent, userPrompt } = processedEvent;
 
-	// Add eyes reaction
-	await addEyeReaction(octokit, repo, agentEvent.github);
+  // Add eyes reaction
+  await addEyeReaction(octokit, repo, agentEvent.github);
 
-	// Clone repository
-	await cloneRepository(
-		workspace,
-		githubToken,
-		repo,
-		context,
-		octokit,
-		agentEvent,
-	);
+  // Clone repository
+  await cloneRepository(
+    workspace,
+    githubToken,
+    repo,
+    context,
+    octokit,
+    agentEvent,
+  );
 
-	// Capture initial file state
-	const originalFileState = captureFileState(workspace);
+  // Capture initial file state
+  const originalFileState = captureFileState(workspace);
 
-	// generate Propmt
-	const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
+  // generate Propmt
+  const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
 
-	core.info(`Prompt: \n${prompt}`);
-	let output;
-	try {
-		const rawOutput: string = await runCodex(
-			workspace,
-			config,
-			prompt,
-			timeoutSeconds * 1000,
-		);
-		output = maskSensitiveInfo(rawOutput, config);
-	} catch (error) {
-		await postComment(
-			octokit,
-			repo,
-			agentEvent.github,
-			`CLI execution failed: ${
-				error instanceof Error ? error.message : String(error)
-			}`,
-		);
-		return;
-	}
-	core.info(`Output: \n${output}`);
+  core.info(`Prompt: \n${prompt}`);
+  let output;
+  try {
+    const rawOutput: string = await runCodex(
+      workspace,
+      config,
+      prompt,
+      timeoutSeconds * 1000,
+    );
+    output = maskSensitiveInfo(rawOutput, config);
+  } catch (error) {
+    await postComment(
+      octokit,
+      repo,
+      agentEvent.github,
+      `CLI execution failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return;
+  }
+  core.info(`Output: \n${output}`);
 
-	// Detect file changes
-	const changedFiles = detectChanges(workspace, originalFileState);
+  // Detect file changes
+  const changedFiles = detectChanges(workspace, originalFileState);
 
-	// Handle the results
-	await handleResult(config, processedEvent, output, changedFiles);
+  // Handle the results
+  await handleResult(config, processedEvent, output, changedFiles);
 
-	core.info('Action completed successfully.');
+  core.info('Action completed successfully.');
 }

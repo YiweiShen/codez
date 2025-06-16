@@ -3,18 +3,18 @@ import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 
 export interface ActionConfig {
-	// Common settings
-	githubToken: string;
-	eventPath: string;
-	workspace: string;
-	timeoutSeconds: number;
-	octokit: Octokit;
-	context: typeof github.context;
-	repo: { owner: string; repo: string };
+  // Common settings
+  githubToken: string;
+  eventPath: string;
+  workspace: string;
+  timeoutSeconds: number;
+  octokit: Octokit;
+  context: typeof github.context;
+  repo: { owner: string; repo: string };
 
-	// Codex
-	openaiApiKey: string;
-	openaiBaseUrl: string;
+  // Codex
+  openaiApiKey: string;
+  openaiBaseUrl: string;
 }
 
 /**
@@ -23,50 +23,52 @@ export interface ActionConfig {
  * @throws Error if required inputs are missing
  */
 export function getConfig(): ActionConfig {
-	const githubToken = core.getInput('github-token', { required: true });
-	const eventPath = core.getInput('event-path');
-	const workspace = '/workspace/app';
-	const timeoutInput = core.getInput('timeout');
-	let timeoutSeconds: number;
-	if (timeoutInput) {
-		timeoutSeconds = parseInt(timeoutInput, 10);
-		if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
-			throw new Error(`Invalid timeout value: ${timeoutInput}. Timeout must be a positive integer.`);
-		}
-	} else {
-		timeoutSeconds = 600;
-	}
-	const octokit = new Octokit({ auth: githubToken });
-	const context = github.context;
-	const repo = context.repo;
+  const githubToken = core.getInput('github-token', { required: true });
+  const eventPath = core.getInput('event-path');
+  const workspace = '/workspace/app';
+  const timeoutInput = core.getInput('timeout');
+  let timeoutSeconds: number;
+  if (timeoutInput) {
+    timeoutSeconds = parseInt(timeoutInput, 10);
+    if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
+      throw new Error(
+        `Invalid timeout value: ${timeoutInput}. Timeout must be a positive integer.`,
+      );
+    }
+  } else {
+    timeoutSeconds = 600;
+  }
+  const octokit = new Octokit({ auth: githubToken });
+  const context = github.context;
+  const repo = context.repo;
 
-	// Codex / OpenAI
-	const openaiApiKey = core.getInput('openai-api-key') || '';
-	const openaiBaseUrl = core.getInput('openai-base-url') || '';
+  // Codex / OpenAI
+  const openaiApiKey = core.getInput('openai-api-key') || '';
+  const openaiBaseUrl = core.getInput('openai-base-url') || '';
 
-	if (!openaiApiKey) {
-		throw new Error('OpenAI API key is required.');
-	}
-	if (!githubToken) {
-		throw new Error('GitHub Token is required.');
-	}
-	if (!eventPath) {
-		throw new Error('GitHub event path is missing.');
-	}
-	if (!workspace) {
-		throw new Error('GitHub workspace path is missing.');
-	}
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key is required.');
+  }
+  if (!githubToken) {
+    throw new Error('GitHub Token is required.');
+  }
+  if (!eventPath) {
+    throw new Error('GitHub event path is missing.');
+  }
+  if (!workspace) {
+    throw new Error('GitHub workspace path is missing.');
+  }
 
-	return {
-		githubToken,
-		eventPath,
-		workspace,
-		timeoutSeconds,
-		octokit,
-		context,
-		repo,
+  return {
+    githubToken,
+    eventPath,
+    workspace,
+    timeoutSeconds,
+    octokit,
+    context,
+    repo,
 
-		openaiApiKey,
-		openaiBaseUrl,
-	};
+    openaiApiKey,
+    openaiBaseUrl,
+  };
 }
