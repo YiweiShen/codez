@@ -19,7 +19,7 @@ inputs:
     required: false
   openai-api-key:
     description: 'Specify the OpenAI API Key'
-    required: false
+    required: true
   openai-base-url:
     description: 'Specify the OpenAI API base URL'
     required: false
