@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
+    "format": "prettier --write .",
     "build": "tsc",
     "test": "jest"
   },
@@ -26,6 +27,7 @@
     "openai": "^4.95.0"
   },
   "devDependencies": {
+    "prettier": "^2.8.0",
     "@types/jest": "^29.5.5",
     "@types/node": "^20.8.2",
     "jest": "^29.7.0",
