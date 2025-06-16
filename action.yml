@@ -14,7 +14,7 @@ inputs:
     default: ${{ github.event_path }}
     required: false
   timeout:
-    description: 'Specify timeout duration (seconds)'
+    description: 'Specify timeout duration in seconds (must be a positive integer)'
     default: '600'
     required: false
   openai-api-key:

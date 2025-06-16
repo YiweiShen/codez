@@ -26,9 +26,16 @@ export function getConfig(): ActionConfig {
 	const githubToken = core.getInput('github-token', { required: true });
 	const eventPath = core.getInput('event-path');
 	const workspace = '/workspace/app';
-	const timeoutSeconds = core.getInput('timeout')
-		? parseInt(core.getInput('timeout'), 10)
-		: 600;
+	const timeoutInput = core.getInput('timeout');
+	let timeoutSeconds: number;
+	if (timeoutInput) {
+		timeoutSeconds = parseInt(timeoutInput, 10);
+		if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
+			throw new Error(`Invalid timeout value: ${timeoutInput}. Timeout must be a positive integer.`);
+		}
+	} else {
+		timeoutSeconds = 600;
+	}
 	const octokit = new Octokit({ auth: githubToken });
 	const context = github.context;
 	const repo = context.repo;
