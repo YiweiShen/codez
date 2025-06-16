@@ -5,6 +5,23 @@ import * as fs from 'fs';
 import { genContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
 
+function getBranchType(commitMessage: string): string {
+  const cm = commitMessage.toLowerCase();
+  if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
+  if (/^(fix|correct|resolve|patch|repair)/.test(cm)) return 'fix';
+  if (/(docs?|documentation)/.test(cm)) return 'docs';
+  if (/^(style|format|lint)/.test(cm)) return 'styles';
+  return 'chore';
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 // --- Type Definitions ---
 
 export type AgentEvent =
@@ -309,10 +326,11 @@ export async function createPullRequest(
 	output: string,
 ): Promise<void> {
 	const issueNumber = event.issue.number;
-	const baseBranchName = `codez-changes-${issueNumber}`;
-	let branchName = `${issueNumber}-${baseBranchName}`;
+	const branchType = getBranchType(commitMessage);
+	const slug = slugify(commitMessage);
+	let branchName = `codez-${branchType}-${issueNumber}-${slug}`;
 	if (event.action === 'created') {
-		branchName = `${issueNumber}-${baseBranchName}-${event.comment.id}`;
+		branchName = `codez-${branchType}-${issueNumber}-${slug}-${event.comment.id}`;
 	}
 	const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
