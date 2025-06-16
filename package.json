@@ -7,7 +7,8 @@
   "scripts": {
     "format": "prettier --write .",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "release": "npx bumpp"
   },
   "keywords": [
     "github",
@@ -27,10 +28,11 @@
     "openai": "^4.95.0"
   },
   "devDependencies": {
-    "prettier": "^2.8.0",
     "@types/jest": "^29.5.5",
     "@types/node": "^20.8.2",
+    "bumpp": "^10.1.1",
     "jest": "^29.7.0",
+    "prettier": "^2.8.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.8.2"
   }
