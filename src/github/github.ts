@@ -693,9 +693,9 @@ export async function generatePrompt(
 		}
 	}
 
-	let historyPropmt = genContentsString(contents.content, userPrompt);
+	let historyPropmt = genContentsString(contents.content);
 	for (const comment of contents.comments) {
-		historyPropmt += genContentsString(comment, userPrompt);
+		historyPropmt += genContentsString(comment);
 	}
 
 	let prompt = '';
