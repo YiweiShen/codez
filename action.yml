@@ -26,4 +26,4 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'Dockerfile.github_action_dockerhub'
+  image: 'Dockerfile'
