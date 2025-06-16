@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { execaSync } from 'execa';
+import { execa } from 'execa';
 import * as fs from 'fs';
 import { genContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
@@ -169,19 +169,19 @@ export async function cloneRepository(
 			`https://x-access-token:${githubToken}@`,
 		);
 
-		execaSync(
-			'git',
-			[
-				'clone',
-				'--depth',
-				'1',
-				'--branch',
-				branchToClone,
-				authenticatedCloneUrl,
-				'.',
-			],
-			{ cwd: workspace, stdio: 'inherit' },
-		);
+			await execa(
+				'git',
+				[
+					'clone',
+					'--depth',
+					'1',
+					'--branch',
+					branchToClone,
+					authenticatedCloneUrl,
+					'.',
+				],
+				{ cwd: workspace, stdio: 'inherit' },
+			);
 		core.info('Repository cloned successfully.');
 	} catch (error) {
 		throw new Error(
@@ -343,33 +343,33 @@ export async function createPullRequest(
 	try {
 		// Set up Git and create a new branch
 		core.info('Configuring Git user identity locally...');
-		execaSync('git', ['config', 'user.name', 'github-actions[bot]'], {
+		await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
 			cwd: workspace,
 			stdio: 'inherit',
 		});
-		execaSync(
+		await execa(
 			'git',
 			['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
 			{ cwd: workspace, stdio: 'inherit' },
 		);
 
 		core.info(`Creating new branch: ${branchName}`);
-		execaSync('git', ['checkout', '-b', branchName], {
+		await execa('git', ['checkout', '-b', branchName], {
 			cwd: workspace,
 			stdio: 'inherit',
 		});
 
 		core.info('Adding changed files to Git...');
-		execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+		await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
 
 		core.info('Committing changes...');
-		execaSync('git', ['commit', '-m', commitMessage], {
+		await execa('git', ['commit', '-m', commitMessage], {
 			cwd: workspace,
 			stdio: 'inherit',
 		});
 
 		core.info(`Pushing changes to origin/${branchName}...`);
-		execaSync('git', ['push', 'origin', branchName, '--force'], {
+		await execa('git', ['push', 'origin', branchName, '--force'], {
 			cwd: workspace,
 			stdio: 'inherit',
 		}); // Use force push for simplicity in case branch exists
@@ -514,7 +514,7 @@ export async function commitAndPush(
 			currentBranch = prData.data.head.ref;
 			core.info(`Checked out PR branch: ${currentBranch}`);
 			// Ensure we are on the correct branch
-			execaSync('git', ['checkout', currentBranch], {
+			await execa('git', ['checkout', currentBranch], {
 				cwd: workspace,
 				stdio: 'inherit',
 			});
@@ -523,7 +523,7 @@ export async function commitAndPush(
 			core.warning(
 				`Could not get PR branch from API, attempting to use current branch: ${e}`,
 			);
-			const branchResult = execaSync(
+			const branchResult = await execa(
 				'git',
 				['rev-parse', '--abbrev-ref', 'HEAD'],
 				{ cwd: workspace },
@@ -531,32 +531,32 @@ export async function commitAndPush(
 			currentBranch = branchResult.stdout.trim();
 			core.info(`Using current branch from git: ${currentBranch}`);
 			// Ensure we are on the correct branch if the checkout happened before the action ran
-			execaSync('git', ['checkout', currentBranch], {
+			await execa('git', ['checkout', currentBranch], {
 				cwd: workspace,
 				stdio: 'inherit',
 			});
 		}
 
 		core.info('Configuring Git user identity locally...');
-		execaSync('git', ['config', 'user.name', 'github-actions[bot]'], {
-			cwd: workspace,
-			stdio: 'inherit',
-		});
-		execaSync(
-			'git',
-			['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
-			{ cwd: workspace, stdio: 'inherit' },
-		);
+			await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
+				cwd: workspace,
+				stdio: 'inherit',
+			});
+			await execa(
+				'git',
+				['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
+				{ cwd: workspace, stdio: 'inherit' },
+			);
 
 		core.info('Adding changed files to Git...');
 		// Add all changed files (including deleted ones)
-		execaSync('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+			await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
 
 		// Check if there are changes to commit
-		const statusResult = execaSync('git', ['status', '--porcelain'], {
-			cwd: workspace,
-		});
-		if (!statusResult.stdout.trim()) {
+			const statusResult = await execa('git', ['status', '--porcelain'], {
+				cwd: workspace,
+			});
+			if (!statusResult.stdout.trim()) {
 			core.info('No changes to commit.');
 			// Post a comment indicating no changes were made or output if relevant
 			await postComment(octokit, repo, event, `${output}`);
@@ -564,16 +564,16 @@ export async function commitAndPush(
 		}
 
 		core.info('Committing changes...');
-		execaSync('git', ['commit', '-m', commitMessage], {
-			cwd: workspace,
-			stdio: 'inherit',
-		});
+			await execa('git', ['commit', '-m', commitMessage], {
+				cwd: workspace,
+				stdio: 'inherit',
+			});
 
 		core.info(`Pushing changes to origin/${currentBranch}...`);
-		execaSync('git', ['push', 'origin', currentBranch], {
-			cwd: workspace,
-			stdio: 'inherit',
-		});
+			await execa('git', ['push', 'origin', currentBranch], {
+				cwd: workspace,
+				stdio: 'inherit',
+			});
 
 		core.info('Changes committed and pushed.');
 
