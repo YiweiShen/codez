@@ -282,7 +282,7 @@ export async function createPullRequest(
 
     core.info(`Pull Request created: ${pr.data.html_url}`);
 
-    const prCommentBody = `Created Pull Request #${pr.data.number}: ${pr.data.html_url}`;
+    const prCommentBody = `Created Pull Request: ${pr.data.html_url}`;
     await octokit.rest.issues.createComment({
       ...repo,
       issue_number: issueNumber,
