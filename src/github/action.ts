@@ -47,7 +47,8 @@ async function handleResult(
       {
         issueNumber:
           agentEvent.type === 'issuesOpened' ||
-          agentEvent.type === 'issueCommentCreated'
+          agentEvent.type === 'issueCommentCreated' ||
+          agentEvent.type === 'issuesAssigned'
             ? agentEvent.github.issue.number
             : undefined,
         prNumber:
@@ -63,7 +64,8 @@ async function handleResult(
     // Handle changes based on event type
     if (
       agentEvent.type === 'issuesOpened' ||
-      agentEvent.type === 'issueCommentCreated'
+      agentEvent.type === 'issueCommentCreated' ||
+      agentEvent.type === 'issuesAssigned'
     ) {
       await createPullRequest(
         workspace,

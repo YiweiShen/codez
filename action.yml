@@ -26,6 +26,14 @@ inputs:
   direct-prompt:
     description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'
     required: false
+  trigger-phrase:
+    description: 'Custom trigger phrase to invoke Codez (default: /codex)'
+    required: false
+    default: '/codex'
+  assignee-trigger:
+    description: 'Comma-separated list of GitHub usernames. Codez will run when an issue is assigned to these users.'
+    required: false
+    default: ''
 
 runs:
   using: 'docker'

@@ -11,6 +11,8 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Post AI output as a comment if there are no changes
 - Support a `--full-history` flag in the `/codex` command to include all user and bot comments in the history block
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
+- Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
+- Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
 
 ## Usage
 
@@ -58,6 +60,8 @@ jobs:
           # [Optional Codex Settings]
           # openai-base-url: "https://api.openai.com"
           # direct-prompt: "Please update the API documentation for the latest endpoints."
+          # trigger-phrase: "/ai"
+          # assignee-trigger: "codex-bot"
 ```
 
 ### Example Usage in Issues
@@ -152,6 +156,8 @@ codez-<type>-<issueNumber>-<short-description>
 | Input Name        | Description         |
 | ----------------- | ------------------- |
 | `openai-base-url` | OpenAI API base URL |
+| `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`) |
+| `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment |
 
 ## Security
 
