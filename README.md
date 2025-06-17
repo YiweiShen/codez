@@ -39,7 +39,7 @@ permissions:
 
 on:
   issues:
-    types: [opened]
+    types: [opened, assigned]
   issue_comment:
     types: [created]
   pull_request_review_comment:
