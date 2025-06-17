@@ -60,6 +60,7 @@ and maintaining this repository.
   - Keep PRs small and focused.
   - Link to relevant issues or context in the PR description.
   - Request at least one reviewer.
+  - Ask follow-up questions before starting to implement the changes or creating a PR.
 - **Merge Strategy:**
   - Prefer squash or rebase merges to maintain a linear history.
   - Enforce passing CI checks via branch protection.
