@@ -9,6 +9,10 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
+  /**
+   * If true, run in review-only mode to provide suggestions without applying changes.
+   */
+  reviewOnly: boolean;
 }
 
 /**
@@ -44,6 +48,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
       userPrompt: config.directPrompt,
       includeFullHistory: false,
       createIssues: false,
+      reviewOnly: false,
     };
   }
   const eventPayload = loadEventPayload(config.eventPath);
@@ -65,7 +70,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
     core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
     const issue = agentEvent.github.issue;
     const prompt = `${issue.title.trim()}\n\n${issue.body.trim()}`;
-    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false };
+    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false, reviewOnly: false };
   }
 
   // Check for configured trigger phrase only
@@ -81,6 +86,8 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   args = args.replace(/--full-history\b/, '').trim();
   const createIssues = args.split(/\s+/).includes('--create-issues');
   args = args.replace(/--create-issues\b/, '').trim();
+  const reviewOnly = args.split(/\s+/).includes('--review-only');
+  args = args.replace(/--review-only\b/, '').trim();
   let userPrompt = args;
 
   let title: string | undefined;
@@ -99,5 +106,5 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt, includeFullHistory, createIssues };
+  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, reviewOnly };
 }

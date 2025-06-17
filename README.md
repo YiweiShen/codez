@@ -11,6 +11,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Post AI output as a comment if there are no changes
 - Support a `--full-history` flag in the `/codex` command to include all user and bot comments in the history block
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
+- Support a `--review-only` flag in the `/codex` command to perform a code review—providing suggestions and feedback without applying changes
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
 
@@ -95,6 +96,16 @@ To include full history in the prompt (both user and bot comments), use the `--f
 ```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
+
+### Example Usage: Review-Only Mode
+
+In an Issue or PR comment, use the `--review-only` flag to request a code review without applying any changes:
+
+```
+/codex --review-only Please review this code and suggest improvements without making changes.
+```
+
+Codex will analyze the code and post suggestions and feedback as a comment without creating a Pull Request or committing changes.
 
 ### Example Usage: Creating Issues
 

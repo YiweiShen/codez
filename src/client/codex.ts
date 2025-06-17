@@ -15,17 +15,18 @@ export async function runCodex(
   config: ActionConfig,
   prompt: string,
   timeout: number,
+  /** If true, do not apply changes and run in review-only mode */
+  reviewOnly: boolean = false,
 ): Promise<string> {
   // Added async and Promise<>
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
     prompt = prompt.replace(/"/g, '\\"');
-    const cliArgs = [
-      '--full-auto',
-      '--dangerously-auto-approve-everything',
-      '--quiet',
-      '"' + prompt + '"',
-    ];
+    const cliArgs: string[] = [];
+    if (!reviewOnly) {
+      cliArgs.push('--full-auto', '--dangerously-auto-approve-everything');
+    }
+    cliArgs.push('--quiet', '"' + prompt + '"');
 
     // Set up environment variables
     const envVars: Record<string, string> = {

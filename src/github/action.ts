@@ -195,7 +195,7 @@ export async function runAction(
 ): Promise<void> {
   const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
     config;
-  const { agentEvent, userPrompt, includeFullHistory, createIssues } = processedEvent;
+  const { agentEvent, userPrompt, includeFullHistory, createIssues, reviewOnly } = processedEvent;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
@@ -236,6 +236,7 @@ export async function runAction(
       config,
       prompt,
       timeoutSeconds * 1000,
+      reviewOnly,
     );
     output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {
@@ -251,6 +252,11 @@ export async function runAction(
   }
   core.info(`Output: \n${output}`);
 
+  // Handle review-only mode: post suggestions and exit without applying changes
+  if (reviewOnly) {
+    await postComment(octokit, repo, agentEvent.github, `${output}`);
+    return;
+  }
   // Handle create issues intent: create issues from JSON output
   if (createIssues) {
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
