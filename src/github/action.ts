@@ -193,7 +193,7 @@ export async function runAction(
 ): Promise<void> {
   const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
     config;
-  const { agentEvent, userPrompt, includeFullHistory } = processedEvent;
+  const { agentEvent, userPrompt, includeFullHistory, createIssues } = processedEvent;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
@@ -213,7 +213,7 @@ export async function runAction(
 
   // generate Prompt (with special handling for create issues)
   let effectiveUserPrompt = userPrompt;
-  if (userPrompt.toLowerCase().includes('create issues')) {
+  if (createIssues) {
     effectiveUserPrompt =
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
@@ -250,7 +250,7 @@ export async function runAction(
   core.info(`Output: \n${output}`);
 
   // Handle create issues intent: create issues from JSON output
-  if (userPrompt.toLowerCase().includes('create issues')) {
+  if (createIssues) {
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
     return;
   }
