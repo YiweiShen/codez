@@ -153,11 +153,16 @@ codez-<type>-<issueNumber>-<short-description>
 
 ### Advanced Codex Configuration
 
-| Input Name        | Description         |
-| ----------------- | ------------------- |
-| `openai-base-url` | OpenAI API base URL |
-| `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`) |
-| `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment |
+| Input Name                     | Description                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------- |
+| `openai-base-url`              | OpenAI API base URL                                                                |
+| `openai-model`                 | OpenAI model identifier to use (default: `o4-mini`)                                   |
+| `azure-openai-endpoint`        | Azure OpenAI endpoint (e.g. `https://<resource-name>.openai.azure.com`)              |
+| `azure-openai-deployment-name` | Azure OpenAI deployment name (required if using Azure provider)                     |
+| `azure-openai-api-version`     | Azure OpenAI API version (required if using Azure provider)                         |
+| `azure-openai-api-key`         | Azure OpenAI API key (required if using Azure provider)                             |
+| `trigger-phrase`               | Custom trigger phrase to invoke Codez (default: `/codex`)                           |
+| `assignee-trigger`             | Comma-separated list of GitHub usernames to trigger Codez on issue assignment       |
 
 ## Security
 

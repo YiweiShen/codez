@@ -23,6 +23,21 @@ inputs:
   openai-base-url:
     description: 'Specify the OpenAI API base URL'
     required: false
+  openai-model:
+    description: 'OpenAI model identifier to use (default: o4-mini)'
+    required: false
+  azure-openai-endpoint:
+    description: 'Azure OpenAI endpoint (e.g. https://<resource-name>.openai.azure.com)'
+    required: false
+  azure-openai-deployment-name:
+    description: 'Azure OpenAI deployment name (required if using Azure provider)'
+    required: false
+  azure-openai-api-version:
+    description: 'Azure OpenAI API version (required if using Azure provider)'
+    required: false
+  azure-openai-api-key:
+    description: 'Azure OpenAI API key (required if using Azure provider)'
+    required: false
   direct-prompt:
     description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'
     required: false

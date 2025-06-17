@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
+import { defaultModel } from '../api/openai.js';
 
 export interface ActionConfig {
   // Common settings
@@ -12,9 +13,37 @@ export interface ActionConfig {
   context: typeof github.context;
   repo: { owner: string; repo: string };
 
-  // Codex
+  // Codex / OpenAI settings
   openaiApiKey: string;
   openaiBaseUrl: string;
+  /**
+   * Model name or deployment identifier for the LLM provider.
+   */
+  model: string;
+  /**
+   * OpenAI model identifier (used when provider is OpenAI).
+   */
+  openaiModel: string;
+  /**
+   * Azure OpenAI endpoint (optional).
+   */
+  azureOpenAIEndpoint: string;
+  /**
+   * Azure OpenAI deployment name (required if using Azure provider).
+   */
+  azureOpenAIDeploymentName: string;
+  /**
+   * Azure OpenAI API version (required if using Azure provider).
+   */
+  azureOpenAIApiVersion: string;
+  /**
+   * Azure OpenAI API key (required if using Azure provider).
+   */
+  azureOpenAIApiKey: string;
+  /**
+   * LLM provider to use: 'openai' or 'azure'.
+   */
+  provider: 'openai' | 'azure';
   /**
    * One-shot direct prompt for automated workflows.
    * If provided, Codez will bypass GitHub comment triggers and run this prompt directly.
@@ -55,9 +84,17 @@ export function getConfig(): ActionConfig {
   const context = github.context;
   const repo = context.repo;
 
-  // Codex / OpenAI
+  // Codex / OpenAI settings
   const openaiApiKey = core.getInput('openai-api-key') || '';
   const openaiBaseUrl = core.getInput('openai-base-url') || '';
+  // Model selection
+  const openaiModelInput = core.getInput('openai-model') || '';
+  const openaiModel = openaiModelInput || defaultModel;
+  // Azure OpenAI settings (optional)
+  const azureOpenAIEndpoint = core.getInput('azure-openai-endpoint') || '';
+  const azureOpenAIDeploymentName = core.getInput('azure-openai-deployment-name') || '';
+  const azureOpenAIApiVersion = core.getInput('azure-openai-api-version') || '';
+  const azureOpenAIApiKey = core.getInput('azure-openai-api-key') || '';
   const directPrompt = core.getInput('direct-prompt') || '';
   const triggerPhrase = core.getInput('trigger-phrase') || '/codex';
   const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
@@ -66,7 +103,20 @@ export function getConfig(): ActionConfig {
     .map((s) => s.trim())
     .filter((s) => s);
 
-  if (!openaiApiKey) {
+  // Validate API keys and provider settings
+  let provider: 'openai' | 'azure' = 'openai';
+  let model = openaiModel;
+  if (azureOpenAIEndpoint) {
+    // Azure requires endpoint, deployment, API version, and key
+    if (!azureOpenAIDeploymentName || !azureOpenAIApiVersion || !azureOpenAIApiKey) {
+      throw new Error(
+        'Azure OpenAI requires azure-openai-endpoint, azure-openai-deployment-name, azure-openai-api-version, and azure-openai-api-key to be set',
+      );
+    }
+    provider = 'azure';
+    model = azureOpenAIDeploymentName;
+  }
+  if (provider === 'openai' && !openaiApiKey) {
     throw new Error('OpenAI API key is required.');
   }
   if (!githubToken) {
@@ -90,6 +140,13 @@ export function getConfig(): ActionConfig {
 
     openaiApiKey,
     openaiBaseUrl,
+    openaiModel,
+    azureOpenAIEndpoint,
+    azureOpenAIDeploymentName,
+    azureOpenAIApiVersion,
+    azureOpenAIApiKey,
+    provider,
+    model,
     directPrompt,
     triggerPhrase,
     assigneeTrigger,

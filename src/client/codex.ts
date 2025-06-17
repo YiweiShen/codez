@@ -20,26 +20,35 @@ export async function runCodex(
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
     prompt = prompt.replace(/"/g, '\\"');
-    const cliArgs = [
+    // Build CLI arguments: model and provider-specific flags
+    const cliArgs: string[] = [];
+    if (config.provider === 'azure') {
+      cliArgs.push(
+        '--azure-openai-endpoint', config.azureOpenAIEndpoint,
+        '--azure-openai-deployment-name', config.azureOpenAIDeploymentName,
+        '--azure-openai-api-version', config.azureOpenAIApiVersion,
+      );
+    }
+    cliArgs.push('--model', config.model);
+    cliArgs.push(
       '--full-auto',
       '--dangerously-auto-approve-everything',
       '--quiet',
-      '"' + prompt + '"',
-    ];
+      `"${prompt}"`,
+    );
 
     // Set up environment variables
     const envVars: Record<string, string> = {
       ...process.env,
-      OPENAI_API_KEY: config.openaiApiKey,
+      OPENAI_API_KEY:
+        config.provider === 'azure' ? config.azureOpenAIApiKey : config.openaiApiKey,
       CODEX_QUIET_MODE: '1',
     };
-
     if (config.openaiBaseUrl) {
       envVars.OPENAI_API_BASE_URL = config.openaiBaseUrl;
     }
 
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
-    // Changed execaSync to await execa
     const result = await execa(
       'codex', // Assuming 'codex' is in the PATH
       cliArgs,
