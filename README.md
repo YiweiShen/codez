@@ -62,6 +62,9 @@ jobs:
           # direct-prompt: "Please update the API documentation for the latest endpoints."
           # trigger-phrase: "/ai"
           # assignee-trigger: "codex-bot"
+          # codex-env: |
+          #   NODE_ENV: test
+          #   API_URL: https://api.example.com
 ```
 
 ### Example Usage in Issues
@@ -158,6 +161,7 @@ codez-<type>-<issueNumber>-<short-description>
 | `openai-base-url` | OpenAI API base URL |
 | `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`) |
 | `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment |
+| `codex-env`      | Custom environment variables to inject into the Codex CLI execution context. Accepts either a YAML mapping (multiline) or comma-separated key=value pairs. |
 
 ## Security
 

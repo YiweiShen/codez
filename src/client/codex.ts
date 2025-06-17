@@ -32,6 +32,7 @@ export async function runCodex(
       ...process.env,
       OPENAI_API_KEY: config.openaiApiKey,
       CODEX_QUIET_MODE: '1',
+      ...config.codexEnv,
     };
 
     if (config.openaiBaseUrl) {
