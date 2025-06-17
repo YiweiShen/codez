@@ -43,6 +43,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
       },
       userPrompt: config.directPrompt,
       includeFullHistory: false,
+      createIssues: false,
     };
   }
   const eventPayload = loadEventPayload(config.eventPath);
