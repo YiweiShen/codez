@@ -13,6 +13,8 @@ import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
 import { maskSensitiveInfo } from '../security/security.js';
 import { runCodex } from '../client/codex.js';
+import type { Octokit } from 'octokit';
+import type { GitHubEvent } from './github.js';
 
 /**
  * Handles the result of execution.
@@ -91,6 +93,53 @@ async function handleResult(
 }
 
 /**
+ * Creates GitHub issues based on a JSON feature plan output.
+ */
+async function createIssuesFromFeaturePlan(
+  octokit: Octokit,
+  repo: { owner: string; repo: string },
+  event: GitHubEvent,
+  output: string,
+): Promise<void> {
+  let features: Array<{ title: string; description: string }>;
+  try {
+    features = JSON.parse(output);
+  } catch (error) {
+    await postComment(
+      octokit,
+      repo,
+      event,
+      `Failed to parse feature plan JSON: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return;
+  }
+  for (const feature of features) {
+    try {
+      const issue = await octokit.rest.issues.create({
+        ...repo,
+        title: feature.title,
+        body: feature.description,
+      });
+      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
+      await postComment(
+        octokit,
+        repo,
+        event,
+        `Created new feature issue #${issue.data.number} for "${feature.title}"`,
+      );
+    } catch (error) {
+      core.warning(
+        `Failed to create issue for feature "${feature.title}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+}
+
+/**
  * Executes the main logic of the GitHub Action.
  * @param config Action configuration.
  * @param processedEvent Processed event data.
@@ -119,8 +168,18 @@ export async function runAction(
   // Capture initial file state
   const originalFileState = captureFileState(workspace);
 
-  // generate Propmt
-  const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
+  // generate Prompt (with special handling for feature planning)
+  let effectiveUserPrompt = userPrompt;
+  if (userPrompt.toLowerCase().includes('plan features')) {
+    effectiveUserPrompt =
+      `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
+  }
+  const prompt = await generatePrompt(
+    octokit,
+    repo,
+    agentEvent,
+    effectiveUserPrompt,
+  );
 
   core.info(`Prompt: \n${prompt}`);
   let output;
@@ -144,6 +203,12 @@ export async function runAction(
     return;
   }
   core.info(`Output: \n${output}`);
+
+  // Handle plan features intent: create issues from JSON output
+  if (userPrompt.toLowerCase().includes('plan features')) {
+    await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
+    return;
+  }
 
   // Detect file changes
   const changedFiles = detectChanges(workspace, originalFileState);
