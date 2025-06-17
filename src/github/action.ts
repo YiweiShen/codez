@@ -150,7 +150,7 @@ export async function runAction(
 ): Promise<void> {
   const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
     config;
-  const { agentEvent, userPrompt } = processedEvent;
+  const { agentEvent, userPrompt, includeFullHistory } = processedEvent;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
@@ -174,11 +174,13 @@ export async function runAction(
     effectiveUserPrompt =
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
+
   const prompt = await generatePrompt(
     octokit,
     repo,
     agentEvent,
     effectiveUserPrompt,
+    includeFullHistory,
   );
 
   core.info(`Prompt: \n${prompt}`);

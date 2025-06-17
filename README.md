@@ -9,6 +9,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Start Codex with the `/codex` command from GitHub Issues or PR comments
 - Automatically create a Pull Request or commit changes if the AI modifies code
 - Post AI output as a comment if there are no changes
+- Support a `--full-history` flag in the `/codex` command to include all user and bot comments in the history block
 - Automatically create GitHub issues when asked to create issues
 
 ## Usage
@@ -66,6 +67,12 @@ Create a new Issue and add the following to the body:
 /codex Please create a new API endpoint. This should be an endpoint that handles GET requests to retrieve user information.
 ```
 
+For full history including all user and bot comments in the `[History]` block, add the `--full-history` flag:
+
+```
+/codex --full-history Please create a new API endpoint. This should be an endpoint that handles GET requests to retrieve user information.
+```
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage in PRs
@@ -74,6 +81,12 @@ Comment on an existing Pull Request to request code modifications:
 
 ```
 /codex Please add unit tests to this code.
+```
+
+To include full history in the prompt (both user and bot comments), use the `--full-history` flag:
+
+```
+/codex --full-history Please add unit tests to this code.
 ```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.

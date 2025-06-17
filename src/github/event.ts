@@ -7,6 +7,7 @@ export interface ProcessedEvent {
   type: 'codex';
   agentEvent: AgentEvent;
   userPrompt: string;
+  includeFullHistory: boolean;
 }
 
 /**
@@ -47,7 +48,10 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
     return null;
   }
 
-  let userPrompt = text.replace('/codex', '').trim();
+  let args = text.replace('/codex', '').trim();
+  const includeFullHistory = args.split(/\s+/).includes('--full-history');
+  args = args.replace(/--full-history\b/, '').trim();
+  let userPrompt = args;
 
   let title: string | undefined;
   if ('issue' in agentEvent.github) {
@@ -65,5 +69,5 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt };
+  return { type, agentEvent, userPrompt, includeFullHistory };
 }
