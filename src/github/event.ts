@@ -33,6 +33,18 @@ function loadEventPayload(eventPath: string): any {
  * @returns ProcessedEvent
  */
 export function processEvent(config: ActionConfig): ProcessedEvent | null {
+  if (config.directPrompt) {
+    core.info('Direct prompt provided. Bypassing GitHub event trigger.');
+    return {
+      type: 'codex',
+      agentEvent: {
+        type: 'issuesOpened',
+        github: { action: 'opened', issue: { number: 0, title: '', body: '', pull_request: null } },
+      },
+      userPrompt: config.directPrompt,
+      includeFullHistory: false,
+    };
+  }
   const eventPayload = loadEventPayload(config.eventPath);
   const agentEvent = getEventType(eventPayload);
 
