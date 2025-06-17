@@ -20,6 +20,14 @@ export interface ActionConfig {
    * If provided, Codez will bypass GitHub comment triggers and run this prompt directly.
    */
   directPrompt: string;
+  /**
+   * Custom trigger phrase to invoke Codez (e.g. '/codex').
+   */
+  triggerPhrase: string;
+  /**
+   * List of GitHub usernames that trigger Codez when an issue is assigned to them.
+   */
+  assigneeTrigger: string[];
 }
 
 /**
@@ -51,6 +59,12 @@ export function getConfig(): ActionConfig {
   const openaiApiKey = core.getInput('openai-api-key') || '';
   const openaiBaseUrl = core.getInput('openai-base-url') || '';
   const directPrompt = core.getInput('direct-prompt') || '';
+  const triggerPhrase = core.getInput('trigger-phrase') || '/codex';
+  const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
+  const assigneeTrigger = assigneeTriggerInput
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s);
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -77,5 +91,7 @@ export function getConfig(): ActionConfig {
     openaiApiKey,
     openaiBaseUrl,
     directPrompt,
+    triggerPhrase,
+    assigneeTrigger,
   };
 }

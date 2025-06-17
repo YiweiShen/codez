@@ -55,14 +55,28 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
   core.info(`Detected event type: ${agentEvent.type}`);
 
-  // Check for /codex command only
+  // Handle assignee-based triggers
+  if (agentEvent.type === 'issuesAssigned') {
+    const assignee = agentEvent.github.assignee.login;
+    if (!config.assigneeTrigger.includes(assignee)) {
+      core.info(`Issue assigned to '${assignee}', not in assignee-trigger list. Skipping.`);
+      return null;
+    }
+    core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
+    const issue = agentEvent.github.issue;
+    const prompt = `${issue.title.trim()}\n\n${issue.body.trim()}`;
+    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false };
+  }
+
+  // Check for configured trigger phrase only
+  const trigger = config.triggerPhrase;
   const text = extractText(agentEvent.github);
-  if (!text || !text.startsWith('/codex')) {
-    core.info('Command "/codex" not found in the event text.');
+  if (!text || !text.startsWith(trigger)) {
+    core.info(`Command "${trigger}" not found in the event text.`);
     return null;
   }
 
-  let args = text.replace('/codex', '').trim();
+  let args = text.replace(trigger, '').trim();
   const includeFullHistory = args.split(/\s+/).includes('--full-history');
   args = args.replace(/--full-history\b/, '').trim();
   const createIssues = args.split(/\s+/).includes('--create-issues');
