@@ -27,20 +27,16 @@ function slugify(text: string): string {
 export type AgentEvent =
   | { type: 'issuesOpened'; github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated'; github: GitHubEventIssueCommentCreated }
-  | {
-      type: 'pullRequestCommentCreated';
-      github: GitHubEventPullRequestCommentCreated;
-    }
-  | {
-      type: 'pullRequestReviewCommentCreated';
-      github: GitHubEventPullRequestReviewCommentCreated;
-    };
+  | { type: 'pullRequestCommentCreated'; github: GitHubEventPullRequestCommentCreated }
+  | { type: 'pullRequestReviewCommentCreated'; github: GitHubEventPullRequestReviewCommentCreated }
+  | { type: 'issuesAssigned'; github: GitHubEventIssuesAssigned };
 
 export type GitHubEvent =
   | GitHubEventIssuesOpened
   | GitHubEventIssueCommentCreated
   | GitHubEventPullRequestCommentCreated
-  | GitHubEventPullRequestReviewCommentCreated;
+  | GitHubEventPullRequestReviewCommentCreated
+  | GitHubEventIssuesAssigned;
 
 export type GitHubEventIssuesOpened = {
   action: 'opened';
@@ -74,6 +70,12 @@ export type GitHubEventPullRequestReviewCommentCreated = {
     position?: number;
     line?: number;
   };
+};
+
+export type GitHubEventIssuesAssigned = {
+  action: 'assigned';
+  issue: GitHubIssue;
+  assignee: { login: string };
 };
 
 export type GithubComment = {
@@ -204,6 +206,14 @@ export function getEventType(payload: any): AgentEvent | null {
     return { type: 'issuesOpened', github: payload };
   }
   if (
+    payload.action === 'assigned' &&
+    payload.issue &&
+    !payload.issue.pull_request &&
+    payload.assignee
+  ) {
+    return { type: 'issuesAssigned', github: payload };
+  }
+  if (
     payload.action === 'created' &&
     payload.issue &&
     !payload.issue.pull_request &&
@@ -296,7 +306,7 @@ export async function addEyeReaction(
  * Comment events remain unchanged.
  */
 export function extractText(event: GitHubEvent): string | null {
-  if (event.action === 'opened' && 'issue' in event) {
+  if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
     const title = event.issue.title.trim();
     const body = event.issue.body.trim();
     if (body.startsWith('/codex')) {
@@ -321,7 +331,10 @@ export async function createPullRequest(
   workspace: string,
   octokit: Octokit,
   repo: RepoContext,
-  event: GitHubEventIssuesOpened | GitHubEventIssueCommentCreated,
+  event:
+    | GitHubEventIssuesOpened
+    | GitHubEventIssueCommentCreated
+    | GitHubEventIssuesAssigned,
   commitMessage: string,
   output: string,
 ): Promise<void> {
