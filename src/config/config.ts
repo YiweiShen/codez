@@ -15,6 +15,11 @@ export interface ActionConfig {
   // Codex
   openaiApiKey: string;
   openaiBaseUrl: string;
+  /**
+   * One-shot direct prompt for automated workflows.
+   * If provided, Codez will bypass GitHub comment triggers and run this prompt directly.
+   */
+  directPrompt: string;
 }
 
 /**
@@ -45,6 +50,7 @@ export function getConfig(): ActionConfig {
   // Codex / OpenAI
   const openaiApiKey = core.getInput('openai-api-key') || '';
   const openaiBaseUrl = core.getInput('openai-base-url') || '';
+  const directPrompt = core.getInput('direct-prompt') || '';
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -70,5 +76,6 @@ export function getConfig(): ActionConfig {
 
     openaiApiKey,
     openaiBaseUrl,
+    directPrompt,
   };
 }
