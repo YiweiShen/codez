@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execa } from 'execa';
 import * as fs from 'fs';
-import { genContentsString } from '../utils/contents.js';
+import { genContentsString, genFullContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
 
 function getBranchType(commitMessage: string): string {
@@ -670,6 +670,7 @@ export async function generatePrompt(
   repo: RepoContext,
   event: AgentEvent,
   userPrompt: string,
+  includeFullHistory: boolean,
 ): Promise<string> {
   const contents = await getContentsData(octokit, repo, event);
 
@@ -693,9 +694,11 @@ export async function generatePrompt(
     }
   }
 
-  let historyPropmt = genContentsString(contents.content);
+  let historyPropmt = '';
+  const formatter = includeFullHistory ? genFullContentsString : genContentsString;
+  historyPropmt += formatter(contents.content);
   for (const comment of contents.comments) {
-    historyPropmt += genContentsString(comment);
+    historyPropmt += formatter(comment);
   }
 
   let prompt = '';
