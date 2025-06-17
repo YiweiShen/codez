@@ -19,3 +19,15 @@ export function genContentsString(content: {
 
   return '';
 }
+
+export function genFullContentsString(content: { body: string; login: string }): string {
+  const body = content.body.trim();
+  if (!body) {
+    return '';
+  }
+  const formatted = body
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return formatted + '\n\n';
+}

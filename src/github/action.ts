@@ -101,7 +101,7 @@ export async function runAction(
 ): Promise<void> {
   const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
     config;
-  const { agentEvent, userPrompt } = processedEvent;
+  const { agentEvent, userPrompt, includeFullHistory } = processedEvent;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
@@ -120,7 +120,13 @@ export async function runAction(
   const originalFileState = captureFileState(workspace);
 
   // generate Propmt
-  const prompt = await generatePrompt(octokit, repo, agentEvent, userPrompt);
+  const prompt = await generatePrompt(
+    octokit,
+    repo,
+    agentEvent,
+    userPrompt,
+    includeFullHistory,
+  );
 
   core.info(`Prompt: \n${prompt}`);
   let output;
