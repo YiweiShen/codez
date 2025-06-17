@@ -10,6 +10,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Automatically create a Pull Request or commit changes if the AI modifies code
 - Post AI output as a comment if there are no changes
 - Support a `--full-history` flag in the `/codex` command to include all user and bot comments in the history block
+- Support a `--max-turns <number>` flag in the `/codex` command to cap the number of back-and-forth exchanges Codez can perform in a single invocation, helping teams control API usage, cost, and runtime exposure
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment

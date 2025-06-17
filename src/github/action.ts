@@ -195,7 +195,7 @@ export async function runAction(
 ): Promise<void> {
   const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
     config;
-  const { agentEvent, userPrompt, includeFullHistory, createIssues } = processedEvent;
+  const { agentEvent, userPrompt, includeFullHistory, createIssues, maxTurns } = processedEvent;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
@@ -236,6 +236,7 @@ export async function runAction(
       config,
       prompt,
       timeoutSeconds * 1000,
+      maxTurns,
     );
     output = maskSensitiveInfo(rawOutput, config);
   } catch (error) {

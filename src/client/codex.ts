@@ -8,13 +8,15 @@ import { ActionConfig } from '../config/config.js';
  * @param config The ActionConfig object containing API keys and configuration.
  * @param prompt The user prompt
  * @param timeout Timeout in milliseconds.
- * @returns A promise resolving to the stdout from the Codex CLI. // Changed return type description
+ * @param maxTurns Optional maximum number of back-and-forth exchanges for the Codex CLI.
+ * @returns A promise resolving to the stdout from the Codex CLI.
  */
 export async function runCodex(
   workspace: string,
   config: ActionConfig,
   prompt: string,
   timeout: number,
+  maxTurns?: number,
 ): Promise<string> {
   // Added async and Promise<>
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
@@ -24,8 +26,11 @@ export async function runCodex(
       '--full-auto',
       '--dangerously-auto-approve-everything',
       '--quiet',
-      '"' + prompt + '"',
     ];
+    if (maxTurns !== undefined) {
+      cliArgs.push('--max-turns', maxTurns.toString());
+    }
+    cliArgs.push('"' + prompt + '"');
 
     // Set up environment variables
     const envVars: Record<string, string> = {

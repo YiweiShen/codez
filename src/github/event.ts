@@ -9,6 +9,10 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
+  /**
+   * Optional cap on the number of back-and-forth exchanges Codez will perform.
+   */
+  maxTurns?: number;
 }
 
 /**
@@ -44,6 +48,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
       userPrompt: config.directPrompt,
       includeFullHistory: false,
       createIssues: false,
+      maxTurns: undefined,
     };
   }
   const eventPayload = loadEventPayload(config.eventPath);
@@ -65,7 +70,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
     core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
     const issue = agentEvent.github.issue;
     const prompt = `${issue.title.trim()}\n\n${issue.body.trim()}`;
-    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false };
+    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false, maxTurns: undefined };
   }
 
   // Check for configured trigger phrase only
@@ -81,6 +86,14 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   args = args.replace(/--full-history\b/, '').trim();
   const createIssues = args.split(/\s+/).includes('--create-issues');
   args = args.replace(/--create-issues\b/, '').trim();
+
+  // Parse optional --max-turns flag (supports "--max-turns <n>" or "--max-turns=<n>")
+  let maxTurns: number | undefined;
+  const maxTurnsMatch = args.match(/--max-turns(?:=|\s+)(\d+)\b/);
+  if (maxTurnsMatch) {
+    maxTurns = parseInt(maxTurnsMatch[1], 10);
+    args = args.replace(/--max-turns(?:=|\s+)\d+\b/, '').trim();
+  }
   let userPrompt = args;
 
   let title: string | undefined;
@@ -99,5 +112,5 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt, includeFullHistory, createIssues };
+  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, maxTurns };
 }
