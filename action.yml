@@ -23,6 +23,9 @@ inputs:
   openai-base-url:
     description: 'Specify the OpenAI API base URL'
     required: false
+  direct-prompt:
+    description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'
+    required: false
 
 runs:
   using: 'docker'

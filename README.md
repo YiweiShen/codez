@@ -57,6 +57,7 @@ jobs:
 
           # [Optional Codex Settings]
           # openai-base-url: "https://api.openai.com"
+          # direct-prompt: "Please update the API documentation for the latest endpoints."
 ```
 
 ### Example Usage in Issues
@@ -138,6 +139,7 @@ codez-<type>-<issueNumber>-<short-description>
 | `github-token` | **Required** GitHub token for authentication                                    |
 | `event-path`   | Path to the event file (default: `${{ github.event_path }}`)                    |
 | `timeout`      | Timeout for AI processing in seconds (default: 600, must be a positive integer) |
+| `direct-prompt` | One-shot prompt for automated workflows. If provided, Codez will bypass comment triggers and execute this prompt directly. |
 
 ### Codex Configuration
 
