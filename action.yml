@@ -34,6 +34,12 @@ inputs:
     description: 'Comma-separated list of GitHub usernames. Codez will run when an issue is assigned to these users.'
     required: false
     default: ''
+  codex-env:
+    description: |
+      Custom environment variables to inject into the Codex CLI execution context.
+      Accepts either a YAML mapping (multiline) or comma-separated key=value pairs.
+    required: false
+    default: ''
 
 runs:
   using: 'docker'
