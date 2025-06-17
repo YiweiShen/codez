@@ -29,6 +29,8 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 
 ### Workflow Configuration
 
+> **Note:** To use the `assignee-trigger` input, add `assigned` to the `issues` event types.
+
 ```yaml
 name: Codez
 
@@ -37,9 +39,10 @@ permissions:
   pull-requests: write
   issues: write
 
+# Include 'assigned' to enable assignee-trigger input
 on:
   issues:
-    types: [opened]
+    types: [opened, assigned]
   issue_comment:
     types: [created]
   pull_request_review_comment:
