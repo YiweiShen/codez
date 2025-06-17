@@ -168,9 +168,9 @@ export async function runAction(
   // Capture initial file state
   const originalFileState = captureFileState(workspace);
 
-  // generate Prompt (with special handling for feature planning)
+  // generate Prompt (with special handling for create issues)
   let effectiveUserPrompt = userPrompt;
-  if (userPrompt.toLowerCase().includes('plan features')) {
+  if (userPrompt.toLowerCase().includes('create issues')) {
     effectiveUserPrompt =
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
@@ -204,8 +204,8 @@ export async function runAction(
   }
   core.info(`Output: \n${output}`);
 
-  // Handle plan features intent: create issues from JSON output
-  if (userPrompt.toLowerCase().includes('plan features')) {
+  // Handle create issues intent: create issues from JSON output
+  if (userPrompt.toLowerCase().includes('create issues')) {
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
     return;
   }
