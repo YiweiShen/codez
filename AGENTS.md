@@ -99,7 +99,7 @@ feat(config): add support for custom timeouts
 ## Other Information
 
 - **CI/CD:** Workflows are defined in `.github/workflows`.
-- **Workflow changes:** Do not modify YAML files in `.github/workflows` directly.
+- **Workflow changes:** Codez automatically skips any changes to YAML files in `.github/workflows` to avoid requiring additional workflow permissions.
 - **Secrets Management:** Store API keys and tokens in GitHub Secrets
   (Settings → Secrets).
 - **Action Usage:** See `README.md` for invoking the Codex Action in
