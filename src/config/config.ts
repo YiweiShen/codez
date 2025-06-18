@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
+import { defaultModel } from '../api/openai.js';
 
 export interface ActionConfig {
   // Common settings
@@ -12,9 +13,13 @@ export interface ActionConfig {
   context: typeof github.context;
   repo: { owner: string; repo: string };
 
-  // Codex
+  // Codex / OpenAI settings
   openaiApiKey: string;
   openaiBaseUrl: string;
+  /**
+   * OpenAI model identifier.
+   */
+  openaiModel: string;
   /**
    * One-shot direct prompt for automated workflows.
    * If provided, Codez will bypass GitHub comment triggers and run this prompt directly.
@@ -92,9 +97,11 @@ export function getConfig(): ActionConfig {
   const context = github.context;
   const repo = context.repo;
 
-  // Codex / OpenAI
+  // Codex / OpenAI settings
   const openaiApiKey = core.getInput('openai-api-key') || '';
   const openaiBaseUrl = core.getInput('openai-base-url') || '';
+  const openaiModelInput = core.getInput('openai-model') || '';
+  const openaiModel = openaiModelInput || defaultModel;
   const directPrompt = core.getInput('direct-prompt') || '';
   const triggerPhrase = core.getInput('trigger-phrase') || '/codex';
   const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
@@ -129,6 +136,7 @@ export function getConfig(): ActionConfig {
 
     openaiApiKey,
     openaiBaseUrl,
+    openaiModel,
     directPrompt,
     triggerPhrase,
     assigneeTrigger,
