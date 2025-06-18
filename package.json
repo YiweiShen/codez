@@ -1,6 +1,6 @@
 {
   "name": "codez",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Codex in GitHub Actions",
   "main": "dist/index.js",
   "type": "module",
