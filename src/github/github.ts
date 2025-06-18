@@ -340,7 +340,10 @@ export async function createPullRequest(
 ): Promise<void> {
   const issueNumber = event.issue.number;
   const branchType = getBranchType(commitMessage);
-  const slug = slugify(commitMessage);
+  let slug = slugify(commitMessage);
+  if (slug.startsWith(`${branchType}-`)) {
+    slug = slug.slice(branchType.length + 1);
+  }
   let branchName = `codez-${branchType}-${issueNumber}-${slug}`;
   if (event.action === 'created') {
     branchName = `codez-${branchType}-${issueNumber}-${slug}-${event.comment.id}`;
