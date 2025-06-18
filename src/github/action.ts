@@ -42,7 +42,7 @@ async function createProgressComment(
       body,
     });
     return data.id;
-  } else if ('pull_request' in event) {
+  } else if ('pull_request' in event && 'comment' in event) {
     const inReplyTo = event.comment.in_reply_to_id ?? event.comment.id;
     const { data } = await octokit.rest.pulls.createReplyForReviewComment({
       ...repo,
