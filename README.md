@@ -13,6 +13,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
+- Support `pull_request`, `workflow_dispatch`, and `repository_dispatch` workflow triggers for automated workflows (e.g., on PR open/sync or manual dispatch).
 
 ## Usage
 
@@ -47,6 +48,15 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      direct-prompt:
+        description: 'One-shot prompt for automated workflows'
+        required: true
+  repository_dispatch:
+    types: [codex]
 
 jobs:
   codez:

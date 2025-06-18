@@ -28,14 +28,18 @@ export type AgentEvent =
   | { type: 'issueCommentCreated'; github: GitHubEventIssueCommentCreated }
   | { type: 'pullRequestCommentCreated'; github: GitHubEventPullRequestCommentCreated }
   | { type: 'pullRequestReviewCommentCreated'; github: GitHubEventPullRequestReviewCommentCreated }
-  | { type: 'issuesAssigned'; github: GitHubEventIssuesAssigned };
+  | { type: 'issuesAssigned'; github: GitHubEventIssuesAssigned }
+  | { type: 'pullRequestOpened'; github: GitHubEventPullRequestOpened }
+  | { type: 'pullRequestSynchronize'; github: GitHubEventPullRequestSynchronize };
 
 export type GitHubEvent =
   | GitHubEventIssuesOpened
   | GitHubEventIssueCommentCreated
   | GitHubEventPullRequestCommentCreated
   | GitHubEventPullRequestReviewCommentCreated
-  | GitHubEventIssuesAssigned;
+  | GitHubEventIssuesAssigned
+  | GitHubEventPullRequestOpened
+  | GitHubEventPullRequestSynchronize;
 
 export type GitHubEventIssuesOpened = {
   action: 'opened';
@@ -75,6 +79,16 @@ export type GitHubEventIssuesAssigned = {
   action: 'assigned';
   issue: GitHubIssue;
   assignee: { login: string };
+};
+
+export type GitHubEventPullRequestOpened = {
+  action: 'opened';
+  pull_request: GitHubPullRequest;
+};
+
+export type GitHubEventPullRequestSynchronize = {
+  action: 'synchronize';
+  pull_request: GitHubPullRequest;
 };
 
 export type GithubComment = {
@@ -238,6 +252,17 @@ export function getEventType(payload: any): AgentEvent | null {
   ) {
     return { type: 'pullRequestReviewCommentCreated', github: payload };
   }
+  if (
+    (payload.action === 'opened' || payload.action === 'synchronize') &&
+    payload.pull_request &&
+    !payload.issue &&
+    !payload.comment
+  ) {
+    return {
+      type: payload.action === 'opened' ? 'pullRequestOpened' : 'pullRequestSynchronize',
+      github: payload,
+    };
+  }
   return null;
 }
 
@@ -305,6 +330,17 @@ export async function addEyeReaction(
  * Comment events remain unchanged.
  */
 export function extractText(event: GitHubEvent): string | null {
+  if ((event.action === 'opened' || event.action === 'synchronize') && 'pull_request' in event) {
+    const title = event.pull_request.title.trim();
+    const body = (event.pull_request.body || '').trim();
+    if (body.startsWith('/codex')) {
+      return body + (title ? '\n\n' + title : '');
+    }
+    if (title.startsWith('/codex')) {
+      return title + (body ? '\n\n' + body : '');
+    }
+    return body;
+  }
   if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
     const title = event.issue.title.trim();
     const body = event.issue.body.trim();
