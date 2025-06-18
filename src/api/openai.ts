@@ -2,13 +2,13 @@ import * as core from '@actions/core';
 import OpenAI, { ClientOptions } from 'openai';
 import { ActionConfig } from '../config/config.js';
 
-const defaultModel = 'o4-mini';
+/**
+ * Default model identifier for OpenAI provider.
+ */
+export const defaultModel = 'o4-mini';
 
 function getOpenAIClient(config: ActionConfig): OpenAI {
-  const openaiOptions: ClientOptions = {
-    apiKey: config.openaiApiKey,
-  };
-  // Set base URL if provided
+  const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
   if (config.openaiBaseUrl) {
     openaiOptions.baseURL = config.openaiBaseUrl;
   }
@@ -57,7 +57,7 @@ ${changedFiles.join('\n')}
     const openai = getOpenAIClient(config);
 
     const response = await openai.chat.completions.create({
-      model: defaultModel,
+      model: config.openaiModel,
       max_completion_tokens: 1024,
       messages: [
         { role: 'system', content: systemPrompt },
