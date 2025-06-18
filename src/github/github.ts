@@ -725,6 +725,11 @@ export async function generatePrompt(
 ): Promise<string> {
   const contents = await getContentsData(octokit, repo, event);
 
+  // Exclude progress comments from context
+  const filteredComments = contents.comments.filter(comment =>
+    !comment.body.trim().startsWith('**Codez Progress**')
+  );
+
   let prFiles: string[] = [];
   let contextInfo: string = '';
 
@@ -748,7 +753,7 @@ export async function generatePrompt(
   let historyPropmt = '';
   const formatter = includeFullHistory ? genFullContentsString : genContentsString;
   historyPropmt += formatter(contents.content);
-  for (const comment of contents.comments) {
+  for (const comment of filteredComments) {
     historyPropmt += formatter(comment);
   }
 
