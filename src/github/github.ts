@@ -17,9 +17,8 @@ function getBranchType(commitMessage: string): string {
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 // --- Type Definitions ---
@@ -340,7 +339,10 @@ export async function createPullRequest(
 ): Promise<void> {
   const issueNumber = event.issue.number;
   const branchType = getBranchType(commitMessage);
-  const slug = slugify(commitMessage);
+  let slug = slugify(commitMessage);
+  if (slug.startsWith(`${branchType}-`)) {
+    slug = slug.slice(branchType.length + 1);
+  }
   let branchName = `codez-${branchType}-${issueNumber}-${slug}`;
   if (event.action === 'created') {
     branchName = `codez-${branchType}-${issueNumber}-${slug}-${event.comment.id}`;
