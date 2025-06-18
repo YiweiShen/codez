@@ -76,7 +76,7 @@ async function updateProgressComment(
       body,
     });
   } else if ('pull_request' in event) {
-    await octokit.rest.pulls.updateReplyForReviewComment({
+    await octokit.rest.pulls.updateReviewComment({
       ...repo,
       comment_id: commentId,
       body,
