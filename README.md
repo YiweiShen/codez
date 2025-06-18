@@ -70,10 +70,6 @@ jobs:
           # [Optional Codex Settings]
           # openai-base-url: "https://api.openai.com"
           # direct-prompt: "Refactor the user authentication module to use async/await and improve error handling."
-          # For workflow_dispatch trigger
-          # direct-prompt: ${{ github.event.inputs.direct-prompt }}
-          # For repository_dispatch trigger
-          # direct-prompt: ${{ github.event.client_payload.prompt }}
           # trigger-phrase: "/ai"
           # assignee-trigger: "codex-bot"
 ```
