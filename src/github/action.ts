@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { execa } from 'execa';
 import {
   cloneRepository,
   addEyeReaction,
@@ -32,9 +33,28 @@ async function handleResult(
   const { octokit, repo, workspace } = config;
   const { agentEvent, userPrompt } = processedEvent;
 
-  if (changedFiles.length > 0) {
+  // Skip any changes to workflow files to avoid requiring workflow permissions
+  const workflowFiles = changedFiles.filter((f) =>
+    f.startsWith('.github/workflows/'),
+  );
+  if (workflowFiles.length > 0) {
+    core.warning(
+      `Ignoring changes to workflow files: ${workflowFiles.join(', ')}`,
+    );
+    // Revert workflow file changes
+    await execa(
+      'git',
+      ['checkout', 'HEAD', '--', '.github/workflows'],
+      { cwd: workspace, stdio: 'inherit' },
+    );
+  }
+  const effectiveChangedFiles = changedFiles.filter(
+    (f) => !f.startsWith('.github/workflows/'),
+  );
+
+  if (effectiveChangedFiles.length > 0) {
     core.info(
-      `Detected changes in ${changedFiles.length} files:\n${changedFiles.join(
+      `Detected changes in ${effectiveChangedFiles.length} files:\n${effectiveChangedFiles.join(
         '\n',
       )}`,
     );
@@ -42,7 +62,7 @@ async function handleResult(
     const generateCommitMessage = generateCommitMessageOpenAI;
     // Generate commit message
     const commitMessage = await generateCommitMessage(
-      changedFiles,
+      effectiveChangedFiles,
       userPrompt,
       {
         issueNumber:
@@ -89,7 +109,7 @@ async function handleResult(
       );
     }
   } else {
-    // No files changed, post AI output as a comment
+    // No non-workflow file changes, post AI output as a comment
     await postComment(octokit, repo, agentEvent.github, `${output}`);
   }
 }
