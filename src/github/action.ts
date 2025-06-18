@@ -11,6 +11,7 @@ import {
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
 import path from 'path';
+import * as fs from 'fs';
 import { extractImageUrls, downloadImages } from '../file/images.js';
 import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
@@ -328,13 +329,33 @@ export async function runAction(
     includeFullHistory,
   );
 
+  // Handle any images in the prompt by downloading and embedding as base64
   const imageUrls = extractImageUrls(prompt);
   if (imageUrls.length > 0) {
     const imagesDir = path.join(workspace, 'codex-comment-images');
     const imageFiles = await downloadImages(imageUrls, imagesDir);
     if (imageFiles.length > 0) {
-      const imageSection = `[Images]\n${imageFiles.join('\n')}\n\n`;
-      prompt = imageSection + prompt;
+      const imageSectionLines: string[] = ['[Images]'];
+      for (const relPath of imageFiles) {
+        try {
+          const absPath = path.join(workspace, relPath);
+          const data = fs.readFileSync(absPath);
+          const ext = path.extname(absPath).slice(1) || 'octet-stream';
+          const base64 = data.toString('base64');
+          const name = path.basename(absPath);
+          imageSectionLines.push(
+            `![${name}](data:image/${ext};base64,${base64})`
+          );
+        } catch (err) {
+          core.warning(
+            `Failed to embed image ${relPath}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+        }
+      }
+      imageSectionLines.push('', '');
+      prompt = imageSectionLines.join('\n') + prompt;
     }
   }
   core.info(`Prompt: \n${prompt}`);
