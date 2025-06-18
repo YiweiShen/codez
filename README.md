@@ -176,6 +176,7 @@ codez-<type>-<issueNumber>-<short-description>
 | `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`) |
 | `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment |
 | `codex-env`      | Custom environment variables to inject into the Codex CLI execution context. Accepts either a YAML mapping (multiline) or comma-separated key=value pairs. |
+| `images`         | Comma-separated or newline-separated list of local image file paths to include in the Codex CLI invocation. Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc. |
 
 ## Security
 
