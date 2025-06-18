@@ -69,7 +69,7 @@ jobs:
 
           # [Optional Codex Settings]
           # openai-base-url: "https://api.openai.com"
-          # direct-prompt: "Refactor the user authentication module to use async/await and improve error handling."
+          # direct-prompt: "Please update the API documentation for the latest endpoints."
           # trigger-phrase: "/ai"
           # assignee-trigger: "codex-bot"
 ```
