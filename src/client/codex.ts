@@ -6,29 +6,38 @@ import { ActionConfig } from '../config/config.js';
  * Executes the Codex CLI command.
  * @param workspace The directory to run the command in.
  * @param config The ActionConfig object containing API keys and configuration.
- * @param prompt The user prompt
+ * @param prompt The user prompt.
  * @param timeout Timeout in milliseconds.
- * @returns A promise resolving to the stdout from the Codex CLI. // Changed return type description
+ * @param images Optional list of local image file paths to include in the CLI invocation.
+ * @returns A promise resolving to the stdout from the Codex CLI.
  */
 export async function runCodex(
   workspace: string,
   config: ActionConfig,
   prompt: string,
   timeout: number,
+  images: string[] = [],
 ): Promise<string> {
   // Added async and Promise<>
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
-  try {
-    prompt = prompt.replace(/"/g, '\\"');
-    // Build CLI arguments: model flag
-    const cliArgs: string[] = [];
-    cliArgs.push('--model', config.openaiModel);
-    cliArgs.push(
-      '--full-auto',
-      '--dangerously-auto-approve-everything',
-      '--quiet',
-      `"${prompt}"`,
-    );
+    try {
+      prompt = prompt.replace(/"/g, '\\"');
+      // Build CLI arguments
+      const cliArgs: string[] = [];
+      // Include image flags if provided
+      if (images.length > 0) {
+        for (const imgPath of images) {
+          cliArgs.push('-i', imgPath);
+        }
+      }
+      // Model and auto flags
+      cliArgs.push('--model', config.openaiModel);
+      cliArgs.push(
+        '--full-auto',
+        '--dangerously-auto-approve-everything',
+        '--quiet',
+        `"${prompt}"`,
+      );
 
     // Set up environment variables
     const envVars: Record<string, string> = {
