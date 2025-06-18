@@ -18,6 +18,75 @@ import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
 
 /**
+ * Creates a progress comment with initial unchecked steps.
+ * @returns comment id
+ */
+async function createProgressComment(
+  octokit: Octokit,
+  repo: { owner: string; repo: string },
+  event: GitHubEvent,
+  steps: string[],
+): Promise<number> {
+  const bodyLines = ['**Codez Progress**', ''];
+  for (const step of steps) {
+    bodyLines.push(`- [ ] ${step}`);
+  }
+  bodyLines.push('');
+  const body = bodyLines.join('\n');
+  if ('issue' in event) {
+    const { data } = await octokit.rest.issues.createComment({
+      ...repo,
+      issue_number: event.issue.number,
+      body,
+    });
+    return data.id;
+  } else if ('pull_request' in event) {
+    const inReplyTo = event.comment.in_reply_to_id ?? event.comment.id;
+    const { data } = await octokit.rest.pulls.createReplyForReviewComment({
+      ...repo,
+      pull_number: event.pull_request.number,
+      comment_id: inReplyTo,
+      body,
+    });
+    return data.id;
+  }
+  throw new Error('Unsupported event for progress comment');
+}
+
+/**
+ * Updates an existing progress comment by comment id.
+ */
+async function updateProgressComment(
+  octokit: Octokit,
+  repo: { owner: string; repo: string },
+  event: GitHubEvent,
+  commentId: number,
+  steps: string[],
+): Promise<void> {
+  const bodyLines = ['**Codez Progress**', ''];
+  for (const s of steps) {
+    bodyLines.push(s);
+  }
+  bodyLines.push('');
+  const body = bodyLines.join('\n');
+  if ('issue' in event) {
+    await octokit.rest.issues.updateComment({
+      ...repo,
+      comment_id: commentId,
+      body,
+    });
+  } else if ('pull_request' in event) {
+    await octokit.rest.pulls.updateReplyForReviewComment({
+      ...repo,
+      comment_id: commentId,
+      body,
+    });
+  } else {
+    throw new Error('Unsupported event for updating progress comment');
+  }
+}
+
+/**
  * Handles the result of execution.
  * @param config Action configuration.
  * @param processedEvent Processed event data.
@@ -220,6 +289,15 @@ export async function runAction(
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);
 
+  // Initialize progress UI
+  const progressSteps = ['Gathering context', 'Planning', 'Applying edits', 'Testing'];
+  let progressCommentId: number | undefined;
+  try {
+    progressCommentId = await createProgressComment(octokit, repo, agentEvent.github, progressSteps);
+  } catch (e) {
+    core.warning(`Failed to create progress comment: ${e instanceof Error ? e.message : e}`);
+  }
+
   // Clone repository
   await cloneRepository(
     workspace,
@@ -249,6 +327,15 @@ export async function runAction(
   );
 
   core.info(`Prompt: \n${prompt}`);
+  // Update progress: context gathering complete
+  if (progressCommentId) {
+    try {
+      const steps = progressSteps.map((s, i) => `- [${i <= 0 ? 'x' : ' '}] ${s}`);
+      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
+    } catch (e) {
+      core.warning(`Failed to update progress to 'Gathering context' complete: ${e instanceof Error ? e.message : e}`);
+    }
+  }
   let output;
   try {
     const rawOutput: string = await runCodex(
@@ -257,7 +344,16 @@ export async function runAction(
       prompt,
       timeoutSeconds * 1000,
     );
-    output = maskSensitiveInfo(rawOutput, config);
+  output = maskSensitiveInfo(rawOutput, config);
+  // Update progress: planning complete
+  if (progressCommentId) {
+    try {
+      const steps = progressSteps.map((s, i) => `- [${i <= 1 ? 'x' : ' '}] ${s}`);
+      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
+    } catch (e) {
+      core.warning(`Failed to update progress to 'Planning' complete: ${e instanceof Error ? e.message : e}`);
+    }
+  }
   } catch (error) {
     await postComment(
       octokit,
@@ -282,6 +378,26 @@ export async function runAction(
 
   // Handle the results
   await handleResult(config, processedEvent, output, changedFiles);
+
+  // Update progress: applying edits complete
+  if (progressCommentId) {
+    try {
+      const steps = progressSteps.map((s, i) => `- [${i <= 2 ? 'x' : ' '}] ${s}`);
+      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
+    } catch (e) {
+      core.warning(`Failed to update progress to 'Applying edits' complete: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+
+  // Update progress: testing complete
+  if (progressCommentId) {
+    try {
+      const steps = progressSteps.map((s, i) => `- [${i <= 3 ? 'x' : ' '}] ${s}`);
+      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
+    } catch (e) {
+      core.warning(`Failed to update progress to 'Testing' complete: ${e instanceof Error ? e.message : e}`);
+    }
+  }
 
   core.info('Action completed successfully.');
 }
