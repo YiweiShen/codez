@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as http from 'http';
-import * as https from 'https';
+import axios from 'axios';
 import * as core from '@actions/core';
 
 /**
@@ -62,25 +61,12 @@ export async function downloadImages(
  * Helper to download a file from URL to destination path.
  */
 function downloadFile(url: string, dest: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const client = url.startsWith('https') ? https : http;
-    const request = client.get(url, (response) => {
-      if (response.statusCode && response.statusCode >= 400) {
-        reject(new Error(`Failed to download ${url}. Status code: ${response.statusCode}`));
-        return;
-      }
+  return axios.get(url, { responseType: 'stream' }).then(response => {
+    return new Promise<void>((resolve, reject) => {
       const stream = fs.createWriteStream(dest);
-      response.pipe(stream);
-      stream.on('finish', () => {
-        stream.close((err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
+      response.data.pipe(stream);
+      stream.on('finish', resolve);
+      stream.on('error', reject);
     });
-    request.on('error', (err) => reject(err));
   });
 }
