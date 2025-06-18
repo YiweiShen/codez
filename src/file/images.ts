@@ -43,8 +43,10 @@ export async function downloadImages(
       const filename = path.basename(parsed.pathname);
       const destPath = path.join(downloadDir, filename);
       await downloadFile(url, destPath);
+      const stats = fs.statSync(destPath);
+      const fileSize = stats.size;
       downloaded.push(path.relative(process.cwd(), destPath));
-      core.info(`Downloaded image ${url} to ${destPath}`);
+      core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
     } catch (err) {
       core.warning(
         `Failed to download image ${url}: ${
