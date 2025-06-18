@@ -672,8 +672,8 @@ export async function postComment(
         body: truncateOutput(body),
       });
       core.info(`Comment posted to Issue/PR #${issueNumber}`);
-    } else if ('pull_request' in event) {
-      // For PR review comments
+    } else if ('pull_request' in event && 'comment' in event) {
+      // For PR review comments only when a comment object is present
       const prNumber = event.pull_request.number;
       const commentId = event.comment.id;
       const inReplyTo = event.comment.in_reply_to_id;
