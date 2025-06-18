@@ -28,6 +28,43 @@ export interface ActionConfig {
    * List of GitHub usernames that trigger Codez when an issue is assigned to them.
    */
   assigneeTrigger: string[];
+  /**
+   * Custom environment variables to inject into the Codex CLI process.
+   */
+  codexEnv: Record<string, string>;
+}
+
+/**
+ * Parses custom environment variables input, either YAML mapping (multiline)
+ * or comma-separated key=value pairs.
+ */
+export function parseEnvInput(input: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!input) return result;
+  if (input.includes('\n')) {
+    for (const line of input.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const idx = trimmed.indexOf(':');
+      if (idx < 0) continue;
+      const key = trimmed.slice(0, idx).trim();
+      let val = trimmed.slice(idx + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (key) result[key] = val;
+    }
+  } else {
+    for (const part of input.split(',')) {
+      const [key, ...rest] = part.split('=');
+      if (!key) continue;
+      result[key.trim()] = rest.join('=').trim();
+    }
+  }
+  return result;
 }
 
 /**
@@ -65,6 +102,8 @@ export function getConfig(): ActionConfig {
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s);
+  const codexEnvInput = core.getInput('codex-env') || '';
+  const codexEnv = parseEnvInput(codexEnvInput);
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -93,5 +132,6 @@ export function getConfig(): ActionConfig {
     directPrompt,
     triggerPhrase,
     assigneeTrigger,
+    codexEnv,
   };
 }
