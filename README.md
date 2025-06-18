@@ -14,6 +14,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
+- Support a `max-turns` input to configure the default maximum number of back-and-forth exchanges when no `--max-turns` flag is provided
 
 ## Usage
 
@@ -63,6 +64,7 @@ jobs:
           # direct-prompt: "Please update the API documentation for the latest endpoints."
           # trigger-phrase: "/ai"
           # assignee-trigger: "codex-bot"
+          # max-turns: "3"
 ```
 
 ### Example Usage in Issues

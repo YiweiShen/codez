@@ -193,9 +193,23 @@ export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
 ): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
-    config;
-  const { agentEvent, userPrompt, includeFullHistory, createIssues, maxTurns } = processedEvent;
+  const {
+    octokit,
+    repo,
+    workspace,
+    githubToken,
+    context,
+    timeoutSeconds,
+    maxTurns: configMaxTurns,
+  } = config;
+  const {
+    agentEvent,
+    userPrompt,
+    includeFullHistory,
+    createIssues,
+    maxTurns: eventMaxTurns,
+  } = processedEvent;
+  const maxTurns = eventMaxTurns !== undefined ? eventMaxTurns : configMaxTurns;
 
   // Add eyes reaction
   await addEyeReaction(octokit, repo, agentEvent.github);

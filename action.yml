@@ -34,6 +34,10 @@ inputs:
     description: 'Comma-separated list of GitHub usernames. Codez will run when an issue is assigned to these users.'
     required: false
     default: ''
+  max-turns:
+    description: 'Specify default maximum number of back-and-forth exchanges Codez can perform when no --max-turns flag is provided'
+    required: false
+    default: ''
 
 runs:
   using: 'docker'

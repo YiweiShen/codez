@@ -28,6 +28,10 @@ export interface ActionConfig {
    * List of GitHub usernames that trigger Codez when an issue is assigned to them.
    */
   assigneeTrigger: string[];
+  /**
+   * Default maximum number of back-and-forth exchanges Codez can perform when no --max-turns flag is provided.
+   */
+  maxTurns?: number;
 }
 
 /**
@@ -65,6 +69,16 @@ export function getConfig(): ActionConfig {
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s);
+  const maxTurnsInput = core.getInput('max-turns') || '';
+  let maxTurns: number | undefined;
+  if (maxTurnsInput) {
+    maxTurns = parseInt(maxTurnsInput, 10);
+    if (isNaN(maxTurns) || maxTurns <= 0) {
+      throw new Error(
+        `Invalid max-turns value: ${maxTurnsInput}. Must be a positive integer.`,
+      );
+    }
+  }
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -93,5 +107,6 @@ export function getConfig(): ActionConfig {
     directPrompt,
     triggerPhrase,
     assigneeTrigger,
+    maxTurns,
   };
 }
