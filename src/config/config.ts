@@ -37,6 +37,10 @@ export interface ActionConfig {
    * Custom environment variables to inject into the Codex CLI process.
    */
   codexEnv: Record<string, string>;
+  /**
+   * Optional list of local image file paths to include in the Codex CLI invocation.
+   */
+  images: string[];
 }
 
 /**
@@ -70,6 +74,25 @@ export function parseEnvInput(input: string): Record<string, string> {
     }
   }
   return result;
+}
+/**
+ * Parses list input, either newline-separated or comma-separated.
+ * @param input String containing list items.
+ * @returns Array of trimmed non-empty strings.
+ */
+export function parseListInput(input: string): string[] {
+  if (!input) {
+    return [];
+  }
+  let items: string[] = [];
+  if (input.includes('\n')) {
+    items = input.split(/\r?\n/);
+  } else if (input.includes(',')) {
+    items = input.split(',');
+  } else {
+    items = [input];
+  }
+  return items.map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
 /**
@@ -111,6 +134,8 @@ export function getConfig(): ActionConfig {
     .filter((s) => s);
   const codexEnvInput = core.getInput('codex-env') || '';
   const codexEnv = parseEnvInput(codexEnvInput);
+  const imagesInput = core.getInput('images') || '';
+  const images = parseListInput(imagesInput);
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -141,5 +166,6 @@ export function getConfig(): ActionConfig {
     triggerPhrase,
     assigneeTrigger,
     codexEnv,
+    images,
   };
 }
