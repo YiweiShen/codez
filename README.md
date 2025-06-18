@@ -62,6 +62,8 @@ jobs:
           # direct-prompt: "Please update the API documentation for the latest endpoints."
           # trigger-phrase: "/ai"
           # assignee-trigger: "codex-bot"
+          # allowed-tools: "file,bash,mcp"
+          # disallowed-tools: "bash"
 ```
 
 ### Example Usage in Issues
@@ -158,6 +160,8 @@ codez-<type>-<issueNumber>-<short-description>
 | `openai-base-url` | OpenAI API base URL |
 | `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`) |
 | `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment |
+| `allowed-tools`    | Comma-separated list of allowed Codex CLI tools (e.g., file, bash, mcp). If specified, only these tools will be enabled. |
+| `disallowed-tools` | Comma-separated list of disallowed Codex CLI tools (e.g., file, bash, mcp). These tools will be disabled during execution. |
 
 ## Security
 

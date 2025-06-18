@@ -28,6 +28,14 @@ export interface ActionConfig {
    * List of GitHub usernames that trigger Codez when an issue is assigned to them.
    */
   assigneeTrigger: string[];
+  /**
+   * Comma-separated list of allowed Codex CLI tools. If specified, only these tools will be enabled.
+   */
+  allowedTools: string[];
+  /**
+   * Comma-separated list of disallowed Codex CLI tools. These tools will be disabled during execution.
+   */
+  disallowedTools: string[];
 }
 
 /**
@@ -66,6 +74,21 @@ export function getConfig(): ActionConfig {
     .map((s) => s.trim())
     .filter((s) => s);
 
+  const allowedToolsInput = core.getInput('allowed-tools') || '';
+  const allowedTools = allowedToolsInput
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s);
+  const disallowedToolsInput = core.getInput('disallowed-tools') || '';
+  const disallowedTools = disallowedToolsInput
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s);
+
+  if (allowedTools.length > 0 && disallowedTools.length > 0) {
+    throw new Error('Cannot specify both allowed-tools and disallowed-tools');
+  }
+
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
   }
@@ -93,5 +116,7 @@ export function getConfig(): ActionConfig {
     directPrompt,
     triggerPhrase,
     assigneeTrigger,
+    allowedTools,
+    disallowedTools,
   };
 }

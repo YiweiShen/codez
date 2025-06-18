@@ -24,6 +24,12 @@ export async function runCodex(
       '--full-auto',
       '--dangerously-auto-approve-everything',
       '--quiet',
+      ...(config.allowedTools.length > 0
+        ? [`--allowed-tools=${config.allowedTools.join(',')}`]
+        : []),
+      ...(config.disallowedTools.length > 0
+        ? [`--disallowed-tools=${config.disallowedTools.join(',')}`]
+        : []),
       '"' + prompt + '"',
     ];
 

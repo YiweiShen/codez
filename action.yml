@@ -34,6 +34,14 @@ inputs:
     description: 'Comma-separated list of GitHub usernames. Codez will run when an issue is assigned to these users.'
     required: false
     default: ''
+  allowed-tools:
+    description: 'Comma-separated list of allowed Codex CLI tools (e.g., file, bash, mcp). If specified, only these tools will be enabled.'
+    required: false
+    default: ''
+  disallowed-tools:
+    description: 'Comma-separated list of disallowed Codex CLI tools (e.g., file, bash, mcp). These tools will be disabled during execution.'
+    required: false
+    default: ''
 
 runs:
   using: 'docker'
