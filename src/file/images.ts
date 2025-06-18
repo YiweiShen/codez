@@ -57,14 +57,35 @@ export async function downloadImages(
 }
 
 /**
- * Helper to download a file from URL to destination path.
+ * Helper to download a file from URL to destination path, following redirects.
  */
-function downloadFile(url: string, dest: string): Promise<void> {
+function downloadFile(
+  url: string,
+  dest: string,
+  redirectCount = 0,
+): Promise<void> {
   return new Promise((resolve, reject) => {
+    const MAX_REDIRECTS = 5;
+    if (redirectCount > MAX_REDIRECTS) {
+      reject(new Error(`Too many redirects when downloading ${url}`));
+      return;
+    }
     const client = url.startsWith('https') ? https : http;
     const request = client.get(url, (response) => {
-      if (response.statusCode && response.statusCode >= 400) {
-        reject(new Error(`Failed to download ${url}. Status code: ${response.statusCode}`));
+      const statusCode = response.statusCode || 0;
+      // Follow HTTP redirects
+      if (statusCode >= 300 && statusCode < 400 && response.headers.location) {
+        let newUrl: string;
+        try {
+          newUrl = new URL(response.headers.location as string, url).toString();
+        } catch {
+          newUrl = response.headers.location as string;
+        }
+        resolve(downloadFile(newUrl, dest, redirectCount + 1));
+        return;
+      }
+      if (statusCode >= 400) {
+        reject(new Error(`Failed to download ${url}. Status code: ${statusCode}`));
         return;
       }
       const stream = fs.createWriteStream(dest);
