@@ -20,16 +20,9 @@ export async function runCodex(
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
     prompt = prompt.replace(/"/g, '\\"');
-    // Build CLI arguments: model and provider-specific flags
+    // Build CLI arguments: model flag
     const cliArgs: string[] = [];
-    if (config.provider === 'azure') {
-      cliArgs.push(
-        '--azure-openai-endpoint', config.azureOpenAIEndpoint,
-        '--azure-openai-deployment-name', config.azureOpenAIDeploymentName,
-        '--azure-openai-api-version', config.azureOpenAIApiVersion,
-      );
-    }
-    cliArgs.push('--model', config.model);
+    cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
       '--full-auto',
       '--dangerously-auto-approve-everything',
@@ -40,8 +33,7 @@ export async function runCodex(
     // Set up environment variables
     const envVars: Record<string, string> = {
       ...process.env,
-      OPENAI_API_KEY:
-        config.provider === 'azure' ? config.azureOpenAIApiKey : config.openaiApiKey,
+      OPENAI_API_KEY: config.openaiApiKey,
       CODEX_QUIET_MODE: '1',
     };
     if (config.openaiBaseUrl) {

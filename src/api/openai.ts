@@ -8,19 +8,9 @@ import { ActionConfig } from '../config/config.js';
 export const defaultModel = 'o4-mini';
 
 function getOpenAIClient(config: ActionConfig): OpenAI {
-  const openaiOptions: ClientOptions = {};
-  if (config.provider === 'azure') {
-    openaiOptions.apiKey = config.azureOpenAIApiKey;
-    openaiOptions.baseURL = config.azureOpenAIEndpoint;
-    openaiOptions.azure = {
-      deploymentName: config.model,
-      apiVersion: config.azureOpenAIApiVersion,
-    };
-  } else {
-    openaiOptions.apiKey = config.openaiApiKey;
-    if (config.openaiBaseUrl) {
-      openaiOptions.baseURL = config.openaiBaseUrl;
-    }
+  const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
+  if (config.openaiBaseUrl) {
+    openaiOptions.baseURL = config.openaiBaseUrl;
   }
   return new OpenAI(openaiOptions);
 }
@@ -67,7 +57,7 @@ ${changedFiles.join('\n')}
     const openai = getOpenAIClient(config);
 
     const response = await openai.chat.completions.create({
-      model: config.model,
+      model: config.openaiModel,
       max_completion_tokens: 1024,
       messages: [
         { role: 'system', content: systemPrompt },
