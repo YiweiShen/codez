@@ -18,6 +18,10 @@ import { maskSensitiveInfo } from '../security/security.js';
 import { runCodex } from '../client/codex.js';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
+// Helper to escape strings for RegExp
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /**
  * Creates a progress comment with initial unchecked steps.
@@ -328,19 +332,17 @@ export async function runAction(
     includeFullHistory,
   );
 
-  // Handle any images in the prompt by downloading and including their file paths
+  // Handle any images in the prompt by downloading and replacing embeds with placeholders
   const imageUrls = extractImageUrls(prompt);
+  let downloadedImageFiles: string[] = [];
   if (imageUrls.length > 0) {
     const imagesDir = path.join(workspace, 'codex-comment-images');
-    const imageFiles = await downloadImages(imageUrls, imagesDir);
-    if (imageFiles.length > 0) {
-      const imageSectionLines: string[] = ['[Images]'];
-      for (const relPath of imageFiles) {
-        const name = path.basename(relPath);
-        imageSectionLines.push(`![${name}](${relPath})`);
-      }
-      imageSectionLines.push('', '');
-      prompt = imageSectionLines.join('\n') + prompt;
+    downloadedImageFiles = await downloadImages(imageUrls, imagesDir);
+    for (let i = 0; i < imageUrls.length; i++) {
+      const url = imageUrls[i];
+      const placeholder = `<image_${i}>`;
+      prompt = prompt.replace(new RegExp(`!\\[[\\s\\S]*?\\]\\(${escapeRegExp(url)}\\)`, 'g'), placeholder);
+      prompt = prompt.replace(new RegExp(`<img[^>]*src=[\\"']${escapeRegExp(url)}[\\"'][^>]*>`, 'g'), placeholder);
     }
   }
   core.info(`Prompt: \n${prompt}`);
@@ -355,11 +357,13 @@ export async function runAction(
   }
   let output;
   try {
+    const allImages = [...config.images, ...downloadedImageFiles];
     const rawOutput: string = await runCodex(
       workspace,
       config,
       prompt,
       timeoutSeconds * 1000,
+      allImages,
     );
   output = maskSensitiveInfo(rawOutput, config);
   // Update progress: planning complete
