@@ -69,7 +69,15 @@ function downloadFile(url: string, dest: string): Promise<void> {
       }
       const stream = fs.createWriteStream(dest);
       response.pipe(stream);
-      stream.on('finish', () => stream.close(resolve));
+      stream.on('finish', () => {
+        stream.close((err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
     });
     request.on('error', (err) => reject(err));
   });
