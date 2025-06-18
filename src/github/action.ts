@@ -10,6 +10,8 @@ import {
 } from './github.js';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
+import path from 'path';
+import { extractImageUrls, downloadImages } from '../file/images.js';
 import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
 import { maskSensitiveInfo } from '../security/security.js';
@@ -318,7 +320,7 @@ export async function runAction(
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
 
-  const prompt = await generatePrompt(
+  let prompt = await generatePrompt(
     octokit,
     repo,
     agentEvent,
@@ -326,6 +328,15 @@ export async function runAction(
     includeFullHistory,
   );
 
+  const imageUrls = extractImageUrls(prompt);
+  if (imageUrls.length > 0) {
+    const imagesDir = path.join(workspace, 'codex-comment-images');
+    const imageFiles = await downloadImages(imageUrls, imagesDir);
+    if (imageFiles.length > 0) {
+      const imageSection = `[Images]\n${imageFiles.join('\n')}\n\n`;
+      prompt = imageSection + prompt;
+    }
+  }
   core.info(`Prompt: \n${prompt}`);
   // Update progress: context gathering complete
   if (progressCommentId) {
