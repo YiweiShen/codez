@@ -1,11 +1,17 @@
+/**
+ * Security helpers module.
+ *
+ * Provides functions for permission checks and masking sensitive information.
+ */
 import * as core from '@actions/core';
 import { ActionConfig } from '../config/config.js';
 import { Octokit } from 'octokit';
 
 /**
- * Checks if the user has appropriate permissions.
- * @param config Action configuration
- * @returns true if the user has permission, false otherwise
+ * Check if the user has appropriate permissions to run the action.
+ *
+ * @param {ActionConfig} config - Action configuration object containing GitHub context.
+ * @returns {Promise<boolean>} True if the user has permission; false otherwise.
  */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
@@ -25,12 +31,12 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
 }
 
 /**
- * Asynchronously checks if a user has appropriate permissions for a repository.
- * This function is used internally and primarily for logging permission information.
- * @param octokit GitHub API client
- * @param repo Repository information
- * @param username Username to check
- * @returns true if the user has permissions, false otherwise
+ * Check if a GitHub user has appropriate permissions for the repository.
+ *
+ * @param {Octokit} octokit - GitHub API client instance.
+ * @param {{ owner: string; repo: string }} repo - Repository information.
+ * @param {string} username - GitHub username to check permissions for.
+ * @returns {Promise<boolean>} True if the user has write or admin permissions; false otherwise.
  */
 async function checkUserPermissionGithub(
   octokit: Octokit,
@@ -58,10 +64,11 @@ async function checkUserPermissionGithub(
 }
 
 /**
- * Masks sensitive information (GitHub token and OpenAI API key) in a given string.
- * @param text The text to mask.
- * @param config Action configuration containing sensitive keys.
- * @returns The masked text.
+ * Mask sensitive information (GitHub token and OpenAI API key) within a string.
+ *
+ * @param {string} text - Input text that may contain sensitive data.
+ * @param {ActionConfig} config - Action configuration containing sensitive keys.
+ * @returns {string} The text with sensitive information replaced by '***'.
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;
