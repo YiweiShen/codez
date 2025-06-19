@@ -4,6 +4,7 @@ import { execa } from 'execa';
 import * as fs from 'fs';
 import { genContentsString, genFullContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
+import { promptBuilderConfig } from '../config/prompts.js';
 
 function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
@@ -759,20 +760,20 @@ export async function generatePrompt(
 
   let prompt = '';
   if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
-    prompt += `[Title]\n${contents.content.title}\n\n`;
+    prompt += `${promptBuilderConfig.titleLabel}\n${contents.content.title}\n\n`;
   }
   if (historyPropmt) {
-    prompt += `[History]\n${historyPropmt}\n\n`;
+    prompt += `${promptBuilderConfig.historyLabel}\n${historyPropmt}\n\n`;
   }
   if (contextInfo) {
-    prompt += `[Context]\n${contextInfo}\n\n`;
+    prompt += `${promptBuilderConfig.contextLabel}\n${contextInfo}\n\n`;
   }
   if (prFiles.length > 0) {
-    prompt += `[Changed Files]\n${prFiles.join('\n')}\n\n`;
+    prompt += `${promptBuilderConfig.changedFilesLabel}\n${prFiles.join('\n')}\n\n`;
   }
 
   if (prompt) {
-    prompt += `---\n\n${userPrompt}`;
+    prompt += `${promptBuilderConfig.promptSeparator}\n\n${userPrompt}`;
   } else {
     prompt = userPrompt;
   }
