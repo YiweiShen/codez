@@ -1,15 +1,22 @@
+/**
+ * Codex CLI integration module.
+ *
+ * Provides a function to invoke the Codex CLI tool with configured parameters
+ * and return its output.
+ */
 import { execa } from 'execa'; // Changed from execaSync
 import * as core from '@actions/core';
 import { ActionConfig } from '../config/config.js';
 
 /**
- * Executes the Codex CLI command.
- * @param workspace The directory to run the command in.
- * @param config The ActionConfig object containing API keys and configuration.
- * @param prompt The user prompt.
- * @param timeout Timeout in milliseconds.
- * @param images Optional list of local image file paths to include in the CLI invocation.
- * @returns A promise resolving to the stdout from the Codex CLI.
+ * Invoke the Codex CLI with the specified parameters.
+ *
+ * @param {string} workspace - Directory in which to run the Codex CLI.
+ * @param {ActionConfig} config - Configuration containing API keys and environment settings.
+ * @param {string} prompt - User-provided prompt string for Codex.
+ * @param {number} timeout - Maximum time in milliseconds to wait for the CLI to complete.
+ * @param {string[]} [images] - Optional array of image file paths to include in the invocation.
+ * @returns {Promise<string>} A promise resolving to the formatted output from Codex.
  */
 export async function runCodex(
   workspace: string,

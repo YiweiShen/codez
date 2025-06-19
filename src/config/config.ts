@@ -1,8 +1,19 @@
+/**
+ * Configuration module for the GitHub Action.
+ *
+ * Parses action inputs and environment variables, providing a validated
+ * ActionConfig object for use throughout the action.
+ */
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 import { defaultModel } from '../api/openai.js';
 
+/**
+ * Defines configuration inputs for the GitHub Action.
+ *
+ * Includes GitHub authentication, workspace settings, and Codex/OpenAI parameters.
+ */
 export interface ActionConfig {
   // Common settings
   githubToken: string;
@@ -44,8 +55,10 @@ export interface ActionConfig {
 }
 
 /**
- * Parses custom environment variables input, either YAML mapping (multiline)
- * or comma-separated key=value pairs.
+ * Parse custom environment variables input from YAML mapping or comma-separated key=value pairs.
+ *
+ * @param {string} input - Raw input string (multiline YAML or comma-separated key=value pairs).
+ * @returns {Record<string, string>} A map of environment variable names to values.
  */
 export function parseEnvInput(input: string): Record<string, string> {
   const result: Record<string, string> = {};
@@ -76,9 +89,10 @@ export function parseEnvInput(input: string): Record<string, string> {
   return result;
 }
 /**
- * Parses list input, either newline-separated or comma-separated.
- * @param input String containing list items.
- * @returns Array of trimmed non-empty strings.
+ * Parse list input into an array of trimmed, non-empty strings.
+ *
+ * @param {string} input - String containing list items.
+ * @returns {string[]} Array of trimmed non-empty strings.
  */
 export function parseListInput(input: string): string[] {
   if (!input) {

@@ -1,12 +1,18 @@
+/**
+ * Image utilities module.
+ *
+ * Provides functions to extract image URLs from text and download images to a local directory.
+ */
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
 
 /**
- * Extracts image URLs from Markdown and HTML <img> tags in text.
- * @param text Text to search for image URLs.
- * @returns Array of unique image URLs.
+ * Extract image URLs from Markdown and HTML <img> tags in the given text.
+ *
+ * @param {string} text - Text to search for image URLs.
+ * @returns {string[]} Array of unique image URLs.
  */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
@@ -23,10 +29,11 @@ export function extractImageUrls(text: string): string[] {
 }
 
 /**
- * Downloads images from the given URLs into a directory.
- * @param urls Array of image URLs to download.
- * @param downloadDir Directory path where images will be saved.
- * @returns Array of relative file paths for downloaded images.
+ * Download images from the given URLs into a local directory.
+ *
+ * @param {string[]} urls - Array of image URLs to download.
+ * @param {string} downloadDir - Directory path where images will be saved.
+ * @returns {Promise<string[]>} Array of relative file paths for downloaded images.
  */
 export async function downloadImages(
   urls: string[],
@@ -58,7 +65,11 @@ export async function downloadImages(
 }
 
 /**
- * Helper to download a file from URL to destination path.
+ * Download a file from a URL to the specified destination path.
+ *
+ * @param {string} url - The URL of the file to download.
+ * @param {string} dest - Destination file path.
+ * @returns {Promise<void>} Promise that resolves when the download completes.
  */
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then(response => {
