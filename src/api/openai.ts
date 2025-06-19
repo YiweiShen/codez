@@ -14,7 +14,7 @@ import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
  */
 export const defaultModel = 'o4-mini';
 
-function getOpenAIClient(config: ActionConfig): OpenAI {
+export function getOpenAIClient(config: ActionConfig): OpenAI {
   const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
   if (config.openaiBaseUrl) {
     openaiOptions.baseURL = config.openaiBaseUrl;
