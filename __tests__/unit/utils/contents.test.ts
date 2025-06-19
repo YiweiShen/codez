@@ -21,6 +21,12 @@ describe('genContentsString', () => {
     const expected = '> Line1\n> Line2\n\n';
     expect(result).toBe(expected);
   });
+  it('should prefix a single-line body with blockquote and two newlines when login is github-actions[bot]', () => {
+    const body = 'SingleLine';
+    const result = genContentsString({ body, login: 'github-actions[bot]' });
+    const expected = '> SingleLine\n\n';
+    expect(result).toBe(expected);
+  });
 });
 
 describe('genFullContentsString', () => {
@@ -33,6 +39,12 @@ describe('genFullContentsString', () => {
     const body = 'Line1\nLine2';
     const result = genFullContentsString({ body, login: 'some-user' });
     const expected = '> Line1\n> Line2\n\n';
+    expect(result).toBe(expected);
+  });
+  it('should prefix a single-line body with blockquote and two newlines regardless of login', () => {
+    const body = 'SingleLine';
+    const result = genFullContentsString({ body, login: 'any-user' });
+    const expected = '> SingleLine\n\n';
     expect(result).toBe(expected);
   });
 });
