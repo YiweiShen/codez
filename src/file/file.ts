@@ -1,3 +1,9 @@
+/**
+ * File state utilities module.
+ *
+ * Provides functions to calculate file hashes, capture workspace file state,
+ * and detect changes between states respecting ignore rules.
+ */
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { globSync } from 'glob';
@@ -6,9 +12,10 @@ import ignore from 'ignore';
 import * as core from '@actions/core';
 
 /**
- * Calculates the SHA-256 hash of a file.
- * @param filePath Absolute path to the file.
- * @returns The SHA-256 hash of the file content.
+ * Calculate the SHA-256 hash of the specified file.
+ *
+ * @param {string} filePath - Absolute path to the file.
+ * @returns {string} The SHA-256 hash of the file content.
  */
 function calculateFileHash(filePath: string): string {
   try {
@@ -24,9 +31,10 @@ function calculateFileHash(filePath: string): string {
 }
 
 /**
- * Captures the state (path and hash) of files in the workspace, respecting .gitignore.
- * @param workspace The root directory of the workspace.
- * @returns A Map where keys are relative file paths and values are their SHA-256 hashes.
+ * Capture the state of files in the workspace, respecting .gitignore rules.
+ *
+ * @param {string} workspace - The root directory of the workspace.
+ * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
  */
 export function captureFileState(workspace: string): Map<string, string> {
   core.info('Capturing current file state (respecting .gitignore)...');
@@ -89,10 +97,11 @@ export function captureFileState(workspace: string): Map<string, string> {
 }
 
 /**
- * Detects file changes by comparing two file states.
- * @param workspace The root directory of the workspace.
- * @param originalState The initial state of files (Map<relativePath, hash>).
- * @returns An array of relative file paths that have been added, modified, or deleted.
+ * Detect file changes by comparing two file state maps.
+ *
+ * @param {string} workspace - The root directory of the workspace.
+ * @param {Map<string, string>} originalState - Initial state of files mapped to hashes.
+ * @returns {string[]} Array of relative file paths that have been added, modified, or deleted.
  */
 export function detectChanges(
   workspace: string,

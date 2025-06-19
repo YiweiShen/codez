@@ -1,8 +1,23 @@
+/**
+ * Event processing module.
+ *
+ * Provides functions and types to load GitHub event payloads and normalize
+ * them into a consistent format for the action workflow.
+ */
 import * as core from '@actions/core';
 import * as fs from 'fs';
 import { AgentEvent, getEventType, extractText } from './github.js';
 import { ActionConfig } from '../config/config.js';
 
+/**
+ * Represents a normalized event to trigger the Codex workflow.
+ *
+ * @property type - The type of agent event (e.g., 'codex').
+ * @property agentEvent - The original GitHub event information.
+ * @property userPrompt - Extracted prompt text for processing.
+ * @property includeFullHistory - Whether to include full conversation history.
+ * @property createIssues - Whether to create issues based on the output.
+ */
 export interface ProcessedEvent {
   type: 'codex';
   agentEvent: AgentEvent;
@@ -12,10 +27,11 @@ export interface ProcessedEvent {
 }
 
 /**
- * Reads and parses the event payload from the specified path.
- * @param eventPath Path to the event payload file.
- * @returns Parsed event payload object.
- * @throws Error if the file cannot be read or parsed.
+ * Load and parse the event payload from the specified file path.
+ *
+ * @param {string} eventPath - Path to the event payload file.
+ * @returns {any} Parsed event payload object.
+ * @throws {Error} If the file cannot be read or parsed.
  */
 function loadEventPayload(eventPath: string): any {
   try {
@@ -28,9 +44,10 @@ function loadEventPayload(eventPath: string): any {
 }
 
 /**
- * Processes the GitHub event to determine the type and extract the user prompt.
- * @param config Action configuration.
- * @returns ProcessedEvent
+ * Process the GitHub event to determine the type and extract the user prompt.
+ *
+ * @param {ActionConfig} config - Action configuration object.
+ * @returns {ProcessedEvent | null} The processed event data or null if unsupported.
  */
 export function processEvent(config: ActionConfig): ProcessedEvent | null {
   if (config.directPrompt) {

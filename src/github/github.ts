@@ -1,3 +1,9 @@
+/**
+ * GitHub client helper module.
+ *
+ * Defines types and functions for interacting with GitHub events, issues,
+ * comments, reactions, and repository operations.
+ */
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execa } from 'execa';

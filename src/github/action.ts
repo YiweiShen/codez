@@ -1,3 +1,9 @@
+/**
+ * Core logic for executing the GitHub Action.
+ *
+ * Orchestrates cloning, prompt generation, Codex invocation,
+ * change detection, and result handling including pull requests and comments.
+ */
 import * as core from '@actions/core';
 import { execa } from 'execa';
 import {

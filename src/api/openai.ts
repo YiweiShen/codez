@@ -1,3 +1,9 @@
+/**
+ * OpenAI API wrapper for generating commit messages.
+ *
+ * Provides functionality to interface with the OpenAI API and generate
+ * Conventional Commits formatted messages based on user input and changed files.
+ */
 import * as core from '@actions/core';
 import OpenAI, { ClientOptions } from 'openai';
 import { ActionConfig } from '../config/config.js';
@@ -17,13 +23,23 @@ function getOpenAIClient(config: ActionConfig): OpenAI {
 }
 
 /**
- * Function to generate Git commit messages using OpenAI API.
- * The generated commit message will follow the Conventional Commits specification.
- * @param changedFiles List of changed files
- * @param userPrompt User's original prompt
- * @param context Context information (PR number, Issue number, etc.)
- * @param config Optional ActionConfig for additional settings
- * @returns Generated commit message
+ * Generate a Git commit message using the OpenAI API.
+ *
+ * The generated commit message follows the Conventional Commits specification.
+ *
+ * @param {string[]} changedFiles - List of modified file paths.
+ * @param {string} userPrompt - The original user request or description.
+ * @param {{ prNumber?: number; issueNumber?: number }} context - Pull request or issue context.
+ * @param {ActionConfig} config - Action configuration settings for API client.
+ * @returns {Promise<string>} A promise that resolves to the generated commit message.
+ *
+ * @example
+ * const message = await generateCommitMessage(
+ *   ['src/index.ts'],
+ *   'Refactor index module',
+ *   { prNumber: 42 },
+ *   config
+ * );
  */
 export async function generateCommitMessage(
   changedFiles: string[],
