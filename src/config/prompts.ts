@@ -20,6 +20,11 @@ Provide only the single-line commit header as the complete output.`;
 /**
  * Configuration for building prompts in the Codex CLI.
  */
+/**
+ * Configuration settings for building prompts in the Codex CLI.
+ *
+ * Defines labels and separators for structuring the generated prompt content.
+ */
 export interface PromptBuilderConfig {
   /** Label used for the title section */
   titleLabel: string;

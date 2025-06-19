@@ -1,4 +1,9 @@
+/**
+ * Entry point for the GitHub Action runner.
+ *
+ * This module imports and invokes the main orchestration logic.
+ */
 import { run } from './main.js';
 
-// Execute the main function
+// Invoke the main execution workflow
 run();

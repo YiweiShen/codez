@@ -1,3 +1,9 @@
+/**
+ * Core orchestration and workflow logic for the GitHub Action.
+ *
+ * This module initializes configuration, processes events, checks permissions,
+ * and triggers the main action logic.
+ */
 import * as core from '@actions/core';
 import { getConfig } from './config/config.js';
 import { processEvent } from './github/event.js';
@@ -5,7 +11,12 @@ import { runAction } from './github/action.js';
 import { checkPermission } from './security/security.js';
 
 /**
- * Main function for the GitHub Action.
+ * Orchestrate the action's workflow.
+ *
+ * Retrieves configuration, processes the event, checks permissions,
+ * and executes the main action logic.
+ *
+ * @returns {Promise<void>} A promise that resolves when the action completes.
  */
 export async function run(): Promise<void> {
   try {
