@@ -33,7 +33,7 @@ export interface ProcessedEvent {
  * @returns {any} Parsed event payload object.
  * @throws {Error} If the file cannot be read or parsed.
  */
-function loadEventPayload(eventPath: string): any {
+ export function loadEventPayload(eventPath: string): any {
   try {
     return JSON.parse(fs.readFileSync(eventPath, 'utf8'));
   } catch (error) {
