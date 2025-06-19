@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import OpenAI, { ClientOptions } from 'openai';
 import { ActionConfig } from '../config/config.js';
+import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
 
 /**
  * Default model identifier for OpenAI provider.
@@ -32,11 +33,7 @@ export async function generateCommitMessage(
 ): Promise<string> {
   try {
     // Create prompt - System prompt + User prompt structure
-    const systemPrompt = `Based on the following file changes and user request, generate a concise and clear Git commit message following the Conventional Commits format:
-<type>(<scope>): <short description>
-
-Where type is one of: feat, fix, docs, style, refactor, perf, test, chore.
-The summary (short description) should be 50 characters or less and should not include any additional text or line breaks.`;
+    const systemPrompt = conventionalCommitsSystemPrompt;
 
     let userContent = `User Request:
 ${userPrompt}
