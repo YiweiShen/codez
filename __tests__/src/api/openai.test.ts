@@ -16,8 +16,9 @@ jest.unstable_mockModule('openai', () => ({
 }));
 
 // Import after mocking to ensure MockOpenAI is used
-const { getOpenAIClient, defaultModel, generateCommitMessage } =
-  await import('../../src/api/openai.js');
+const { getOpenAIClient, defaultModel, generateCommitMessage } = await import(
+  '../../src/api/openai.js'
+);
 
 beforeEach(() => {
   createMock.mockReset();
@@ -32,7 +33,10 @@ describe('getOpenAIClient', () => {
   });
 
   it('sets apiKey and baseURL when openaiBaseUrl is provided', () => {
-    const config = { openaiApiKey: 'key2', openaiBaseUrl: 'https://api.example.com' } as any;
+    const config = {
+      openaiApiKey: 'key2',
+      openaiBaseUrl: 'https://api.example.com',
+    } as any;
     const client = getOpenAIClient(config);
     expect(client.options.apiKey).toBe('key2');
     expect(client.options.baseURL).toBe('https://api.example.com');
@@ -40,7 +44,11 @@ describe('getOpenAIClient', () => {
 });
 
 describe('generateCommitMessage', () => {
-  const config = { openaiApiKey: 'key', openaiBaseUrl: '', openaiModel: 'model' } as any;
+  const config = {
+    openaiApiKey: 'key',
+    openaiBaseUrl: '',
+    openaiModel: 'model',
+  } as any;
   const changedFiles = ['file1.ts', 'file2.ts'];
   const userPrompt = 'Test prompt';
 
@@ -58,8 +66,15 @@ describe('generateCommitMessage', () => {
   });
 
   it('falls back to PR message on empty commit', async () => {
-    createMock.mockResolvedValueOnce({ choices: [{ message: { content: '' } }] });
-    const result = await generateCommitMessage(changedFiles, userPrompt, { prNumber: 5 }, config);
+    createMock.mockResolvedValueOnce({
+      choices: [{ message: { content: '' } }],
+    });
+    const result = await generateCommitMessage(
+      changedFiles,
+      userPrompt,
+      { prNumber: 5 },
+      config,
+    );
     expect(result).toBe('chore: apply changes for PR #5');
   });
 
@@ -68,16 +83,35 @@ describe('generateCommitMessage', () => {
     createMock.mockResolvedValueOnce({
       choices: [{ message: { content: longContent } }],
     });
-    const result = await generateCommitMessage(changedFiles, userPrompt, { issueNumber: 3 }, config);
+    const result = await generateCommitMessage(
+      changedFiles,
+      userPrompt,
+      { issueNumber: 3 },
+      config,
+    );
     expect(result).toBe('chore: apply changes for Issue #3');
   });
 
   it('falls back to file count message when no context', async () => {
-    createMock.mockResolvedValueOnce({ choices: [{ message: { content: '' } }] });
-    const result = await generateCommitMessage(changedFiles, userPrompt, {}, config);
+    createMock.mockResolvedValueOnce({
+      choices: [{ message: { content: '' } }],
+    });
+    const result = await generateCommitMessage(
+      changedFiles,
+      userPrompt,
+      {},
+      config,
+    );
     expect(result).toBe('chore: apply changes to 2 files');
-    createMock.mockResolvedValueOnce({ choices: [{ message: { content: '' } }] });
-    const single = await generateCommitMessage(['one.ts'], userPrompt, {}, config);
+    createMock.mockResolvedValueOnce({
+      choices: [{ message: { content: '' } }],
+    });
+    const single = await generateCommitMessage(
+      ['one.ts'],
+      userPrompt,
+      {},
+      config,
+    );
     expect(single).toBe('chore: apply changes to 1 file');
   });
 });

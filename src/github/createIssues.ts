@@ -76,7 +76,9 @@ export async function createIssuesFromFeaturePlan(
         title: feature.title,
         body: feature.description,
       });
-      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
+      core.info(
+        `Created feature issue #${issue.data.number}: ${feature.title}`,
+      );
       await postComment(
         octokit,
         repo,

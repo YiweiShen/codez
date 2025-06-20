@@ -75,7 +75,7 @@ export async function downloadImages(
  * @returns {Promise<void>} Promise that resolves when the download completes.
  */
 function downloadFile(url: string, dest: string): Promise<void> {
-  return axios.get(url, { responseType: 'stream' }).then(response => {
+  return axios.get(url, { responseType: 'stream' }).then((response) => {
     return new Promise<void>((resolve, reject) => {
       const stream = fs.createWriteStream(dest);
       response.data.pipe(stream);

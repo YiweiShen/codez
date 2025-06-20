@@ -27,24 +27,24 @@ export async function runCodex(
 ): Promise<string> {
   // Added async and Promise<>
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
-    try {
-      prompt = prompt.replace(/"/g, '\\"');
-      // Build CLI arguments
-      const cliArgs: string[] = [];
-      // Include image flags if provided
-      if (images.length > 0) {
-        for (const imgPath of images) {
-          cliArgs.push('-i', imgPath);
-        }
+  try {
+    prompt = prompt.replace(/"/g, '\\"');
+    // Build CLI arguments
+    const cliArgs: string[] = [];
+    // Include image flags if provided
+    if (images.length > 0) {
+      for (const imgPath of images) {
+        cliArgs.push('-i', imgPath);
       }
-      // Model and auto flags
-      cliArgs.push('--model', config.openaiModel);
-      cliArgs.push(
-        '--full-auto',
-        '--dangerously-auto-approve-everything',
-        '--quiet',
-        `"${prompt}"`,
-      );
+    }
+    // Model and auto flags
+    cliArgs.push('--model', config.openaiModel);
+    cliArgs.push(
+      '--full-auto',
+      '--dangerously-auto-approve-everything',
+      '--quiet',
+      `"${prompt}"`,
+    );
 
     // Set up environment variables
     const envVars: Record<string, string> = {

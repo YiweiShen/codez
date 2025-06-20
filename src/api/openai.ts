@@ -105,7 +105,9 @@ ${changedFiles.join('\n')}
       return `chore: apply changes for Issue #${context.issueNumber}`;
     } else {
       const fileCount = changedFiles.length;
-      return `chore: apply changes to ${fileCount} file${fileCount !== 1 ? 's' : ''}`;
+      return `chore: apply changes to ${fileCount} file${
+        fileCount !== 1 ? 's' : ''
+      }`;
     }
   }
 }

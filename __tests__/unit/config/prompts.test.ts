@@ -1,4 +1,7 @@
-import { conventionalCommitsSystemPrompt, promptBuilderConfig } from '../../../src/config/prompts';
+import {
+  conventionalCommitsSystemPrompt,
+  promptBuilderConfig,
+} from '../../../src/config/prompts';
 
 describe('conventionalCommitsSystemPrompt', () => {
   it('should be a non-empty string', () => {
@@ -7,11 +10,23 @@ describe('conventionalCommitsSystemPrompt', () => {
   });
 
   it('should include the commit header format instruction', () => {
-    expect(conventionalCommitsSystemPrompt).toContain('<type>(<scope>): <subject>');
+    expect(conventionalCommitsSystemPrompt).toContain(
+      '<type>(<scope>): <subject>',
+    );
   });
 
   it('should list valid Conventional Commit types', () => {
-    const types = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'chore', 'revert'];
+    const types = [
+      'feat',
+      'fix',
+      'docs',
+      'style',
+      'refactor',
+      'perf',
+      'test',
+      'chore',
+      'revert',
+    ];
     types.forEach((type) => {
       expect(conventionalCommitsSystemPrompt).toContain(type);
     });

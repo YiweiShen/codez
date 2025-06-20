@@ -1,4 +1,8 @@
-import { parseEnvInput, parseListInput, getConfig } from '../../../src/config/config';
+import {
+  parseEnvInput,
+  parseListInput,
+  getConfig,
+} from '../../../src/config/config';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { defaultModel } from '../../../src/api/openai';

@@ -25,7 +25,8 @@ function createStream(data: string): Readable {
 
 describe('extractImageUrls', () => {
   it('extracts markdown image URLs', () => {
-    const text = 'Some text ![alt text](https://example.com/image.png) and more';
+    const text =
+      'Some text ![alt text](https://example.com/image.png) and more';
     expect(extractImageUrls(text)).toEqual(['https://example.com/image.png']);
   });
 
@@ -65,7 +66,7 @@ describe('downloadImages', () => {
       'https://example.com/image2.jpg',
     ];
     mockedAxios.get.mockImplementation((url: string) =>
-      Promise.resolve({ data: createStream('filecontent') } as any)
+      Promise.resolve({ data: createStream('filecontent') } as any),
     );
 
     const result = await downloadImages(urls, downloadDir);
@@ -80,12 +81,12 @@ describe('downloadImages', () => {
     );
     expect(result).toEqual([rel1, rel2]);
 
-    expect(
-      fs.readFileSync(path.join(downloadDir, 'image1.png'), 'utf-8'),
-    ).toBe('filecontent');
-    expect(
-      fs.readFileSync(path.join(downloadDir, 'image2.jpg'), 'utf-8'),
-    ).toBe('filecontent');
+    expect(fs.readFileSync(path.join(downloadDir, 'image1.png'), 'utf-8')).toBe(
+      'filecontent',
+    );
+    expect(fs.readFileSync(path.join(downloadDir, 'image2.jpg'), 'utf-8')).toBe(
+      'filecontent',
+    );
 
     expect(mockedCoreInfo).toHaveBeenCalledTimes(2);
   });
@@ -108,9 +109,9 @@ describe('downloadImages', () => {
     );
     expect(result).toEqual([relGood]);
 
-    expect(
-      fs.readFileSync(path.join(downloadDir, 'good.png'), 'utf-8'),
-    ).toBe('gooddata');
+    expect(fs.readFileSync(path.join(downloadDir, 'good.png'), 'utf-8')).toBe(
+      'gooddata',
+    );
 
     expect(mockedCoreInfo).toHaveBeenCalledTimes(1);
     expect(mockedCoreWarning).toHaveBeenCalledTimes(1);

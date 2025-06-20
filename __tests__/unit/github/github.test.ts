@@ -1,4 +1,9 @@
-import { getBranchType, slugify, getEventType, extractText } from '../../../src/github/github';
+import {
+  getBranchType,
+  slugify,
+  getEventType,
+  extractText,
+} from '../../../src/github/github';
 
 describe('getBranchType', () => {
   it('returns feat for add, create, implement, introduce verbs', () => {
@@ -47,29 +52,51 @@ describe('slugify', () => {
 
 describe('getEventType', () => {
   it('identifies issuesOpened event', () => {
-    const payload: any = { action: 'opened', issue: { number: 1, title: '', body: '', pull_request: null } };
+    const payload: any = {
+      action: 'opened',
+      issue: { number: 1, title: '', body: '', pull_request: null },
+    };
     const ev = getEventType(payload);
     expect(ev).toEqual({ type: 'issuesOpened', github: payload });
   });
   it('identifies issuesAssigned event', () => {
-    const payload: any = { action: 'assigned', issue: { number: 2, title: '', body: '', pull_request: null }, assignee: { login: 'user' } };
+    const payload: any = {
+      action: 'assigned',
+      issue: { number: 2, title: '', body: '', pull_request: null },
+      assignee: { login: 'user' },
+    };
     const ev = getEventType(payload);
     expect(ev).toEqual({ type: 'issuesAssigned', github: payload });
   });
   it('identifies issueCommentCreated event', () => {
-    const payload: any = { action: 'created', issue: { number: 3, title: '', body: '', pull_request: null }, comment: { id: 10, body: 'hi' } };
+    const payload: any = {
+      action: 'created',
+      issue: { number: 3, title: '', body: '', pull_request: null },
+      comment: { id: 10, body: 'hi' },
+    };
     const ev = getEventType(payload);
     expect(ev).toEqual({ type: 'issueCommentCreated', github: payload });
   });
   it('identifies pullRequestCommentCreated event', () => {
-    const payload: any = { action: 'created', issue: { number: 4, title: '', body: '', pull_request: {} }, comment: { id: 20, body: 'pr comment' } };
+    const payload: any = {
+      action: 'created',
+      issue: { number: 4, title: '', body: '', pull_request: {} },
+      comment: { id: 20, body: 'pr comment' },
+    };
     const ev = getEventType(payload);
     expect(ev).toEqual({ type: 'pullRequestCommentCreated', github: payload });
   });
   it('identifies pullRequestReviewCommentCreated event', () => {
-    const payload: any = { action: 'created', pull_request: { number: 5 }, comment: { id: 30, body: 'review', path: 'file.js' } };
+    const payload: any = {
+      action: 'created',
+      pull_request: { number: 5 },
+      comment: { id: 30, body: 'review', path: 'file.js' },
+    };
     const ev = getEventType(payload);
-    expect(ev).toEqual({ type: 'pullRequestReviewCommentCreated', github: payload });
+    expect(ev).toEqual({
+      type: 'pullRequestReviewCommentCreated',
+      github: payload,
+    });
   });
   it('identifies pullRequestOpened event', () => {
     const payload: any = { action: 'opened', pull_request: { number: 6 } };
@@ -89,23 +116,53 @@ describe('getEventType', () => {
 
 describe('extractText', () => {
   it('returns issue body by default', () => {
-    const event: any = { action: 'opened', issue: { title: 'Title', body: ' Body ', pull_request: null } };
+    const event: any = {
+      action: 'opened',
+      issue: { title: 'Title', body: ' Body ', pull_request: null },
+    };
     expect(extractText(event)).toBe('Body');
   });
   it('prepends title when body starts with /codex', () => {
-    const event: any = { action: 'opened', issue: { title: 'Issue', body: '/codex do this', pull_request: null } };
+    const event: any = {
+      action: 'opened',
+      issue: { title: 'Issue', body: '/codex do this', pull_request: null },
+    };
     expect(extractText(event)).toBe('/codex do this\n\nIssue');
   });
   it('prepends body when title starts with /codex', () => {
-    const event: any = { action: 'opened', issue: { title: '/codex generate', body: 'desc', pull_request: null } };
+    const event: any = {
+      action: 'opened',
+      issue: { title: '/codex generate', body: 'desc', pull_request: null },
+    };
     expect(extractText(event)).toBe('/codex generate\n\ndesc');
   });
   it('handles pull request events similarly', () => {
-    const event1: any = { action: 'synchronize', pull_request: { title: 'PR Title', body: ' PR Body ', pull_request: { url: '' } } };
+    const event1: any = {
+      action: 'synchronize',
+      pull_request: {
+        title: 'PR Title',
+        body: ' PR Body ',
+        pull_request: { url: '' },
+      },
+    };
     expect(extractText(event1)).toBe('PR Body');
-    const event2: any = { action: 'opened', pull_request: { title: '/codex PR', body: 'body', pull_request: { url: '' } } };
+    const event2: any = {
+      action: 'opened',
+      pull_request: {
+        title: '/codex PR',
+        body: 'body',
+        pull_request: { url: '' },
+      },
+    };
     expect(extractText(event2)).toBe('/codex PR\n\nbody');
-    const event3: any = { action: 'opened', pull_request: { title: 'Title', body: '/codex body', pull_request: { url: '' } } };
+    const event3: any = {
+      action: 'opened',
+      pull_request: {
+        title: 'Title',
+        body: '/codex body',
+        pull_request: { url: '' },
+      },
+    };
     expect(extractText(event3)).toBe('/codex body\n\nTitle');
   });
   it('returns comment body for comment events', () => {

@@ -9,7 +9,9 @@ jest.mock('@actions/core', () => ({
 // Mock all collaborators of run()
 jest.mock('../../../src/config/config.js', () => ({ getConfig: jest.fn() }));
 jest.mock('../../../src/github/event.js', () => ({ processEvent: jest.fn() }));
-jest.mock('../../../src/security/security.js', () => ({ checkPermission: jest.fn() }));
+jest.mock('../../../src/security/security.js', () => ({
+  checkPermission: jest.fn(),
+}));
 jest.mock('../../../src/github/action.js', () => ({ runAction: jest.fn() }));
 
 import * as core from '@actions/core';
@@ -25,10 +27,12 @@ describe('run (src/main.ts)', () => {
 
   it('calls core.setFailed if getConfig throws', async () => {
     const err = new Error('config error');
-    (getConfig as jest.Mock).mockImplementation(() => { throw err; });
+    (getConfig as jest.Mock).mockImplementation(() => {
+      throw err;
+    });
     await run();
     expect(core.setFailed).toHaveBeenCalledWith(
-      `Action failed: ${err.message}\n${err.stack}`
+      `Action failed: ${err.message}\n${err.stack}`,
     );
   });
 
@@ -36,10 +40,12 @@ describe('run (src/main.ts)', () => {
     const cfg = {};
     (getConfig as jest.Mock).mockReturnValue(cfg);
     const err = new Error('process error');
-    (processEvent as jest.Mock).mockImplementation(() => { throw err; });
+    (processEvent as jest.Mock).mockImplementation(() => {
+      throw err;
+    });
     await run();
     expect(core.setFailed).toHaveBeenCalledWith(
-      expect.stringContaining(`Action failed: ${err.message}`)
+      expect.stringContaining(`Action failed: ${err.message}`),
     );
   });
 
@@ -48,10 +54,12 @@ describe('run (src/main.ts)', () => {
     (getConfig as jest.Mock).mockReturnValue(cfg);
     (processEvent as jest.Mock).mockReturnValue({});
     const err = new Error('permission error');
-    (checkPermission as jest.Mock).mockImplementation(() => { throw err; });
+    (checkPermission as jest.Mock).mockImplementation(() => {
+      throw err;
+    });
     await run();
     expect(core.setFailed).toHaveBeenCalledWith(
-      expect.stringContaining(`Action failed: ${err.message}`)
+      expect.stringContaining(`Action failed: ${err.message}`),
     );
   });
 
@@ -62,10 +70,12 @@ describe('run (src/main.ts)', () => {
     (processEvent as jest.Mock).mockReturnValue(evt);
     (checkPermission as jest.Mock).mockResolvedValue(true);
     const err = new Error('runAction error');
-    (runAction as jest.Mock).mockImplementation(() => { throw err; });
+    (runAction as jest.Mock).mockImplementation(() => {
+      throw err;
+    });
     await run();
     expect(core.setFailed).toHaveBeenCalledWith(
-      expect.stringContaining(`Action failed: ${err.message}`)
+      expect.stringContaining(`Action failed: ${err.message}`),
     );
   });
 
@@ -78,7 +88,7 @@ describe('run (src/main.ts)', () => {
     (runAction as jest.Mock).mockRejectedValue('oops');
     await run();
     expect(core.setFailed).toHaveBeenCalledWith(
-      `An unknown error occurred: oops`
+      `An unknown error occurred: oops`,
     );
   });
 });

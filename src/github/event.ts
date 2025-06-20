@@ -50,14 +50,19 @@ export async function loadEventPayload(eventPath: string): Promise<any> {
  * @param {ActionConfig} config - Action configuration object.
  * @returns {ProcessedEvent | null} The processed event data or null if unsupported.
  */
-export async function processEvent(config: ActionConfig): Promise<ProcessedEvent | null> {
+export async function processEvent(
+  config: ActionConfig,
+): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
       type: 'codex',
       agentEvent: {
         type: 'issuesOpened',
-        github: { action: 'opened', issue: { number: 0, title: '', body: '', pull_request: null } },
+        github: {
+          action: 'opened',
+          issue: { number: 0, title: '', body: '', pull_request: null },
+        },
       },
       userPrompt: config.directPrompt,
       includeFullHistory: false,
@@ -77,13 +82,21 @@ export async function processEvent(config: ActionConfig): Promise<ProcessedEvent
   if (agentEvent.type === 'issuesAssigned') {
     const assignee = agentEvent.github.assignee.login;
     if (!config.assigneeTrigger.includes(assignee)) {
-      core.info(`Issue assigned to '${assignee}', not in assignee-trigger list. Skipping.`);
+      core.info(
+        `Issue assigned to '${assignee}', not in assignee-trigger list. Skipping.`,
+      );
       return null;
     }
     core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
     const issue = agentEvent.github.issue;
     const prompt = `${issue.title.trim()}\n\n${issue.body.trim()}`;
-    return { type: 'codex', agentEvent, userPrompt: prompt, includeFullHistory: false, createIssues: false };
+    return {
+      type: 'codex',
+      agentEvent,
+      userPrompt: prompt,
+      includeFullHistory: false,
+      createIssues: false,
+    };
   }
 
   // Check for configured trigger phrase only

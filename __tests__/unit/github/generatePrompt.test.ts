@@ -14,14 +14,21 @@ describe('generatePrompt', () => {
   });
 
   it('no history, no files → returns just userPrompt', async () => {
-    jest.spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({ content: { body: '', title: '', login: 'u' }, comments: [] });
+    jest
+      .spyOn(githubModule, 'getContentsData')
+      .mockResolvedValue({
+        content: { body: '', title: '', login: 'u' },
+        comments: [],
+      });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
 
     const result = await generatePrompt(
       fakeOctokit,
       fakeRepo,
-      { type: 'issueCommentCreated', github: { comment: {}, issue: { number: 1 } } } as any,
+      {
+        type: 'issueCommentCreated',
+        github: { comment: {}, issue: { number: 1 } },
+      } as any,
       USER_PROMPT,
       false,
     );
@@ -34,14 +41,18 @@ describe('generatePrompt', () => {
       { body: 'first', login: 'github-actions[bot]' },
       { body: 'second', login: 'alice' },
     ];
-    jest.spyOn(githubModule, 'getContentsData')
+    jest
+      .spyOn(githubModule, 'getContentsData')
       .mockResolvedValue({ content, comments });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
 
     const result = await generatePrompt(
       fakeOctokit,
       fakeRepo,
-      { type: 'issueCommentCreated', github: { comment: {}, issue: { number: 1 } } } as any,
+      {
+        type: 'issueCommentCreated',
+        github: { comment: {}, issue: { number: 1 } },
+      } as any,
       USER_PROMPT,
       false,
     );
@@ -58,14 +69,18 @@ describe('generatePrompt', () => {
       { body: 'A', login: 'bob' },
       { body: 'B', login: 'carol' },
     ];
-    jest.spyOn(githubModule, 'getContentsData')
+    jest
+      .spyOn(githubModule, 'getContentsData')
       .mockResolvedValue({ content, comments });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
 
     const result = await generatePrompt(
       fakeOctokit,
       fakeRepo,
-      { type: 'issueCommentCreated', github: { comment: {}, issue: { number: 1 } } } as any,
+      {
+        type: 'issueCommentCreated',
+        github: { comment: {}, issue: { number: 1 } },
+      } as any,
       USER_PROMPT,
       true,
     );
@@ -75,12 +90,19 @@ describe('generatePrompt', () => {
   });
 
   it('review‐comment event → includes [Context] section', async () => {
-    jest.spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({ content: { body: '', title: '', login: 'u' }, comments: [] });
+    jest
+      .spyOn(githubModule, 'getContentsData')
+      .mockResolvedValue({
+        content: { body: '', title: '', login: 'u' },
+        comments: [],
+      });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
     const evt = {
       type: 'pullRequestReviewCommentCreated',
-      github: { comment: { path: 'foo.ts', line: 42 }, pull_request: { number: 7 } },
+      github: {
+        comment: { path: 'foo.ts', line: 42 },
+        pull_request: { number: 7 },
+      },
     } as any;
     const result = await generatePrompt(
       fakeOctokit,
@@ -94,9 +116,15 @@ describe('generatePrompt', () => {
   });
 
   it('with changed files → includes [Changed Files] list', async () => {
-    jest.spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({ content: { body: '', title: '', login: 'u' }, comments: [] });
-    jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue(['a.ts', 'b.js']);
+    jest
+      .spyOn(githubModule, 'getContentsData')
+      .mockResolvedValue({
+        content: { body: '', title: '', login: 'u' },
+        comments: [],
+      });
+    jest
+      .spyOn(githubModule, 'getChangedFiles')
+      .mockResolvedValue(['a.ts', 'b.js']);
     const evt = {
       type: 'pullRequestCommentCreated',
       github: { comment: {}, issue: { number: 99 } },
