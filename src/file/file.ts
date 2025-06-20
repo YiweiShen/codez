@@ -5,6 +5,7 @@
  * and detect changes between states respecting ignore rules.
  */
 import * as fs from 'fs';
+import { pipeline } from 'stream/promises';
 import * as crypto from 'crypto';
 import { globSync } from 'glob';
 import * as path from 'path';
@@ -18,26 +19,14 @@ import * as core from '@actions/core';
  * @returns {Promise<string>} Promise resolving to the SHA-256 hash of the file content.
  */
 async function calculateFileHash(filePath: string): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const hash = crypto.createHash('sha256');
-    const stream = fs.createReadStream(filePath);
-    stream.on('error', (err) => {
-      core.error(`Failed to create read stream for ${filePath}: ${err}`);
-      reject(err);
-    });
-    stream.on('data', (chunk) => {
-      hash.update(chunk);
-    });
-    stream.on('end', () => {
-      try {
-        const digest = hash.digest('hex');
-        resolve(digest);
-      } catch (err) {
-        core.error(`Failed to compute hash digest for ${filePath}: ${err}`);
-        reject(err);
-      }
-    });
-  });
+  const hash = crypto.createHash('sha256');
+  try {
+    await pipeline(fs.createReadStream(filePath), hash);
+  } catch (err) {
+    core.error(`Failed to hash file ${filePath}: ${err}`);
+    throw err;
+  }
+  return hash.digest('hex');
 }
 
 /**
@@ -92,8 +81,9 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
   for (const relativeFilePath of filesToProcess) {
     const absoluteFilePath = path.join(workspace, relativeFilePath);
     try {
-      // Ensure it's actually a file before hashing
-      if (fs.statSync(absoluteFilePath).isFile()) {
+      // Check file stats asynchronously
+      const stats = await fs.promises.stat(absoluteFilePath);
+      if (stats.isFile()) {
         try {
           const hash = await calculateFileHash(absoluteFilePath);
           fileState.set(relativeFilePath, hash);
@@ -102,7 +92,6 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
         }
       }
     } catch (error) {
-      // Log specific file errors but continue processing others
       core.warning(`Could not process file ${relativeFilePath}: ${error}`);
     }
   }
