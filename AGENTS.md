@@ -106,3 +106,13 @@ feat(config): add support for custom timeouts
   issues and PR comments.
 - **Maintenance:** Keep dependencies up to date by reviewing alerts in
   GitHub security tab.
+
+## Offload CPU-Intensive Work
+
+Node.js is single-threaded, so CPU-bound operations can block the event loop and degrade performance. To prevent this:
+
+- Offload heavy computations to separate threads with `worker_threads`.
+- Spawn dedicated subprocesses for CPU-intensive tasks using `child_process`.
+- Stream large data inputs through Node.js streams to avoid loading everything into memory.
+- For specialized workloads (e.g., image processing, data analysis), consider external services or serverless functions.
+- Monitor resource usage and ensure tasks complete within GitHub Actions timeouts.
