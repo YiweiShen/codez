@@ -839,36 +839,50 @@ async function getIssueData(
 ): Promise<GithubContentsData> {
   core.info(`Fetching data for issue #${issueNumber}...`);
   try {
-    // Get issue body
-    const issueResponse = await octokit.rest.issues.get({
-      ...repo,
-      issue_number: issueNumber,
+    // Fetch issue and its comments via GraphQL in a single request
+    core.info(`Fetching data for issue #${issueNumber} via GraphQL...`);
+    const query = `
+      query($owner: String!, $repo: String!, $issueNumber: Int!) {
+        repository(owner: $owner, name: $repo) {
+          issue(number: $issueNumber) {
+            number
+            title
+            body
+            author { login }
+            comments(first: 100) {
+              nodes { body author { login } }
+            }
+          }
+        }
+      }
+    `;
+    const resp = await octokit.graphql<{
+      repository: {
+        issue: {
+          number: number;
+          title: string;
+          body: string | null;
+          author: { login: string };
+          comments: { nodes: { body: string | null; author: { login: string } }[] };
+        };
+      };
+    }>(query, {
+      owner: repo.owner,
+      repo: repo.repo,
+      issueNumber,
     });
+    const issue = resp.repository.issue;
     const content = {
-      number: issueResponse.data.number,
-      title: issueResponse.data.title,
-      body: issueResponse.data.body ?? '',
-      login: issueResponse.data.user?.login ?? 'anonymous',
+      number: issue.number,
+      title: issue.title,
+      body: issue.body ?? '',
+      login: issue.author.login,
     };
-
-    // Get all issue comments by using paginate
-    const commentsData = await octokit.paginate(
-      octokit.rest.issues.listComments,
-      {
-        ...repo,
-        issue_number: issueNumber,
-        per_page: 100, // Fetch 100 per page for efficiency
-      },
-    );
-
-    const comments = commentsData.map((comment) => ({
-      body: comment.body ?? '',
-      login: comment.user?.login ?? 'anonymous',
-    })); // Extract comment bodies and authors
-    core.info(
-      `Fetched ${commentsData.length} comments for issue #${issueNumber}.`,
-    );
-
+    const comments = issue.comments.nodes.map(c => ({
+      body: c.body ?? '',
+      login: c.author.login,
+    }));
+    core.info(`Fetched ${comments.length} comments for issue #${issueNumber}.`);
     return { content, comments };
   } catch (error) {
     core.error(`Failed to get data for issue #${issueNumber}: ${error}`);
@@ -951,39 +965,51 @@ async function getPullRequestData(
   repo: RepoContext,
   pullNumber: number,
 ): Promise<GithubContentsData> {
-  core.info(`Fetching data for pull request #${pullNumber}...`);
+  core.info(`Fetching data for pull request #${pullNumber} via GraphQL...`);
   try {
-    // Get PR body
-    const prResponse = await octokit.rest.pulls.get({
-      ...repo,
-      pull_number: pullNumber,
+    // Fetch PR and its issue‐thread comments via GraphQL
+    const query = `
+      query($owner: String!, $repo: String!, $prNumber: Int!) {
+        repository(owner: $owner, name: $repo) {
+          pullRequest(number: $prNumber) {
+            number
+            title
+            body
+            author { login }
+            comments(first: 100) {
+              nodes { body author { login } }
+            }
+          }
+        }
+      }
+    `;
+    const resp = await octokit.graphql<{
+      repository: {
+        pullRequest: {
+          number: number;
+          title: string;
+          body: string | null;
+          author: { login: string };
+          comments: { nodes: { body: string | null; author: { login: string } }[] };
+        };
+      };
+    }>(query, {
+      owner: repo.owner,
+      repo: repo.repo,
+      prNumber: pullNumber,
     });
+    const pr = resp.repository.pullRequest;
     const content = {
-      number: prResponse.data.number,
-      title: prResponse.data.title,
-      body: prResponse.data.body ?? '',
-      login: prResponse.data.user?.login ?? 'anonymous',
+      number: pr.number,
+      title: pr.title,
+      body: pr.body ?? '',
+      login: pr.author.login,
     };
-
-    // Get all PR comments by using paginate (using the issues API endpoint for the corresponding issue number)
-    const commentsData = await octokit.paginate(
-      octokit.rest.issues.listComments,
-      {
-        ...repo,
-        issue_number: pullNumber, // Use pullNumber as issue_number for comments
-        per_page: 100, // Fetch 100 per page for efficiency
-      },
-    );
-    const comments = commentsData.map((comment) => ({
-      body: comment.body ?? '',
-      login: comment.user?.login ?? 'unknown',
+    const comments = pr.comments.nodes.map(c => ({
+      body: c.body ?? '',
+      login: c.author.login,
     }));
-    core.info(`Fetched ${commentsData.length} comments for PR #${pullNumber}.`);
-
-    // Note: This fetches *issue comments* on the PR. To get *review comments* (comments on specific lines of code),
-    // you would use `octokit.paginate(octokit.rest.pulls.listReviewComments, { ... })`.
-    // The current request asks for "all comments written on the PR", which typically refers to the main conversation thread (issue comments).
-
+    core.info(`Fetched ${comments.length} comments for PR #${pullNumber}.`);
     return { content, comments };
   } catch (error) {
     core.error(`Failed to get data for pull request #${pullNumber}: ${error}`);
