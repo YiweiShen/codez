@@ -275,7 +275,7 @@ export async function runAction(
   // Capture initial file state (instrumented)
   core.info('[perf] captureFileState start');
   const _t_captureState = Date.now();
-  const originalFileState = captureFileState(workspace);
+  const originalFileState = await captureFileState(workspace);
   core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
 
   // generate Prompt (with special handling for create issues)
@@ -367,7 +367,7 @@ export async function runAction(
   // Detect file changes (instrumented)
   core.info('[perf] detectChanges start');
   const _t_detect = Date.now();
-  const changedFiles = detectChanges(workspace, originalFileState);
+  const changedFiles = await detectChanges(workspace, originalFileState);
   core.info(`[perf] detectChanges end - ${Date.now() - _t_detect}ms`);
 
   // Handle the results
