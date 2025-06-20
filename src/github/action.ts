@@ -142,6 +142,9 @@ async function handleResult(
 
     const generateCommitMessage = generateCommitMessageOpenAI;
     // Generate commit message
+    // Generate commit message via OpenAI (instrumented)
+    core.info('[perf] generateCommitMessage start');
+    const _t_commitMsg = Date.now();
     const commitMessage = await generateCommitMessage(
       effectiveChangedFiles,
       userPrompt,
@@ -161,6 +164,7 @@ async function handleResult(
       },
       config,
     );
+    core.info(`[perf] generateCommitMessage end - ${Date.now() - _t_commitMsg}ms`);
 
     // Handle changes based on event type
     if (
@@ -298,8 +302,11 @@ export async function runAction(
     config;
   const { agentEvent, userPrompt, includeFullHistory, createIssues } = processedEvent;
 
-  // Add eyes reaction
+  // Add eyes reaction (instrumented)
+  core.info('[perf] addEyeReaction start');
+  const _t_addEye = Date.now();
   await addEyeReaction(octokit, repo, agentEvent.github);
+  core.info(`[perf] addEyeReaction end - ${Date.now() - _t_addEye}ms`);
 
   // Initialize progress UI
   const progressSteps = ['Gathering context', 'Planning', 'Applying edits', 'Testing'];
@@ -310,7 +317,9 @@ export async function runAction(
     core.warning(`Failed to create progress comment: ${e instanceof Error ? e.message : e}`);
   }
 
-  // Clone repository
+  // Clone repository (instrumented)
+  core.info('[perf] cloneRepository start');
+  const _t_clone = Date.now();
   await cloneRepository(
     workspace,
     githubToken,
@@ -319,9 +328,13 @@ export async function runAction(
     octokit,
     agentEvent,
   );
+  core.info(`[perf] cloneRepository end - ${Date.now() - _t_clone}ms`);
 
-  // Capture initial file state
+  // Capture initial file state (instrumented)
+  core.info('[perf] captureFileState start');
+  const _t_captureState = Date.now();
   const originalFileState = captureFileState(workspace);
+  core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
 
   // generate Prompt (with special handling for create issues)
   let effectiveUserPrompt = userPrompt;
@@ -330,6 +343,9 @@ export async function runAction(
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
 
+  // Generate prompt for Codex (instrumented)
+  core.info('[perf] generatePrompt start');
+  const _t_prompt = Date.now();
   let prompt = await generatePrompt(
     octokit,
     repo,
@@ -337,6 +353,7 @@ export async function runAction(
     effectiveUserPrompt,
     includeFullHistory,
   );
+  core.info(`[perf] generatePrompt end - ${Date.now() - _t_prompt}ms`);
 
   // Handle any images in the prompt by downloading and replacing embeds with placeholders
   const imageUrls = extractImageUrls(prompt);
@@ -364,6 +381,9 @@ export async function runAction(
   let output;
   try {
     const allImages = [...config.images, ...downloadedImageFiles];
+    // Execute Codex CLI (instrumented)
+    core.info('[perf] runCodex start');
+    const _t_codex = Date.now();
     const rawOutput: string = await runCodex(
       workspace,
       config,
@@ -371,6 +391,7 @@ export async function runAction(
       timeoutSeconds * 1000,
       allImages,
     );
+    core.info(`[perf] runCodex end - ${Date.now() - _t_codex}ms`);
   output = maskSensitiveInfo(rawOutput, config);
   // Update progress: planning complete
   if (progressCommentId) {
@@ -400,8 +421,11 @@ export async function runAction(
     return;
   }
 
-  // Detect file changes
+  // Detect file changes (instrumented)
+  core.info('[perf] detectChanges start');
+  const _t_detect = Date.now();
   const changedFiles = detectChanges(workspace, originalFileState);
+  core.info(`[perf] detectChanges end - ${Date.now() - _t_detect}ms`);
 
   // Handle the results
   await handleResult(config, processedEvent, output, changedFiles);
