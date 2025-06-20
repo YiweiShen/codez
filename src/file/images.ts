@@ -8,6 +8,10 @@ import * as path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
 
+// Precompiled regular expressions for Markdown and HTML image tags
+const mdRegex = /!\[[\s\S]*?\]\((https?:\/\/[^)]+)\)/g;
+const htmlRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
+
 /**
  * Extract image URLs from Markdown and HTML <img> tags in the given text.
  *
@@ -16,12 +20,12 @@ import * as core from '@actions/core';
  */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
-  const mdRegex = /!\[[\s\S]*?\]\((https?:\/\/[^)]+)\)/g;
   let match: RegExpExecArray | null;
+  mdRegex.lastIndex = 0;
   while ((match = mdRegex.exec(text)) !== null) {
     urls.push(match[1]);
   }
-  const htmlRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
+  htmlRegex.lastIndex = 0;
   while ((match = htmlRegex.exec(text)) !== null) {
     urls.push(match[1]);
   }
