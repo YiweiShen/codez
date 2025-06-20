@@ -6,7 +6,7 @@
  */
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import { globSync } from 'glob';
+import fg from 'fast-glob';
 import * as path from 'path';
 import ignore from 'ignore';
 import * as core from '@actions/core';
@@ -36,7 +36,7 @@ function calculateFileHash(filePath: string): string {
  * @param {string} workspace - The root directory of the workspace.
  * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
  */
-export function captureFileState(workspace: string): Map<string, string> {
+export async function captureFileState(workspace: string): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
   const gitignorePath = path.join(workspace, '.gitignore');
@@ -61,14 +61,12 @@ export function captureFileState(workspace: string): Map<string, string> {
     core.info('.gitignore not found in workspace root. Using default ignores.');
   }
 
-  // Use glob to find all files, then filter using ignore rules
-  // Ensure glob pattern covers hidden files (dotfiles) as well
-  const allFiles = globSync('**/*', {
+  // Use async fast-glob to find all files, with include/exclude patterns for performance
+  const allFiles = await fg(['**/*'], {
     cwd: workspace,
-    nodir: true, // Only files, not directories
-    dot: true, // Include dotfiles
-    absolute: false, // Get relative paths
-    ignore: ['.git/**'], // Explicitly ignore .git directory in glob for performance
+    onlyFiles: true,       // Only files, not directories
+    dot: true,             // Include dotfiles
+    ignore: ['.git/**', 'node_modules/**'], // Ignore .git and node_modules directories
   });
 
   // Filter the glob results using the ignore instance
@@ -103,12 +101,12 @@ export function captureFileState(workspace: string): Map<string, string> {
  * @param {Map<string, string>} originalState - Initial state of files mapped to hashes.
  * @returns {string[]} Array of relative file paths that have been added, modified, or deleted.
  */
-export function detectChanges(
+export async function detectChanges(
   workspace: string,
   originalState: Map<string, string>,
-): string[] {
+): Promise<string[]> {
   core.info('Detecting file changes by comparing states...');
-  const currentState = captureFileState(workspace); // Recapture the current state
+  const currentState = await captureFileState(workspace); // Recapture the current state
   const changedFiles = new Set<string>();
 
   // Check for changed or added files by iterating through the current state
