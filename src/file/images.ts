@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
+import pLimit from 'p-limit';
 
 /**
  * Extract image URLs from Markdown and HTML <img> tags in the given text.
@@ -28,8 +29,9 @@ export function extractImageUrls(text: string): string[] {
   return Array.from(new Set(urls));
 }
 
+
 /**
- * Download images from the given URLs into a local directory.
+ * Download images from the given URLs into a local directory, with controlled concurrency.
  *
  * @param {string[]} urls - Array of image URLs to download.
  * @param {string} downloadDir - Directory path where images will be saved.
@@ -39,29 +41,29 @@ export async function downloadImages(
   urls: string[],
   downloadDir: string,
 ): Promise<string[]> {
-  if (!fs.existsSync(downloadDir)) {
-    fs.mkdirSync(downloadDir, { recursive: true });
-  }
-  const downloaded: string[] = [];
-  for (const url of urls) {
+  // Ensure download directory exists
+  await fs.promises.mkdir(downloadDir, { recursive: true });
+  const limit = pLimit(5);
+  const tasks = urls.map(url => limit(async (): Promise<string | null> => {
     try {
       const parsed = new URL(url);
       const filename = path.basename(parsed.pathname);
       const destPath = path.join(downloadDir, filename);
       await downloadFile(url, destPath);
-      const stats = fs.statSync(destPath);
+      const stats = await fs.promises.stat(destPath);
       const fileSize = stats.size;
-      downloaded.push(path.relative(process.cwd(), destPath));
+      const relativePath = path.relative(process.cwd(), destPath);
       core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
+      return relativePath;
     } catch (err) {
       core.warning(
-        `Failed to download image ${url}: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
+        `Failed to download image ${url}: ${err instanceof Error ? err.message : String(err)}`
       );
+      return null;
     }
-  }
-  return downloaded;
+  }));
+  const results = await Promise.all(tasks);
+  return results.filter((item): item is string => item !== null);
 }
 
 /**
