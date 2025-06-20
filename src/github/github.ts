@@ -7,7 +7,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execa } from 'execa';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import { genContentsString, genFullContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
 import { promptBuilderConfig } from '../config/prompts.js';
@@ -180,10 +180,8 @@ export async function cloneRepository(
   );
   try {
     // Ensure the workspace directory exists and is empty or doesn't exist
-    if (fs.existsSync(workspace)) {
-      fs.rmSync(workspace, { recursive: true, force: true });
-    }
-    fs.mkdirSync(workspace, { recursive: true });
+    await fs.rm(workspace, { recursive: true, force: true });
+    await fs.mkdir(workspace, { recursive: true });
 
     // Use token for authentication with clone URL
     const authenticatedCloneUrl = cloneUrl.replace(

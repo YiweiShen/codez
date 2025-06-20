@@ -24,7 +24,7 @@ export async function run(): Promise<void> {
     const config = getConfig();
 
     // Process Event
-    const processedEvent = processEvent(config);
+    const processedEvent = await processEvent(config);
 
     // Execute Action Logic or Handle Edge Cases
     if (!processedEvent) {
