@@ -321,7 +321,7 @@ export async function runAction(
   );
 
   // Capture initial file state
-  const originalFileState = captureFileState(workspace);
+  const originalFileState = await captureFileState(workspace);
 
   // generate Prompt (with special handling for create issues)
   let effectiveUserPrompt = userPrompt;
@@ -401,7 +401,7 @@ export async function runAction(
   }
 
   // Detect file changes
-  const changedFiles = detectChanges(workspace, originalFileState);
+  const changedFiles = await detectChanges(workspace, originalFileState);
 
   // Handle the results
   await handleResult(config, processedEvent, output, changedFiles);
