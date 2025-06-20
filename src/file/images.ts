@@ -4,6 +4,7 @@
  * Provides functions to extract image URLs from text and download images to a local directory.
  */
 import * as fs from 'fs';
+import { promises as fsp } from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
@@ -39,9 +40,7 @@ export async function downloadImages(
   urls: string[],
   downloadDir: string,
 ): Promise<string[]> {
-  if (!fs.existsSync(downloadDir)) {
-    fs.mkdirSync(downloadDir, { recursive: true });
-  }
+  await fsp.mkdir(downloadDir, { recursive: true });
   const downloaded: string[] = [];
   for (const url of urls) {
     try {
@@ -49,7 +48,7 @@ export async function downloadImages(
       const filename = path.basename(parsed.pathname);
       const destPath = path.join(downloadDir, filename);
       await downloadFile(url, destPath);
-      const stats = fs.statSync(destPath);
+      const stats = await fsp.stat(destPath);
       const fileSize = stats.size;
       downloaded.push(path.relative(process.cwd(), destPath));
       core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
