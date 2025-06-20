@@ -6,7 +6,7 @@
  */
 import { promises as fs } from 'fs';
 import * as crypto from 'crypto';
-import { globSync } from 'glob';
+import fg from 'fast-glob';
 import * as path from 'path';
 import ignore from 'ignore';
 import * as core from '@actions/core';
@@ -30,16 +30,16 @@ async function calculateFileHash(filePath: string): Promise<string> {
   }
 }
 
+function pathExists(filePath: string): Promise<boolean> {
+  return fs.access(filePath).then(() => true).catch(() => false);
+}
+
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
  *
  * @param {string} workspace - The root directory of the workspace.
  * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
  */
-function pathExists(filePath: string): Promise<boolean> {
-  return fs.access(filePath).then(() => true).catch(() => false);
-}
-
 export async function captureFileState(workspace: string): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
@@ -65,14 +65,12 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
     core.info('.gitignore not found in workspace root. Using default ignores.');
   }
 
-  // Use glob to find all files, then filter using ignore rules
-  // Ensure glob pattern covers hidden files (dotfiles) as well
-  const allFiles = globSync('**/*', {
+  // Use async fast-glob to find all files, with include/exclude patterns for performance
+  const allFiles = await fg(['**/*'], {
     cwd: workspace,
-    nodir: true, // Only files, not directories
-    dot: true, // Include dotfiles
-    absolute: false, // Get relative paths
-    ignore: ['.git/**'], // Explicitly ignore .git directory in glob for performance
+    onlyFiles: true,       // Only files, not directories
+    dot: true,             // Include dotfiles
+    ignore: ['.git/**', 'node_modules/**'], // Ignore .git and node_modules directories
   });
 
   // Filter the glob results using the ignore instance
