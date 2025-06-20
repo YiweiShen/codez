@@ -310,6 +310,41 @@ export async function runAction(
     core.warning(`Failed to create progress comment: ${e instanceof Error ? e.message : e}`);
   }
 
+  // Set up debounced progress comment updates
+  let updateTimer: NodeJS.Timeout | undefined;
+  let pendingSteps: string[] | undefined;
+  function scheduleProgressUpdate(steps: string[]) {
+    pendingSteps = steps;
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+    }
+    updateTimer = setTimeout(async () => {
+      if (progressCommentId != null) {
+        try {
+          await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, pendingSteps!);
+        } catch (e) {
+          core.warning(`Failed to update progress comment: ${e instanceof Error ? e.message : e}`);
+        }
+      }
+      updateTimer = undefined;
+      pendingSteps = undefined;
+    }, 500);
+  }
+  async function flushProgressUpdate() {
+    if (updateTimer && pendingSteps && progressCommentId != null) {
+      clearTimeout(updateTimer);
+      const steps = pendingSteps;
+      updateTimer = undefined;
+      pendingSteps = undefined;
+
+      try {
+        await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
+      } catch (e) {
+        core.warning(`Failed to flush progress comment update: ${e instanceof Error ? e.message : e}`);
+      }
+    }
+  }
+
   // Clone repository
   await cloneRepository(
     workspace,
@@ -354,12 +389,8 @@ export async function runAction(
   core.info(`Prompt: \n${prompt}`);
   // Update progress: context gathering complete
   if (progressCommentId) {
-    try {
-      const steps = progressSteps.map((s, i) => `- [${i <= 0 ? 'x' : ' '}] ${s}`);
-      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
-    } catch (e) {
-      core.warning(`Failed to update progress to 'Gathering context' complete: ${e instanceof Error ? e.message : e}`);
-    }
+    const steps = progressSteps.map((s, i) => `- [${i <= 0 ? 'x' : ' '}] ${s}`);
+    scheduleProgressUpdate(steps);
   }
   let output;
   try {
@@ -374,12 +405,8 @@ export async function runAction(
   output = maskSensitiveInfo(rawOutput, config);
   // Update progress: planning complete
   if (progressCommentId) {
-    try {
-      const steps = progressSteps.map((s, i) => `- [${i <= 1 ? 'x' : ' '}] ${s}`);
-      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
-    } catch (e) {
-      core.warning(`Failed to update progress to 'Planning' complete: ${e instanceof Error ? e.message : e}`);
-    }
+    const steps = progressSteps.map((s, i) => `- [${i <= 1 ? 'x' : ' '}] ${s}`);
+    scheduleProgressUpdate(steps);
   }
   } catch (error) {
     await postComment(
@@ -408,23 +435,18 @@ export async function runAction(
 
   // Update progress: applying edits complete
   if (progressCommentId) {
-    try {
-      const steps = progressSteps.map((s, i) => `- [${i <= 2 ? 'x' : ' '}] ${s}`);
-      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
-    } catch (e) {
-      core.warning(`Failed to update progress to 'Applying edits' complete: ${e instanceof Error ? e.message : e}`);
-    }
+    const steps = progressSteps.map((s, i) => `- [${i <= 2 ? 'x' : ' '}] ${s}`);
+    scheduleProgressUpdate(steps);
   }
 
   // Update progress: testing complete
   if (progressCommentId) {
-    try {
-      const steps = progressSteps.map((s, i) => `- [${i <= 3 ? 'x' : ' '}] ${s}`);
-      await updateProgressComment(octokit, repo, agentEvent.github, progressCommentId, steps);
-    } catch (e) {
-      core.warning(`Failed to update progress to 'Testing' complete: ${e instanceof Error ? e.message : e}`);
-    }
+    const steps = progressSteps.map((s, i) => `- [${i <= 3 ? 'x' : ' '}] ${s}`);
+    scheduleProgressUpdate(steps);
   }
 
   core.info('Action completed successfully.');
+  if (progressCommentId) {
+    await flushProgressUpdate();
+  }
 }
