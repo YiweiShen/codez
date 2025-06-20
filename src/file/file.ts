@@ -12,31 +12,41 @@ import ignore from 'ignore';
 import * as core from '@actions/core';
 
 /**
- * Calculate the SHA-256 hash of the specified file.
+ * Calculate the SHA-256 hash of the specified file in a streaming manner.
  *
  * @param {string} filePath - Absolute path to the file.
- * @returns {string} The SHA-256 hash of the file content.
+ * @returns {Promise<string>} Promise resolving to the SHA-256 hash of the file content.
  */
-function calculateFileHash(filePath: string): string {
-  try {
-    const fileBuffer = fs.readFileSync(filePath);
-    const hashSum = crypto.createHash('sha256');
-    hashSum.update(fileBuffer);
-    return hashSum.digest('hex');
-  } catch (error) {
-    // Log error but rethrow to be handled by caller, as hash calculation is critical
-    core.error(`Failed to calculate hash for ${filePath}: ${error}`);
-    throw error;
-  }
+async function calculateFileHash(filePath: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', (err) => {
+      core.error(`Failed to create read stream for ${filePath}: ${err}`);
+      reject(err);
+    });
+    stream.on('data', (chunk) => {
+      hash.update(chunk);
+    });
+    stream.on('end', () => {
+      try {
+        const digest = hash.digest('hex');
+        resolve(digest);
+      } catch (err) {
+        core.error(`Failed to compute hash digest for ${filePath}: ${err}`);
+        reject(err);
+      }
+    });
+  });
 }
 
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
  *
  * @param {string} workspace - The root directory of the workspace.
- * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
+ * @returns {Promise<Map<string, string>>} Promise resolving to a map of relative file paths to their SHA-256 hashes.
  */
-export function captureFileState(workspace: string): Map<string, string> {
+export async function captureFileState(workspace: string): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
   const gitignorePath = path.join(workspace, '.gitignore');
@@ -84,8 +94,12 @@ export function captureFileState(workspace: string): Map<string, string> {
     try {
       // Ensure it's actually a file before hashing
       if (fs.statSync(absoluteFilePath).isFile()) {
-        const hash = calculateFileHash(absoluteFilePath);
-        fileState.set(relativeFilePath, hash); // Store relative path
+        try {
+          const hash = await calculateFileHash(absoluteFilePath);
+          fileState.set(relativeFilePath, hash);
+        } catch (error) {
+          core.warning(`Could not process file ${relativeFilePath}: ${error}`);
+        }
       }
     } catch (error) {
       // Log specific file errors but continue processing others
@@ -101,14 +115,14 @@ export function captureFileState(workspace: string): Map<string, string> {
  *
  * @param {string} workspace - The root directory of the workspace.
  * @param {Map<string, string>} originalState - Initial state of files mapped to hashes.
- * @returns {string[]} Array of relative file paths that have been added, modified, or deleted.
+ * @returns {Promise<string[]>} Promise resolving to an array of relative file paths that have been added, modified, or deleted.
  */
-export function detectChanges(
+export async function detectChanges(
   workspace: string,
   originalState: Map<string, string>,
-): string[] {
+): Promise<string[]> {
   core.info('Detecting file changes by comparing states...');
-  const currentState = captureFileState(workspace); // Recapture the current state
+  const currentState = await captureFileState(workspace); // Recapture the current state
   const changedFiles = new Set<string>();
 
   // Check for changed or added files by iterating through the current state
