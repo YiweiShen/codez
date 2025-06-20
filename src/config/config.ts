@@ -7,6 +7,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
+import { addOctokitCache } from '../utils/octokitCache.js';
 import { defaultModel } from '../api/openai.js';
 
 /**
@@ -131,6 +132,8 @@ export function getConfig(): ActionConfig {
     timeoutSeconds = 600;
   }
   const octokit = new Octokit({ auth: githubToken });
+  // Cache repeated GitHub API responses for the duration of the run
+  addOctokitCache(octokit);
   const context = github.context;
   const repo = context.repo;
 
