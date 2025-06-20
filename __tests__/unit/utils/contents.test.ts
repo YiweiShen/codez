@@ -1,4 +1,7 @@
-import { genContentsString, genFullContentsString } from '../../../src/utils/contents';
+import {
+  genContentsString,
+  genFullContentsString,
+} from '../../../src/utils/contents';
 
 describe('genContentsString', () => {
   it('should return empty string when body is empty or whitespace', () => {

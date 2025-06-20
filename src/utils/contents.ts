@@ -41,7 +41,10 @@ export function genContentsString(content: {
  * @param {{ body: string; login: string }} content - Object containing body text and user login.
  * @returns {string} Fully quoted body string or empty string if the body is empty.
  */
-export function genFullContentsString(content: { body: string; login: string }): string {
+export function genFullContentsString(content: {
+  body: string;
+  login: string;
+}): string {
   const body = content.body.trim();
   if (!body) {
     return '';

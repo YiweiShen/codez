@@ -28,7 +28,10 @@ describe('runCodex', () => {
   });
 
   it('parses JSON from stdout and returns text result', async () => {
-    const jsonLine = JSON.stringify({ type: 'message', content: [{ text: 'Hello' }] });
+    const jsonLine = JSON.stringify({
+      type: 'message',
+      content: [{ text: 'Hello' }],
+    });
     const stdout = 'some log\n' + jsonLine;
     (execa as jest.Mock).mockResolvedValue({
       exitCode: 0,
@@ -37,7 +40,12 @@ describe('runCodex', () => {
       failed: false,
     });
 
-    const result = await runCodex(workspace, config, 'prompt with "quotes"', timeout);
+    const result = await runCodex(
+      workspace,
+      config,
+      'prompt with "quotes"',
+      timeout,
+    );
     expect(result).toBe('Hello\n\n');
     expect(execa).toHaveBeenCalledWith(
       'codex',
@@ -48,7 +56,10 @@ describe('runCodex', () => {
   });
 
   it('logs warning when stderr with exitCode 0 and returns text result', async () => {
-    const jsonLine = JSON.stringify({ type: 'message', content: [{ text: 'World' }] });
+    const jsonLine = JSON.stringify({
+      type: 'message',
+      content: [{ text: 'World' }],
+    });
     (execa as jest.Mock).mockResolvedValue({
       exitCode: 0,
       stdout: jsonLine,
@@ -71,7 +82,9 @@ describe('runCodex', () => {
       failed: true,
     });
 
-    await expect(runCodex(workspace, config, 'prompt', timeout)).rejects.toThrow(
+    await expect(
+      runCodex(workspace, config, 'prompt', timeout),
+    ).rejects.toThrow(
       'Codex command failed with exit code 1. Stderr: error occurred',
     );
     expect(core.error).toHaveBeenCalledWith(
@@ -84,8 +97,8 @@ describe('runCodex', () => {
     (error as any).timedOut = true;
     (execa as jest.Mock).mockRejectedValue(error);
 
-    await expect(runCodex(workspace, config, 'prompt', timeout)).rejects.toThrow(
-      `Codex command timed out after ${timeout}ms.`,
-    );
+    await expect(
+      runCodex(workspace, config, 'prompt', timeout),
+    ).rejects.toThrow(`Codex command timed out after ${timeout}ms.`);
   });
 });

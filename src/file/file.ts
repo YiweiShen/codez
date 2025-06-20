@@ -31,7 +31,10 @@ async function calculateFileHash(filePath: string): Promise<string> {
 }
 
 function pathExists(filePath: string): Promise<boolean> {
-  return fs.access(filePath).then(() => true).catch(() => false);
+  return fs
+    .access(filePath)
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
@@ -40,7 +43,9 @@ function pathExists(filePath: string): Promise<boolean> {
  * @param {string} workspace - The root directory of the workspace.
  * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
  */
-export async function captureFileState(workspace: string): Promise<Map<string, string>> {
+export async function captureFileState(
+  workspace: string,
+): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
   const gitignorePath = path.join(workspace, '.gitignore');
@@ -68,8 +73,8 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
   // Use async fast-glob to find all files, with include/exclude patterns for performance
   const allFiles = await fg(['**/*'], {
     cwd: workspace,
-    onlyFiles: true,       // Only files, not directories
-    dot: true,             // Include dotfiles
+    onlyFiles: true, // Only files, not directories
+    dot: true, // Include dotfiles
     ignore: ['.git/**', 'node_modules/**'], // Ignore .git and node_modules directories
   });
 

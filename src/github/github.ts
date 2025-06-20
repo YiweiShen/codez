@@ -33,11 +33,20 @@ function slugify(text: string): string {
 export type AgentEvent =
   | { type: 'issuesOpened'; github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated'; github: GitHubEventIssueCommentCreated }
-  | { type: 'pullRequestCommentCreated'; github: GitHubEventPullRequestCommentCreated }
-  | { type: 'pullRequestReviewCommentCreated'; github: GitHubEventPullRequestReviewCommentCreated }
+  | {
+      type: 'pullRequestCommentCreated';
+      github: GitHubEventPullRequestCommentCreated;
+    }
+  | {
+      type: 'pullRequestReviewCommentCreated';
+      github: GitHubEventPullRequestReviewCommentCreated;
+    }
   | { type: 'issuesAssigned'; github: GitHubEventIssuesAssigned }
   | { type: 'pullRequestOpened'; github: GitHubEventPullRequestOpened }
-  | { type: 'pullRequestSynchronize'; github: GitHubEventPullRequestSynchronize };
+  | {
+      type: 'pullRequestSynchronize';
+      github: GitHubEventPullRequestSynchronize;
+    };
 
 export type GitHubEvent =
   | GitHubEventIssuesOpened
@@ -264,7 +273,10 @@ export function getEventType(payload: any): AgentEvent | null {
     !payload.comment
   ) {
     return {
-      type: payload.action === 'opened' ? 'pullRequestOpened' : 'pullRequestSynchronize',
+      type:
+        payload.action === 'opened'
+          ? 'pullRequestOpened'
+          : 'pullRequestSynchronize',
       github: payload,
     };
   }
@@ -335,7 +347,10 @@ export async function addEyeReaction(
  * Comment events remain unchanged.
  */
 export function extractText(event: GitHubEvent): string | null {
-  if ((event.action === 'opened' || event.action === 'synchronize') && 'pull_request' in event) {
+  if (
+    (event.action === 'opened' || event.action === 'synchronize') &&
+    'pull_request' in event
+  ) {
     const title = event.pull_request.title.trim();
     const body = (event.pull_request.body || '').trim();
     if (body.startsWith('/codex')) {
@@ -346,7 +361,10 @@ export function extractText(event: GitHubEvent): string | null {
     }
     return body;
   }
-  if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
+  if (
+    (event.action === 'opened' || event.action === 'assigned') &&
+    'issue' in event
+  ) {
     const title = event.issue.title.trim();
     const body = event.issue.body.trim();
     if (body.startsWith('/codex')) {
@@ -731,8 +749,8 @@ export async function generatePrompt(
   const contents = await getContentsData(octokit, repo, event);
 
   // Exclude progress comments from context
-  const filteredComments = contents.comments.filter(comment =>
-    !comment.body.trim().startsWith('**Codez Progress**')
+  const filteredComments = contents.comments.filter(
+    (comment) => !comment.body.trim().startsWith('**Codez Progress**'),
   );
 
   let prFiles: string[] = [];
@@ -756,7 +774,9 @@ export async function generatePrompt(
   }
 
   let historyPropmt = '';
-  const formatter = includeFullHistory ? genFullContentsString : genContentsString;
+  const formatter = includeFullHistory
+    ? genFullContentsString
+    : genContentsString;
   historyPropmt += formatter(contents.content);
   for (const comment of filteredComments) {
     historyPropmt += formatter(comment);
@@ -773,7 +793,9 @@ export async function generatePrompt(
     prompt += `${promptBuilderConfig.contextLabel}\n${contextInfo}\n\n`;
   }
   if (prFiles.length > 0) {
-    prompt += `${promptBuilderConfig.changedFilesLabel}\n${prFiles.join('\n')}\n\n`;
+    prompt += `${promptBuilderConfig.changedFilesLabel}\n${prFiles.join(
+      '\n',
+    )}\n\n`;
   }
 
   if (prompt) {

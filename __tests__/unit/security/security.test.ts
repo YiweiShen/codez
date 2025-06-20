@@ -1,4 +1,7 @@
-import { checkPermission, maskSensitiveInfo } from '../../../src/security/security';
+import {
+  checkPermission,
+  maskSensitiveInfo,
+} from '../../../src/security/security';
 import type { ActionConfig } from '../../../src/config/config';
 
 describe('checkPermission', () => {
@@ -23,7 +26,9 @@ describe('checkPermission', () => {
       repo: { owner: 'owner', repo: 'repo' },
     } as unknown as ActionConfig;
     await expect(checkPermission(config)).resolves.toBe(true);
-    expect(octokit.rest.repos.getCollaboratorPermissionLevel).toHaveBeenCalledWith({
+    expect(
+      octokit.rest.repos.getCollaboratorPermissionLevel,
+    ).toHaveBeenCalledWith({
       owner: 'owner',
       repo: 'repo',
       username: 'user',
@@ -102,12 +107,8 @@ describe('maskSensitiveInfo', () => {
   });
 
   it('masks OpenAI API key and Base URL', () => {
-    const text = `Key: ${sensitiveConfig.openaiApiKey}, URL: ${
-      sensitiveConfig.openaiBaseUrl
-    }`;
-    expect(maskSensitiveInfo(text, sensitiveConfig)).toBe(
-      'Key: ***, URL: ***',
-    );
+    const text = `Key: ${sensitiveConfig.openaiApiKey}, URL: ${sensitiveConfig.openaiBaseUrl}`;
+    expect(maskSensitiveInfo(text, sensitiveConfig)).toBe('Key: ***, URL: ***');
   });
 
   it('leaves text without sensitive info unchanged', () => {

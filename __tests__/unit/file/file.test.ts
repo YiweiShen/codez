@@ -35,7 +35,10 @@ describe('captureFileState', () => {
     const content = 'abc';
     fs.writeFileSync(path.join(workspace, 'a.txt'), content);
     const state = await captureFileState(workspace);
-    const expectedHash = crypto.createHash('sha256').update(Buffer.from(content)).digest('hex');
+    const expectedHash = crypto
+      .createHash('sha256')
+      .update(Buffer.from(content))
+      .digest('hex');
     expect(state.get('a.txt')).toBe(expectedHash);
   });
 
