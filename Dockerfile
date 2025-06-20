@@ -8,7 +8,8 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run build
+ RUN npm run build
+ RUN npm prune --production
 
 FROM node:22-slim AS runner
 
