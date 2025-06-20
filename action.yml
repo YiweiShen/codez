@@ -43,12 +43,16 @@ inputs:
       Accepts either a YAML mapping (multiline) or comma-separated key=value pairs.
     required: false
     default: ''
-  images:
-    description: |
-      Comma-separated or newline-separated list of local image file paths to include in the Codex CLI invocation.
-      Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc.
-    required: false
-    default: ''
+ 	  images:
+ 	    description: |
+ 	      Comma-separated or newline-separated list of local image file paths to include in the Codex CLI invocation.
+ 	      Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc.
+ 	    required: false
+ 	    default: ''
+ 	  fix-build:
+ 	    description: 'When set to "true", instructs Codex to inspect workflow logs and suggest a fix when the workflow fails.'
+ 	    required: false
+ 	    default: 'false'
 
 runs:
   using: 'docker'

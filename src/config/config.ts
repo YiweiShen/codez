@@ -52,6 +52,10 @@ export interface ActionConfig {
    * Optional list of local image file paths to include in the Codex CLI invocation.
    */
   images: string[];
+  /**
+   * When true, instructs Codex to inspect workflow logs and suggest a fix on failure.
+   */
+  fixBuild: boolean;
 }
 
 /**
@@ -150,6 +154,8 @@ export function getConfig(): ActionConfig {
   const codexEnv = parseEnvInput(codexEnvInput);
   const imagesInput = core.getInput('images') || '';
   const images = parseListInput(imagesInput);
+  const fixBuildInput = core.getInput('fix-build') || 'false';
+  const fixBuild = fixBuildInput.toLowerCase() === 'true';
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -181,5 +187,6 @@ export function getConfig(): ActionConfig {
     assigneeTrigger,
     codexEnv,
     images,
+    fixBuild,
   };
 }

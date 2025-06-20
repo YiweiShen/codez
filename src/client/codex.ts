@@ -31,6 +31,10 @@ export async function runCodex(
       prompt = prompt.replace(/"/g, '\\"');
       // Build CLI arguments
       const cliArgs: string[] = [];
+      // Include fix-build flag if requested
+      if (config.fixBuild) {
+        cliArgs.push('--fix-build');
+      }
       // Include image flags if provided
       if (images.length > 0) {
         for (const imgPath of images) {
