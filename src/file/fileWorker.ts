@@ -1,5 +1,5 @@
 import { parentPort, workerData } from 'worker_threads';
-import { captureFileState as captureFileStateSync, detectChanges as detectChangesSync } from './file';
+import { captureFileState as captureFileStateSync, detectChanges as detectChangesSync } from './file.js';
 
 if (!parentPort) {
   throw new Error('Worker threads must have a parentPort.');

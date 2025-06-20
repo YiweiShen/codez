@@ -9,7 +9,7 @@ import path from 'path';
  */
 export function captureFileState(workspace: string): Promise<Map<string, string>> {
   const workerPath = path.join(__dirname, 'fileWorker.js');
-  const worker = new Worker(workerPath, { workerData: { task: 'capture', workspace } });
+  const worker = new Worker(workerPath, { workerData: { task: 'capture', workspace }, type: 'module' });
   return new Promise((resolve, reject) => {
     worker.on('message', (entries: [string, string][]) => {
       resolve(new Map(entries));
@@ -33,7 +33,7 @@ export function captureFileState(workspace: string): Promise<Map<string, string>
 export function detectChanges(workspace: string, originalState: Map<string, string>): Promise<string[]> {
   const entries = Array.from(originalState.entries());
   const workerPath = path.join(__dirname, 'fileWorker.js');
-  const worker = new Worker(workerPath, { workerData: { task: 'detect', workspace, originalState: entries } });
+  const worker = new Worker(workerPath, { workerData: { task: 'detect', workspace, originalState: entries }, type: 'module' });
   return new Promise((resolve, reject) => {
     worker.on('message', (changes: string[]) => {
       resolve(changes);
