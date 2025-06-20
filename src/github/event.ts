@@ -5,7 +5,7 @@
  * them into a consistent format for the action workflow.
  */
 import * as core from '@actions/core';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import { AgentEvent, getEventType, extractText } from './github.js';
 import { ActionConfig } from '../config/config.js';
 
@@ -33,9 +33,10 @@ export interface ProcessedEvent {
  * @returns {any} Parsed event payload object.
  * @throws {Error} If the file cannot be read or parsed.
  */
- export function loadEventPayload(eventPath: string): any {
+export async function loadEventPayload(eventPath: string): Promise<any> {
   try {
-    return JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+    const content = await fs.readFile(eventPath, 'utf8');
+    return JSON.parse(content);
   } catch (error) {
     throw new Error(
       `Failed to read or parse event payload at ${eventPath}: ${error}`,
@@ -49,7 +50,7 @@ export interface ProcessedEvent {
  * @param {ActionConfig} config - Action configuration object.
  * @returns {ProcessedEvent | null} The processed event data or null if unsupported.
  */
-export function processEvent(config: ActionConfig): ProcessedEvent | null {
+export async function processEvent(config: ActionConfig): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
@@ -63,7 +64,7 @@ export function processEvent(config: ActionConfig): ProcessedEvent | null {
       createIssues: false,
     };
   }
-  const eventPayload = loadEventPayload(config.eventPath);
+  const eventPayload = await loadEventPayload(config.eventPath);
   const agentEvent = getEventType(eventPayload);
 
   if (!agentEvent) {

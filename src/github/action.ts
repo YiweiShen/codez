@@ -24,10 +24,12 @@ import { maskSensitiveInfo } from '../security/security.js';
 import { runCodex } from '../client/codex.js';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
+export { createIssuesFromFeaturePlan } from './createIssues.js';
 // Helper to escape strings for RegExp
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+const PROGRESS_BAR_BLOCKS = 20;
 
 /**
  * Creates a progress comment with initial unchecked steps.
@@ -39,7 +41,17 @@ async function createProgressComment(
   event: GitHubEvent,
   steps: string[],
 ): Promise<number> {
-  const bodyLines = ['**Codez Progress**', ''];
+  // Build initial progress display with emoji title, bar, and unchecked steps
+  const total = steps.length;
+  const barBlocks = PROGRESS_BAR_BLOCKS;
+  const emptyBar = '░'.repeat(barBlocks);
+  const title = '**🚀 Codez Progress**';
+  const bodyLines: string[] = [
+    title,
+    '',
+    `Progress: [${emptyBar}] 0%`,
+    ''
+  ];
   for (const step of steps) {
     bodyLines.push(`- [ ] ${step}`);
   }
@@ -75,7 +87,20 @@ async function updateProgressComment(
   commentId: number,
   steps: string[],
 ): Promise<void> {
-  const bodyLines = ['**Codez Progress**', ''];
+  // Build updated progress display with emoji title, dynamic bar, and step statuses
+  const total = steps.length;
+  const completed = steps.filter(s => s.startsWith('- [x]')).length;
+  const barBlocks = PROGRESS_BAR_BLOCKS;
+  const filled = Math.round((completed / total) * barBlocks);
+  const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
+  const percent = Math.round((completed / total) * 100);
+  const title = '**🚀 Codez Progress**';
+  const bodyLines: string[] = [
+    title,
+    '',
+    `Progress: [${bar}] ${percent}%${percent === 100 ? ' ✅' : ''}`,
+    ''
+  ];
   for (const s of steps) {
     bodyLines.push(s);
   }
@@ -142,6 +167,9 @@ async function handleResult(
 
     const generateCommitMessage = generateCommitMessageOpenAI;
     // Generate commit message
+    // Generate commit message via OpenAI (instrumented)
+    core.info('[perf] generateCommitMessage start');
+    const _t_commitMsg = Date.now();
     const commitMessage = await generateCommitMessage(
       effectiveChangedFiles,
       userPrompt,
@@ -161,6 +189,7 @@ async function handleResult(
       },
       config,
     );
+    core.info(`[perf] generateCommitMessage end - ${Date.now() - _t_commitMsg}ms`);
 
     // Handle changes based on event type
     if (
@@ -195,95 +224,6 @@ async function handleResult(
   }
 }
 
-/**
- * Creates GitHub issues based on a JSON feature plan output.
- */
-async function createIssuesFromFeaturePlan(
-  octokit: Octokit,
-  repo: { owner: string; repo: string },
-  event: GitHubEvent,
-  output: string,
-): Promise<void> {
-  let features: Array<{ title: string; description: string }>;
-  try {
-    features = JSON.parse(output);
-  } catch (error) {
-    const arrayMatch = output.match(/\[[\s\S]*\]/);
-    if (arrayMatch) {
-      try {
-        features = JSON.parse(arrayMatch[0]);
-      } catch (error2) {
-        await postComment(
-          octokit,
-          repo,
-          event,
-          `Failed to parse feature plan JSON: ${
-            error2 instanceof Error ? error2.message : String(error2)
-          }`,
-        );
-        return;
-      }
-    } else {
-      await postComment(
-        octokit,
-        repo,
-        event,
-        `Failed to parse feature plan JSON: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-      return;
-    }
-  }
-
-  if (!Array.isArray(features)) {
-    await postComment(
-      octokit,
-      repo,
-      event,
-      'Feature plan JSON is not an array. Please output an array of feature objects.',
-    );
-    return;
-  }
-  for (const [index, feature] of features.entries()) {
-    if (
-      typeof feature !== 'object' ||
-      feature === null ||
-      typeof feature.title !== 'string' ||
-      typeof feature.description !== 'string'
-    ) {
-      await postComment(
-        octokit,
-        repo,
-        event,
-        `Invalid feature format at index ${index}. Each feature must be an object with 'title' (string) and 'description' (string).`,
-      );
-      return;
-    }
-  }
-  for (const feature of features) {
-    try {
-      const issue = await octokit.rest.issues.create({
-        ...repo,
-        title: feature.title,
-        body: feature.description,
-      });
-      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
-      await postComment(
-        octokit,
-        repo,
-        event,
-        `Created new feature issue #${issue.data.number} for "${feature.title}"`,
-      );
-    } catch (error) {
-      core.warning(
-        `Failed to create issue for feature "${feature.title}": ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
-  }
-}
 
 /**
  * Executes the main logic of the GitHub Action.
@@ -298,11 +238,20 @@ export async function runAction(
     config;
   const { agentEvent, userPrompt, includeFullHistory, createIssues } = processedEvent;
 
-  // Add eyes reaction
+  // Add eyes reaction (instrumented)
+  core.info('[perf] addEyeReaction start');
+  const _t_addEye = Date.now();
   await addEyeReaction(octokit, repo, agentEvent.github);
+  core.info(`[perf] addEyeReaction end - ${Date.now() - _t_addEye}ms`);
 
   // Initialize progress UI
-  const progressSteps = ['Gathering context', 'Planning', 'Applying edits', 'Testing'];
+  // Define progress steps with emojis for clarity
+  const progressSteps = [
+    '🔍 Gathering context',
+    '📝 Planning',
+    '✨ Applying edits',
+    '🧪 Testing',
+  ];
   let progressCommentId: number | undefined;
   try {
     progressCommentId = await createProgressComment(octokit, repo, agentEvent.github, progressSteps);
@@ -310,7 +259,9 @@ export async function runAction(
     core.warning(`Failed to create progress comment: ${e instanceof Error ? e.message : e}`);
   }
 
-  // Clone repository
+  // Clone repository (instrumented)
+  core.info('[perf] cloneRepository start');
+  const _t_clone = Date.now();
   await cloneRepository(
     workspace,
     githubToken,
@@ -319,9 +270,13 @@ export async function runAction(
     octokit,
     agentEvent,
   );
+  core.info(`[perf] cloneRepository end - ${Date.now() - _t_clone}ms`);
 
-  // Capture initial file state
+  // Capture initial file state (instrumented)
+  core.info('[perf] captureFileState start');
+  const _t_captureState = Date.now();
   const originalFileState = await captureFileState(workspace);
+  core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
 
   // generate Prompt (with special handling for create issues)
   let effectiveUserPrompt = userPrompt;
@@ -330,6 +285,9 @@ export async function runAction(
       `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
 
+  // Generate prompt for Codex (instrumented)
+  core.info('[perf] generatePrompt start');
+  const _t_prompt = Date.now();
   let prompt = await generatePrompt(
     octokit,
     repo,
@@ -337,6 +295,7 @@ export async function runAction(
     effectiveUserPrompt,
     includeFullHistory,
   );
+  core.info(`[perf] generatePrompt end - ${Date.now() - _t_prompt}ms`);
 
   // Handle any images in the prompt by downloading and replacing embeds with placeholders
   const imageUrls = extractImageUrls(prompt);
@@ -364,6 +323,9 @@ export async function runAction(
   let output;
   try {
     const allImages = [...config.images, ...downloadedImageFiles];
+    // Execute Codex CLI (instrumented)
+    core.info('[perf] runCodex start');
+    const _t_codex = Date.now();
     const rawOutput: string = await runCodex(
       workspace,
       config,
@@ -371,6 +333,7 @@ export async function runAction(
       timeoutSeconds * 1000,
       allImages,
     );
+    core.info(`[perf] runCodex end - ${Date.now() - _t_codex}ms`);
   output = maskSensitiveInfo(rawOutput, config);
   // Update progress: planning complete
   if (progressCommentId) {
@@ -396,12 +359,16 @@ export async function runAction(
 
   // Handle create issues intent: create issues from JSON output
   if (createIssues) {
+    const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
     return;
   }
 
-  // Detect file changes
+  // Detect file changes (instrumented)
+  core.info('[perf] detectChanges start');
+  const _t_detect = Date.now();
   const changedFiles = await detectChanges(workspace, originalFileState);
+  core.info(`[perf] detectChanges end - ${Date.now() - _t_detect}ms`);
 
   // Handle the results
   await handleResult(config, processedEvent, output, changedFiles);

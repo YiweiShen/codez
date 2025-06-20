@@ -4,7 +4,7 @@
  * Provides functions to calculate file hashes, capture workspace file state,
  * and detect changes between states respecting ignore rules.
  */
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import * as crypto from 'crypto';
 import fg from 'fast-glob';
 import * as path from 'path';
@@ -17,9 +17,9 @@ import * as core from '@actions/core';
  * @param {string} filePath - Absolute path to the file.
  * @returns {string} The SHA-256 hash of the file content.
  */
-function calculateFileHash(filePath: string): string {
+async function calculateFileHash(filePath: string): Promise<string> {
   try {
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.readFile(filePath);
     const hashSum = crypto.createHash('sha256');
     hashSum.update(fileBuffer);
     return hashSum.digest('hex');
@@ -28,6 +28,10 @@ function calculateFileHash(filePath: string): string {
     core.error(`Failed to calculate hash for ${filePath}: ${error}`);
     throw error;
   }
+}
+
+function pathExists(filePath: string): Promise<boolean> {
+  return fs.access(filePath).then(() => true).catch(() => false);
 }
 
 /**
@@ -47,10 +51,10 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
   // Consider adding other common ignores if necessary, e.g., node_modules, build artifacts
   // ig.add('node_modules/**');
 
-  if (fs.existsSync(gitignorePath)) {
+  if (await pathExists(gitignorePath)) {
     core.info(`Reading .gitignore rules from ${gitignorePath}`);
     try {
-      const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+      const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
       ig.add(gitignoreContent);
     } catch (error) {
       core.warning(
@@ -80,13 +84,12 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
   for (const relativeFilePath of filesToProcess) {
     const absoluteFilePath = path.join(workspace, relativeFilePath);
     try {
-      // Ensure it's actually a file before hashing
-      if (fs.statSync(absoluteFilePath).isFile()) {
-        const hash = calculateFileHash(absoluteFilePath);
-        fileState.set(relativeFilePath, hash); // Store relative path
+      const stats = await fs.stat(absoluteFilePath);
+      if (stats.isFile()) {
+        const hash = await calculateFileHash(absoluteFilePath);
+        fileState.set(relativeFilePath, hash);
       }
     } catch (error) {
-      // Log specific file errors but continue processing others
       core.warning(`Could not process file ${relativeFilePath}: ${error}`);
     }
   }

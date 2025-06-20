@@ -152,6 +152,29 @@ codez-<type>-<issueNumber>-<short-description>
 
 ## Inputs Settings
 
+## Instrumentation & Profiling
+
+This action includes performance instrumentation for key phases (file scanning, API calls, Codex execution). When running, timing logs prefixed with `[perf]` will appear in the console output.
+
+You can also use Node.js profiling tools on large runs to pinpoint bottlenecks:
+
+- **Node.js built-in profiler** (`--prof`):
+  ```bash
+  # Run the built-in profiler locally in Docker
+  docker run --rm \
+    -e OPENAI_API_KEY=... \
+    your-image \
+    node --prof /app/dist/index.js
+  ```
+- **0x profiler**:
+  ```bash
+  # Install 0x globally, then run
+  npm install -g 0x
+  docker run --rm \
+    -e OPENAI_API_KEY=... \
+    your-image \
+    0x /app/dist/index.js
+  ```
 ### Basic Configuration
 
 | Input Name     | Description                                                                     |
