@@ -28,6 +28,7 @@ import type { GitHubEvent } from './github.js';
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+const PROGRESS_BAR_BLOCKS = 20;
 
 /**
  * Creates a progress comment with initial unchecked steps.
@@ -41,7 +42,7 @@ async function createProgressComment(
 ): Promise<number> {
   // Build initial progress display with emoji title, bar, and unchecked steps
   const total = steps.length;
-  const barBlocks = 10;
+  const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = '**🚀 Codez Progress**';
   const bodyLines: string[] = [
@@ -88,7 +89,7 @@ async function updateProgressComment(
   // Build updated progress display with emoji title, dynamic bar, and step statuses
   const total = steps.length;
   const completed = steps.filter(s => s.startsWith('- [x]')).length;
-  const barBlocks = 10;
+  const barBlocks = PROGRESS_BAR_BLOCKS;
   const filled = Math.round((completed / total) * barBlocks);
   const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
   const percent = Math.round((completed / total) * 100);
@@ -96,7 +97,7 @@ async function updateProgressComment(
   const bodyLines: string[] = [
     title,
     '',
-    `Progress: [${bar}] ${percent}%`,
+    `Progress: [${bar}] ${percent}%${percent === 100 ? ' ✅' : ''}`,
     ''
   ];
   for (const s of steps) {
