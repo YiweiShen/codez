@@ -4,7 +4,7 @@
  * Provides functions to calculate file hashes, capture workspace file state,
  * and detect changes between states respecting ignore rules.
  */
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import * as crypto from 'crypto';
 import { globSync } from 'glob';
 import * as path from 'path';
@@ -17,9 +17,9 @@ import * as core from '@actions/core';
  * @param {string} filePath - Absolute path to the file.
  * @returns {string} The SHA-256 hash of the file content.
  */
-function calculateFileHash(filePath: string): string {
+async function calculateFileHash(filePath: string): Promise<string> {
   try {
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.readFile(filePath);
     const hashSum = crypto.createHash('sha256');
     hashSum.update(fileBuffer);
     return hashSum.digest('hex');
@@ -36,7 +36,11 @@ function calculateFileHash(filePath: string): string {
  * @param {string} workspace - The root directory of the workspace.
  * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
  */
-export function captureFileState(workspace: string): Map<string, string> {
+function pathExists(filePath: string): Promise<boolean> {
+  return fs.access(filePath).then(() => true).catch(() => false);
+}
+
+export async function captureFileState(workspace: string): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
   const gitignorePath = path.join(workspace, '.gitignore');
@@ -47,10 +51,10 @@ export function captureFileState(workspace: string): Map<string, string> {
   // Consider adding other common ignores if necessary, e.g., node_modules, build artifacts
   // ig.add('node_modules/**');
 
-  if (fs.existsSync(gitignorePath)) {
+  if (await pathExists(gitignorePath)) {
     core.info(`Reading .gitignore rules from ${gitignorePath}`);
     try {
-      const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+      const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
       ig.add(gitignoreContent);
     } catch (error) {
       core.warning(
@@ -82,13 +86,12 @@ export function captureFileState(workspace: string): Map<string, string> {
   for (const relativeFilePath of filesToProcess) {
     const absoluteFilePath = path.join(workspace, relativeFilePath);
     try {
-      // Ensure it's actually a file before hashing
-      if (fs.statSync(absoluteFilePath).isFile()) {
-        const hash = calculateFileHash(absoluteFilePath);
-        fileState.set(relativeFilePath, hash); // Store relative path
+      const stats = await fs.stat(absoluteFilePath);
+      if (stats.isFile()) {
+        const hash = await calculateFileHash(absoluteFilePath);
+        fileState.set(relativeFilePath, hash);
       }
     } catch (error) {
-      // Log specific file errors but continue processing others
       core.warning(`Could not process file ${relativeFilePath}: ${error}`);
     }
   }
@@ -103,12 +106,12 @@ export function captureFileState(workspace: string): Map<string, string> {
  * @param {Map<string, string>} originalState - Initial state of files mapped to hashes.
  * @returns {string[]} Array of relative file paths that have been added, modified, or deleted.
  */
-export function detectChanges(
+export async function detectChanges(
   workspace: string,
   originalState: Map<string, string>,
-): string[] {
+): Promise<string[]> {
   core.info('Detecting file changes by comparing states...');
-  const currentState = captureFileState(workspace); // Recapture the current state
+  const currentState = await captureFileState(workspace); // Recapture the current state
   const changedFiles = new Set<string>();
 
   // Check for changed or added files by iterating through the current state
