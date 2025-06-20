@@ -39,7 +39,17 @@ async function createProgressComment(
   event: GitHubEvent,
   steps: string[],
 ): Promise<number> {
-  const bodyLines = ['**Codez Progress**', ''];
+  // Build initial progress display with emoji title, bar, and unchecked steps
+  const total = steps.length;
+  const barBlocks = 10;
+  const emptyBar = '░'.repeat(barBlocks);
+  const title = '**🚀 Codez Progress**';
+  const bodyLines: string[] = [
+    title,
+    '',
+    `Progress: [${emptyBar}] 0%`,
+    ''
+  ];
   for (const step of steps) {
     bodyLines.push(`- [ ] ${step}`);
   }
@@ -75,7 +85,20 @@ async function updateProgressComment(
   commentId: number,
   steps: string[],
 ): Promise<void> {
-  const bodyLines = ['**Codez Progress**', ''];
+  // Build updated progress display with emoji title, dynamic bar, and step statuses
+  const total = steps.length;
+  const completed = steps.filter(s => s.startsWith('- [x]')).length;
+  const barBlocks = 10;
+  const filled = Math.round((completed / total) * barBlocks);
+  const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
+  const percent = Math.round((completed / total) * 100);
+  const title = '**🚀 Codez Progress**';
+  const bodyLines: string[] = [
+    title,
+    '',
+    `Progress: [${bar}] ${percent}%`,
+    ''
+  ];
   for (const s of steps) {
     bodyLines.push(s);
   }
@@ -302,7 +325,13 @@ export async function runAction(
   await addEyeReaction(octokit, repo, agentEvent.github);
 
   // Initialize progress UI
-  const progressSteps = ['Gathering context', 'Planning', 'Applying edits', 'Testing'];
+  // Define progress steps with emojis for clarity
+  const progressSteps = [
+    '🔍 Gathering context',
+    '📝 Planning',
+    '✨ Applying edits',
+    '🧪 Testing',
+  ];
   let progressCommentId: number | undefined;
   try {
     progressCommentId = await createProgressComment(octokit, repo, agentEvent.github, progressSteps);
