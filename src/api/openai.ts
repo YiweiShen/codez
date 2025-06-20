@@ -69,28 +69,33 @@ ${changedFiles.join('\n')}
 
     const openai = getOpenAIClient(config);
 
-    const response = await openai.chat.completions.create({
+    // Stream the OpenAI response to build the commit message as tokens arrive
+    const stream = await openai.chat.completions.create({
       model: config.openaiModel,
       max_completion_tokens: 1024,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userContent },
       ],
+      stream: true,
     });
-
-    // Extract commit message from response
-    let commitMessage = response.choices[0]?.message?.content?.trim() || '';
-    commitMessage = commitMessage.split('\n')[0]; // Take the first line
-
-    // Fallback if the message is empty or too long (adjust length check if needed)
+    let fullContent = '';
+    for await (const part of stream) {
+      const delta = part.choices?.[0]?.delta?.content;
+      if (delta) {
+        fullContent += delta;
+      }
+    }
+    // Trim and take only the first line as the commit message
+    const trimmed = fullContent.trim();
+    const commitMessage = trimmed.split('\n')[0] || '';
+    // Fallback if the message is empty or too long
     if (!commitMessage || commitMessage.length > 100) {
-      // Keep 100 char limit for safety
       core.warning(
         `Generated commit message was empty or too long: "${commitMessage}". Falling back.`,
       );
-      throw new Error('Generated commit message invalid.'); // Trigger fallback
+      throw new Error('Generated commit message invalid.');
     }
-
     core.info(`Generated commit message: ${commitMessage}`);
     return commitMessage;
   } catch (error) {
