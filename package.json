@@ -3,7 +3,6 @@
   "version": "0.3.1",
   "description": "Codex in GitHub Actions",
   "main": "dist/index.js",
-  "type": "module",
   "scripts": {
     "format": "prettier --write .",
     "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --minify --outfile=dist/index.js",
