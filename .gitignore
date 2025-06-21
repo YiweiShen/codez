@@ -131,10 +131,5 @@ dist
 # misc
 *.pem
 
-# Code comment images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-*.webp
+# Code comment images folder
+/codex-comment-images/
