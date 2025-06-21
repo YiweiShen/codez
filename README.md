@@ -101,6 +101,18 @@ To skip pull request creation and only post AI output as a comment, use the `--n
 /codex --no-pr Please update the README formatting.
 ```
 
+You can combine multiple flags. For example, to include full history but skip PR creation:
+
+```
+/codex --full-history --no-pr Please optimize the database queries.
+```
+
+Or to generate and create issues with full conversation context:
+
+```
+/codex --create-issues --full-history Please generate a comprehensive roadmap for our next API release.
+```
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage in PRs
@@ -123,6 +135,12 @@ To skip pull request creation and only post AI output as a comment, use the `--n
 /codex --no-pr Please add unit tests to this code.
 ```
 
+You can also combine flags. For example, to include full history but skip PR creation:
+
+```
+/codex --full-history --no-pr Please optimize the performance of the sorting algorithm.
+```
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage: Creating Issues
@@ -131,6 +149,12 @@ In an Issue or PR comment, use the `--create-issues` flag to generate and create
 
 ```
 /codex --create-issues Please generate a feature plan for our next API release.
+```
+
+You can combine with `--full-history` to include the full conversation context when generating issues:
+
+```
+/codex --create-issues --full-history Please generate a detailed feature plan based on our prior discussions.
 ```
 
 Codex will respond by outputting a JSON-based feature plan and create a separate GitHub Issue for each feature.
