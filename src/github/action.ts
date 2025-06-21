@@ -151,8 +151,25 @@ async function handleResult(
       stdio: 'inherit',
     });
   }
+  // Skip any changes in the codex-comment-images folder (downloaded artifacts)
+  const imageFiles = changedFiles.filter((f) =>
+    f.startsWith('codex-comment-images/'),
+  );
+  if (imageFiles.length > 0) {
+    core.warning(
+      `Ignoring changes to codex-comment-images folder: ${imageFiles.join(', ')}`,
+    );
+    // Revert any image folder changes
+    await execa('git', ['checkout', 'HEAD', '--', 'codex-comment-images'], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
+  }
+  // Filter out workflow and image folder changes
   const effectiveChangedFiles = changedFiles.filter(
-    (f) => !f.startsWith('.github/workflows/'),
+    (f) =>
+      !f.startsWith('.github/workflows/') &&
+      !f.startsWith('codex-comment-images/'),
   );
 
   if (!noPr && effectiveChangedFiles.length > 0) {
