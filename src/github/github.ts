@@ -417,13 +417,13 @@ export async function createPullRequest(
   try {
     // Set up Git and create a new branch
     core.info('Configuring Git user identity locally...');
-    await execa('git', ['config', 'user.name', 'Codez'], {
+    await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
       cwd: workspace,
       stdio: 'inherit',
     });
     await execa(
       'git',
-      ['config', 'user.email', 'codez@users.noreply.github.com'],
+      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
       { cwd: workspace, stdio: 'inherit' },
     );
 
@@ -612,13 +612,13 @@ export async function commitAndPush(
     }
 
     core.info('Configuring Git user identity locally...');
-    await execa('git', ['config', 'user.name', 'Codez'], {
+    await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
       cwd: workspace,
       stdio: 'inherit',
     });
     await execa(
       'git',
-      ['config', 'user.email', 'codez@users.noreply.github.com'],
+      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
       { cwd: workspace, stdio: 'inherit' },
     );
 
