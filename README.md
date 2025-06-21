@@ -135,6 +135,26 @@ In an Issue or PR comment, use the `--create-issues` flag to generate and create
 
 Codex will respond by outputting a JSON-based feature plan and create a separate GitHub Issue for each feature.
 
+### Example Usage: Combining Flags
+
+You can chain multiple flags in any order. For example, to include the full history and skip pull request creation:
+
+```bash
+/codex --full-history --no-pr Please refactor the authentication flow.
+```
+
+To generate issues without creating a PR:
+
+```bash
+/codex --create-issues --no-pr Please generate a testing plan for the payment module.
+```
+
+Or combine all three flags to include history, skip PR creation, and create issues:
+
+```bash
+/codex --full-history --no-pr --create-issues Please draft release notes and create issues.
+```
+
 ## Running Tests
 
 Install dependencies and run all unit tests:
