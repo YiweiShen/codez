@@ -217,6 +217,21 @@ async function handleResult(
         output,
       );
     }
+  } else if (noPr && effectiveChangedFiles.length > 0) {
+    core.info(`--no-pr flag used and detected changes in ${effectiveChangedFiles.length} files; posting diff in comment.`);
+    let diffOutput = '';
+    try {
+      const { stdout } = await execa(
+        'git',
+        ['diff', 'HEAD', '--', ...effectiveChangedFiles],
+        { cwd: workspace }
+      );
+      diffOutput = stdout;
+    } catch (err) {
+      core.warning(`Failed to generate diff for comment: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    const commentBody = `${output}\n\n**Proposed changes:**\n\`\`\`diff\n${diffOutput}\n\`\`\``;
+    await postComment(octokit, repo, agentEvent.github, commentBody);
   } else {
     // No non-workflow file changes, post AI output as a comment
     await postComment(octokit, repo, agentEvent.github, `${output}`);
