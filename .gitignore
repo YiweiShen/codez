@@ -129,3 +129,6 @@ dist
 # misc
 .DS_Store
 *.pem
+
+# Code comment images folder
+/codex-comment-images/
