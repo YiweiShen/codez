@@ -11,6 +11,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Post AI output as a comment if there are no changes
 - Support a `--full-history` flag in the `/codex` command to include all user and bot comments in the history block
 - Support a `--create-issues` flag in the `/codex` command to automatically generate GitHub issues from a JSON-based feature plan
+- Support a `--no-pr` flag in the `/codex` command to skip pull request creation and post AI output as a comment
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
 - Support `pull_request`, `workflow_dispatch`, and `repository_dispatch` workflow triggers for automated workflows (e.g., on PR open/sync or manual dispatch).
@@ -94,6 +95,12 @@ For full history including all user and bot comments in the `[History]` block, a
 /codex --full-history Please create a new API endpoint. This should be an endpoint that handles GET requests to retrieve user information.
 ```
 
+To skip pull request creation and only post AI output as a comment, use the `--no-pr` flag:
+
+```
+/codex --no-pr Please update the README formatting.
+```
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage in PRs
@@ -108,6 +115,12 @@ To include full history in the prompt (both user and bot comments), use the `--f
 
 ```
 /codex --full-history Please add unit tests to this code.
+```
+
+To skip pull request creation and only post AI output as a comment, use the `--no-pr` flag:
+
+```
+/codex --no-pr Please add unit tests to this code.
 ```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.

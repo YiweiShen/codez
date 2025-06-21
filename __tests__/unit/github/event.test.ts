@@ -40,6 +40,7 @@ describe('processEvent', () => {
       userPrompt: 'my-prompt',
       includeFullHistory: false,
       createIssues: false,
+      noPr: false,
     });
   });
 
@@ -98,6 +99,7 @@ describe('processEvent', () => {
       userPrompt: 'Title\n\nBody',
       includeFullHistory: false,
       createIssues: false,
+      noPr: false,
     });
   });
 

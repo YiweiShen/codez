@@ -24,6 +24,7 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
+  noPr: boolean;
 }
 
 /**
@@ -67,6 +68,7 @@ export async function processEvent(
       userPrompt: config.directPrompt,
       includeFullHistory: false,
       createIssues: false,
+      noPr: false,
     };
   }
   const eventPayload = await loadEventPayload(config.eventPath);
@@ -96,6 +98,7 @@ export async function processEvent(
       userPrompt: prompt,
       includeFullHistory: false,
       createIssues: false,
+      noPr: false,
     };
   }
 
@@ -112,6 +115,8 @@ export async function processEvent(
   args = args.replace(/--full-history\b/, '').trim();
   const createIssues = args.split(/\s+/).includes('--create-issues');
   args = args.replace(/--create-issues\b/, '').trim();
+  const noPr = args.split(/\s+/).includes('--no-pr');
+  args = args.replace(/--no-pr\b/, '').trim();
   let userPrompt = args;
 
   let title: string | undefined;
@@ -130,5 +135,5 @@ export async function processEvent(
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt, includeFullHistory, createIssues };
+  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, noPr };
 }

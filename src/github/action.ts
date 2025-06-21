@@ -132,7 +132,10 @@ async function handleResult(
   changedFiles: string[],
 ): Promise<void> {
   const { octokit, repo, workspace } = config;
-  const { agentEvent, userPrompt } = processedEvent;
+  const { agentEvent, userPrompt, noPr } = processedEvent;
+  if (noPr) {
+    core.info('Flag --no-pr detected; skipping pull request creation.');
+  }
 
   // Skip any changes to workflow files to avoid requiring workflow permissions
   const workflowFiles = changedFiles.filter((f) =>
@@ -152,7 +155,7 @@ async function handleResult(
     (f) => !f.startsWith('.github/workflows/'),
   );
 
-  if (effectiveChangedFiles.length > 0) {
+  if (!noPr && effectiveChangedFiles.length > 0) {
     core.info(
       `Detected changes in ${
         effectiveChangedFiles.length
