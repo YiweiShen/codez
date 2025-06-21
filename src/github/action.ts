@@ -324,7 +324,11 @@ export async function runAction(
   let downloadedImageFiles: string[] = [];
   if (imageUrls.length > 0) {
     const imagesDir = path.join(workspace, 'codex-comment-images');
-    downloadedImageFiles = await downloadImages(imageUrls, imagesDir);
+    const allowedPrefix = 'https://github.com/user-attachments/assets/';
+    const downloadUrls = imageUrls.filter((url) =>
+      url.startsWith(allowedPrefix)
+    );
+    downloadedImageFiles = await downloadImages(downloadUrls, imagesDir);
     for (let i = 0; i < imageUrls.length; i++) {
       const url = imageUrls[i];
       const placeholder = `<image_${i}>`;
