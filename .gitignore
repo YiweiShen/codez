@@ -128,4 +128,13 @@ dist
 
 # misc
 .DS_Store
+# misc
 *.pem
+
+# Code comment images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
