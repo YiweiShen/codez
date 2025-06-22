@@ -24,6 +24,39 @@ import { maskSensitiveInfo } from '../security/security.js';
 import { runCodex } from '../client/codex.js';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
+
+/**
+ * Fetches the latest failed workflow run for the repository and returns its logs URL.
+ * @param octokit Octokit client
+ * @param repo Repository context ({owner, repo})
+ * @returns URL string to the logs or an informational message
+ */
+async function fetchLatestFailedWorkflowLogs(
+  octokit: Octokit,
+  repo: { owner: string; repo: string },
+): Promise<string> {
+  core.info('[perf] fetchLatestFailedWorkflowLogs start');
+  try {
+    const runsResponse = await octokit.rest.actions.listWorkflowRunsForRepo({
+      ...repo,
+      status: 'completed',
+      conclusion: 'failure',
+      per_page: 1,
+    });
+    const runs = runsResponse.data.workflow_runs;
+    if (!runs || runs.length === 0) {
+      return 'No failed workflow runs found.';
+    }
+    const latest = runs[0] as any;
+    const logsUrl = latest.logs_url;
+    return logsUrl
+      ? `Logs URL: ${logsUrl}`
+      : 'No logs URL available for the latest failed run.';
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Error fetching workflow runs: ${msg}`);
+  }
+}
 export { createIssuesFromFeaturePlan } from './createIssues.js';
 // Helper to escape strings for RegExp
 function escapeRegExp(str: string): string {
@@ -264,10 +297,8 @@ export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
 ): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
-    config;
-  const { agentEvent, userPrompt, includeFullHistory, createIssues } =
-    processedEvent;
+  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } = config;
+  const { agentEvent, userPrompt, includeFullHistory, createIssues, includeFixBuild } = processedEvent;
 
   // Add eyes reaction (instrumented)
   core.info('[perf] addEyeReaction start');
@@ -318,10 +349,26 @@ export async function runAction(
   const originalFileState = await captureFileState(workspace);
   core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
 
-  // generate Prompt (with special handling for create issues)
+  // generate Prompt (with special handling for --fix-build or create issues)
   let effectiveUserPrompt = userPrompt;
-  if (createIssues) {
-    effectiveUserPrompt = `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
+  if (includeFixBuild) {
+    core.info('Fetching latest failed CI build logs for --fix-build flag');
+    let logs: string;
+    try {
+      logs = await fetchLatestFailedWorkflowLogs(octokit, repo);
+    } catch (err) {
+      core.warning(
+        `Failed to fetch build logs: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      logs = `Failed to fetch logs: ${err instanceof Error ? err.message : String(err)}`;
+    }
+    effectiveUserPrompt =
+      `Latest failed build logs:\n\n${logs}\n\nPlease suggest changes to fix the build errors above.`;
+  } else if (createIssues) {
+    effectiveUserPrompt =
+      `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
 
   // Generate prompt for Codex (instrumented)
