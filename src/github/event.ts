@@ -25,6 +25,10 @@ export interface ProcessedEvent {
   includeFullHistory: boolean;
   createIssues: boolean;
   noPr: boolean;
+  /**
+   * Whether to fetch and include the latest failed CI build logs as context.
+   */
+  includeFixBuild: boolean;
 }
 
 /**
@@ -55,6 +59,12 @@ export async function processEvent(
   config: ActionConfig,
 ): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
+    let prompt = config.directPrompt;
+    let includeFixBuild = false;
+    if (prompt.split(/\s+/).includes('--fix-build')) {
+      includeFixBuild = true;
+      prompt = prompt.replace(/--fix-build\b/, '').trim();
+    }
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
       type: 'codex',
@@ -65,10 +75,11 @@ export async function processEvent(
           issue: { number: 0, title: '', body: '', pull_request: null },
         },
       },
-      userPrompt: config.directPrompt,
+      userPrompt: prompt,
       includeFullHistory: false,
       createIssues: false,
       noPr: false,
+      includeFixBuild,
     };
   }
   const eventPayload = await loadEventPayload(config.eventPath);
@@ -117,6 +128,9 @@ export async function processEvent(
   args = args.replace(/--create-issues\b/, '').trim();
   const noPr = args.split(/\s+/).includes('--no-pr');
   args = args.replace(/--no-pr\b/, '').trim();
+  // --fix-build: fetch latest failed CI build logs and include as context
+  const includeFixBuild = args.split(/\s+/).includes('--fix-build');
+  args = args.replace(/--fix-build\b/, '').trim();
   let userPrompt = args;
 
   let title: string | undefined;
@@ -135,5 +149,5 @@ export async function processEvent(
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, noPr };
+  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, noPr, includeFixBuild };
 }

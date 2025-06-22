@@ -41,6 +41,7 @@ describe('processEvent', () => {
       includeFullHistory: false,
       createIssues: false,
       noPr: false,
+      includeFixBuild: false,
     });
   });
 
@@ -100,6 +101,7 @@ describe('processEvent', () => {
       includeFullHistory: false,
       createIssues: false,
       noPr: false,
+      includeFixBuild: false,
     });
   });
 
