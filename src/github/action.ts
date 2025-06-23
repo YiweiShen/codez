@@ -51,12 +51,15 @@ async function fetchLatestFailedWorkflowLogs(
     const latest = runs[0] as any;
     const runId: number = latest.id;
     core.info(`[perf] downloading logs for run ${runId}`);
-    const downloadResponse = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs', {
-      owner: repo.owner,
-      repo: repo.repo,
-      run_id: runId,
-      request: { responseType: 'arraybuffer' },
-    });
+    const downloadResponse = await octokit.request(
+      'GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs',
+      {
+        owner: repo.owner,
+        repo: repo.repo,
+        run_id: runId,
+        request: { responseType: 'arraybuffer' },
+      },
+    );
     const buffer = Buffer.from(downloadResponse.data as ArrayBuffer);
     const zip = new AdmZip(buffer);
     const entries = zip.getEntries();
@@ -143,7 +146,7 @@ async function updateProgressComment(
   const bodyLines: string[] = [
     title,
     '',
-    `Progress: [${bar}] ${percent}%${percent === 100 ? ' ✅' : ''}`,
+    `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
     '',
   ];
   for (const s of steps) {
@@ -207,7 +210,9 @@ async function handleResult(
   );
   if (imageFiles.length > 0) {
     core.warning(
-      `Ignoring changes to codex-comment-images folder: ${imageFiles.join(', ')}`,
+      `Ignoring changes to codex-comment-images folder: ${imageFiles.join(
+        ', ',
+      )}`,
     );
     // Revert any image folder changes
     await execa('git', ['checkout', 'HEAD', '--', 'codex-comment-images'], {
@@ -285,17 +290,23 @@ async function handleResult(
       );
     }
   } else if (noPr && effectiveChangedFiles.length > 0) {
-    core.info(`--no-pr flag used and detected changes in ${effectiveChangedFiles.length} files; posting diff in comment.`);
+    core.info(
+      `--no-pr flag used and detected changes in ${effectiveChangedFiles.length} files; posting diff in comment.`,
+    );
     let diffOutput = '';
     try {
       const { stdout } = await execa(
         'git',
         ['diff', 'HEAD', '--', ...effectiveChangedFiles],
-        { cwd: workspace }
+        { cwd: workspace },
       );
       diffOutput = stdout;
     } catch (err) {
-      core.warning(`Failed to generate diff for comment: ${err instanceof Error ? err.message : String(err)}`);
+      core.warning(
+        `Failed to generate diff for comment: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     }
     const commentBody = `${output}\n\n**Proposed changes:**\n\`\`\`diff\n${diffOutput}\n\`\`\``;
     await postComment(octokit, repo, agentEvent.github, commentBody);
@@ -314,8 +325,15 @@ export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
 ): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } = config;
-  const { agentEvent, userPrompt, includeFullHistory, createIssues, includeFixBuild } = processedEvent;
+  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
+    config;
+  const {
+    agentEvent,
+    userPrompt,
+    includeFullHistory,
+    createIssues,
+    includeFixBuild,
+  } = processedEvent;
 
   // Add eyes reaction (instrumented)
   core.info('[perf] addEyeReaction start');
@@ -379,13 +397,13 @@ export async function runAction(
           err instanceof Error ? err.message : String(err)
         }`,
       );
-      logs = `Failed to fetch logs: ${err instanceof Error ? err.message : String(err)}`;
+      logs = `Failed to fetch logs: ${
+        err instanceof Error ? err.message : String(err)
+      }`;
     }
-    effectiveUserPrompt =
-      `Latest failed build logs:\n\n${logs}\n\nPlease suggest changes to fix the build errors above.`;
+    effectiveUserPrompt = `Latest failed build logs:\n\n${logs}\n\nPlease suggest changes to fix the build errors above.`;
   } else if (createIssues) {
-    effectiveUserPrompt =
-      `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
+    effectiveUserPrompt = `Please output only a JSON array of feature objects, each with a "title" (concise summary) and "description" (detailed explanation or examples). ${userPrompt}`;
   }
 
   // Generate prompt for Codex (instrumented)
@@ -407,7 +425,7 @@ export async function runAction(
     const imagesDir = path.join(workspace, 'codex-comment-images');
     const allowedPrefix = 'https://github.com/user-attachments/assets/';
     const downloadUrls = imageUrls.filter((url) =>
-      url.startsWith(allowedPrefix)
+      url.startsWith(allowedPrefix),
     );
     downloadedImageFiles = await downloadImages(downloadUrls, imagesDir);
     for (let i = 0; i < imageUrls.length; i++) {

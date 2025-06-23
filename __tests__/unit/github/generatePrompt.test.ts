@@ -14,12 +14,10 @@ describe('generatePrompt', () => {
   });
 
   it('no history, no files → returns just userPrompt', async () => {
-    jest
-      .spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({
-        content: { body: '', title: '', login: 'u' },
-        comments: [],
-      });
+    jest.spyOn(githubModule, 'getContentsData').mockResolvedValue({
+      content: { body: '', title: '', login: 'u' },
+      comments: [],
+    });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
 
     const result = await generatePrompt(
@@ -90,12 +88,10 @@ describe('generatePrompt', () => {
   });
 
   it('review‐comment event → includes [Context] section', async () => {
-    jest
-      .spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({
-        content: { body: '', title: '', login: 'u' },
-        comments: [],
-      });
+    jest.spyOn(githubModule, 'getContentsData').mockResolvedValue({
+      content: { body: '', title: '', login: 'u' },
+      comments: [],
+    });
     jest.spyOn(githubModule, 'getChangedFiles').mockResolvedValue([]);
     const evt = {
       type: 'pullRequestReviewCommentCreated',
@@ -116,12 +112,10 @@ describe('generatePrompt', () => {
   });
 
   it('with changed files → includes [Changed Files] list', async () => {
-    jest
-      .spyOn(githubModule, 'getContentsData')
-      .mockResolvedValue({
-        content: { body: '', title: '', login: 'u' },
-        comments: [],
-      });
+    jest.spyOn(githubModule, 'getContentsData').mockResolvedValue({
+      content: { body: '', title: '', login: 'u' },
+      comments: [],
+    });
     jest
       .spyOn(githubModule, 'getChangedFiles')
       .mockResolvedValue(['a.ts', 'b.js']);

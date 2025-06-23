@@ -149,5 +149,13 @@ export async function processEvent(
   }
 
   const type: 'codex' = 'codex';
-  return { type, agentEvent, userPrompt, includeFullHistory, createIssues, noPr, includeFixBuild };
+  return {
+    type,
+    agentEvent,
+    userPrompt,
+    includeFullHistory,
+    createIssues,
+    noPr,
+    includeFixBuild,
+  };
 }

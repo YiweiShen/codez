@@ -883,7 +883,9 @@ async function getIssueData(
           title: string;
           body: string | null;
           author: { login: string };
-          comments: { nodes: { body: string | null; author: { login: string } }[] };
+          comments: {
+            nodes: { body: string | null; author: { login: string } }[];
+          };
         };
       };
     }>(query, {
@@ -898,7 +900,7 @@ async function getIssueData(
       body: issue.body ?? '',
       login: issue.author.login,
     };
-    const comments = issue.comments.nodes.map(c => ({
+    const comments = issue.comments.nodes.map((c) => ({
       body: c.body ?? '',
       login: c.author.login,
     }));
@@ -1010,7 +1012,9 @@ async function getPullRequestData(
           title: string;
           body: string | null;
           author: { login: string };
-          comments: { nodes: { body: string | null; author: { login: string } }[] };
+          comments: {
+            nodes: { body: string | null; author: { login: string } }[];
+          };
         };
       };
     }>(query, {
@@ -1025,7 +1029,7 @@ async function getPullRequestData(
       body: pr.body ?? '',
       login: pr.author.login,
     };
-    const comments = pr.comments.nodes.map(c => ({
+    const comments = pr.comments.nodes.map((c) => ({
       body: c.body ?? '',
       login: c.author.login,
     }));
