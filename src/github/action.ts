@@ -24,12 +24,13 @@ import { maskSensitiveInfo } from '../security/security.js';
 import { runCodex } from '../client/codex.js';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
+import AdmZip from 'adm-zip';
 
 /**
- * Fetches the latest failed workflow run for the repository and returns its logs URL.
+ * Fetches the latest failed workflow run logs for the repository and returns their content.
  * @param octokit Octokit client
  * @param repo Repository context ({owner, repo})
- * @returns URL string to the logs or an informational message
+ * @returns String of log content or an informational message
  */
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
@@ -48,10 +49,26 @@ async function fetchLatestFailedWorkflowLogs(
       return 'No failed workflow runs found.';
     }
     const latest = runs[0] as any;
-    const logsUrl = latest.logs_url;
-    return logsUrl
-      ? `Logs URL: ${logsUrl}`
-      : 'No logs URL available for the latest failed run.';
+    const runId: number = latest.id;
+    core.info(`[perf] downloading logs for run ${runId}`);
+    const downloadResponse = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs', {
+      owner: repo.owner,
+      repo: repo.repo,
+      run_id: runId,
+      request: { responseType: 'arraybuffer' },
+    });
+    const buffer = Buffer.from(downloadResponse.data as ArrayBuffer);
+    const zip = new AdmZip(buffer);
+    const entries = zip.getEntries();
+    if (!entries || entries.length === 0) {
+      return 'No log files found in the logs archive.';
+    }
+    const logs: string[] = entries.map((entry) => {
+      const name = entry.entryName;
+      const content = entry.getData().toString('utf8');
+      return `=== ${name} ===\n${content}`;
+    });
+    return logs.join('\n\n');
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     throw new Error(`Error fetching workflow runs: ${msg}`);
