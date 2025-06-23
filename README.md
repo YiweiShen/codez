@@ -14,6 +14,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Support a `--no-pr` flag in the `/codex` command to skip pull request creation and post AI output as a comment
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
+- Support a `--fix-build` flag in the `/codex` command to fetch and include the latest failed CI build logs in the prompt
 - Support `pull_request`, `workflow_dispatch`, and `repository_dispatch` workflow triggers for automated workflows (e.g., on PR open/sync or manual dispatch).
 
 ## Usage
@@ -100,6 +101,11 @@ To skip pull request creation and only post AI output as a comment, use the `--n
 ```
 /codex --no-pr Please update the README formatting.
 ```
+For fetching and including the latest failed CI build logs, use the `--fix-build` flag:
+
+```
+/codex --fix-build Please suggest changes to fix the build errors.
+```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
@@ -121,6 +127,11 @@ To skip pull request creation and only post AI output as a comment, use the `--n
 
 ```
 /codex --no-pr Please add unit tests to this code.
+```
+For fetching and including the latest failed CI build logs, use the `--fix-build` flag:
+
+```
+/codex --fix-build Please suggest changes to fix the build errors.
 ```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
