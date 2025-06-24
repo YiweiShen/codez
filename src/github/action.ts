@@ -372,6 +372,32 @@ export async function runAction(
       }`,
     );
   }
+  /**
+   * Deletes the progress comment, replacing it with the final comment.
+   */
+  async function cleanupProgressComment(): Promise<void> {
+    if (!progressCommentId) return;
+    try {
+      const event = agentEvent.github;
+      if ('issue' in event) {
+        await octokit.rest.issues.deleteComment({
+          ...repo,
+          comment_id: progressCommentId,
+        });
+      } else if ('pull_request' in event && 'comment' in event) {
+        await octokit.rest.pulls.deleteReviewComment({
+          ...repo,
+          comment_id: progressCommentId,
+        });
+      }
+    } catch (err) {
+      core.warning(
+        `Failed to delete progress comment: ${
+          err instanceof Error ? err.message : err
+        }`,
+      );
+    }
+  }
 
   // Clone repository (instrumented)
   core.info('[perf] cloneRepository start');
@@ -516,6 +542,7 @@ export async function runAction(
         error instanceof Error ? error.message : String(error)
       }`,
     );
+    await cleanupProgressComment();
     return;
   }
   core.info(`Output: \n${output}`);
@@ -524,6 +551,7 @@ export async function runAction(
   if (createIssues) {
     const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
+    await cleanupProgressComment();
     return;
   }
 
@@ -581,4 +609,6 @@ export async function runAction(
   }
 
   core.info('Action completed successfully.');
+  // Remove the progress comment now that final comment is posted
+  await cleanupProgressComment();
 }
