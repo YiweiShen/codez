@@ -2,7 +2,7 @@
 
 ![GitHub Release](https://img.shields.io/github/v/release/YiweiShen/codez) ![GitHub Release Date](https://img.shields.io/github/release-date/YiweiShen/codez) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/YiweiShen/codez/build-and-push.yml) ![GitHub License](https://img.shields.io/github/license/YiweiShen/codez)
 
-**Built with Codez**: This repository is created and maintained using Codez, an AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions.
+**Built with Codez**: This repository (Codez) was built and is maintained using Codez, an AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions.
 
 An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Codex from GitHub Issues or Pull Request comments and automate code changes.
 
