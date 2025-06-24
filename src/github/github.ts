@@ -572,6 +572,8 @@ export async function commitAndPush(
     | GitHubEventPullRequestReviewCommentCreated,
   commitMessage: string,
   output: string,
+  /** Optional comment ID to update instead of creating a new one */
+  progressCommentId?: number,
 ): Promise<void> {
   // Get PR number from the event - different location based on event type
   const prNumber =
@@ -632,8 +634,25 @@ export async function commitAndPush(
     });
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit.');
-      // Post a comment indicating no changes were made or output if relevant
-      await postComment(octokit, repo, event, `${output}`);
+      if (progressCommentId) {
+        if ('issue' in event) {
+          await octokit.rest.issues.updateComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: truncateOutput(output),
+          });
+        } else if ('pull_request' in event && 'comment' in event) {
+          await octokit.rest.pulls.updateReviewComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: truncateOutput(output),
+          });
+        } else {
+          await postComment(octokit, repo, event, output);
+        }
+      } else {
+        await postComment(octokit, repo, event, output);
+      }
       return; // Exit early if no changes
     }
 
@@ -651,8 +670,26 @@ export async function commitAndPush(
 
     core.info('Changes committed and pushed.');
 
-    // Post a comment confirming the changes
-    await postComment(octokit, repo, event, `${output}`);
+    // Update existing progress comment or post a new comment confirming the changes
+    if (progressCommentId) {
+      if ('issue' in event) {
+        await octokit.rest.issues.updateComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body: truncateOutput(output),
+        });
+      } else if ('pull_request' in event && 'comment' in event) {
+        await octokit.rest.pulls.updateReviewComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body: truncateOutput(output),
+        });
+      } else {
+        await postComment(octokit, repo, event, output);
+      }
+    } else {
+      await postComment(octokit, repo, event, output);
+    }
   } catch (error) {
     core.error(`Error committing and pushing changes: ${error}`);
     // Attempt to post an error comment
