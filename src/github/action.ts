@@ -17,6 +17,7 @@ import {
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
 import path from 'path';
+import { promises as fs } from 'fs';
 import { extractImageUrls, downloadImages } from '../file/images.js';
 import { ActionConfig } from '../config/config.js';
 import { ProcessedEvent } from './event.js';
@@ -214,11 +215,18 @@ async function handleResult(
         ', ',
       )}`,
     );
-    // Revert any image folder changes
-    await execa('git', ['checkout', 'HEAD', '--', 'codex-comment-images'], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    // Remove any image folder changes (downloaded artifacts)
+    const imagesDir = path.join(workspace, 'codex-comment-images');
+    try {
+      await fs.rm(imagesDir, { recursive: true, force: true });
+      core.info(`Removed image artifacts directory: ${imagesDir}`);
+    } catch (error) {
+      core.warning(
+        `Failed to remove image artifacts directory: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
   // Filter out workflow and image folder changes
   const effectiveChangedFiles = changedFiles.filter(
