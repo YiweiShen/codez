@@ -325,6 +325,7 @@ async function handleResult(
         agentEvent.github,
         commitMessage,
         output,
+        progressCommentId,
       );
     }
   } else if (noPr && effectiveChangedFiles.length > 0) {
