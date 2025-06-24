@@ -313,6 +313,7 @@ async function handleResult(
         agentEvent.github,
         commitMessage,
         output,
+        progressCommentId,
       );
     } else if (
       agentEvent.type === 'pullRequestCommentCreated' ||
