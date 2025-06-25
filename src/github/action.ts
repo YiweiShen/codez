@@ -112,6 +112,7 @@ async function createProgressComment(
       issue_number: event.issue.number,
       body,
     });
+    core.info(`Created progress comment with id: ${data.id}`);
     return data.id;
   } else if ('pull_request' in event && 'comment' in event) {
     const inReplyTo = event.comment.in_reply_to_id ?? event.comment.id;
@@ -121,6 +122,7 @@ async function createProgressComment(
       comment_id: inReplyTo,
       body,
     });
+    core.info(`Created progress comment with id: ${data.id}`);
     return data.id;
   }
   throw new Error('Unsupported event for progress comment');
