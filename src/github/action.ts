@@ -624,25 +624,6 @@ export async function runAction(
         output,
         progressCommentId
       );
-    // After issues are created, mark all progress steps complete
-    if (progressCommentId) {
-      try {
-        const finalSteps = progressSteps.map((s) => `- [x] ${s}`);
-        await updateProgressComment(
-          octokit,
-          repo,
-          agentEvent.github,
-          progressCommentId,
-          finalSteps,
-        );
-      } catch (err) {
-        core.warning(
-          `Failed to update progress for create-issues: ${
-            err instanceof Error ? err.message : err
-          }`,
-        );
-      }
-    }
     // Then update the original reaction from eyes to thumbs up
     try {
       const evt = agentEvent.github;
