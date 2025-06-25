@@ -386,18 +386,13 @@ export async function runAction(
   core.info(`[perf] addEyeReaction end - ${Date.now() - _t_addEye}ms`);
 
   // Initialize progress UI
-  // Define progress steps with emojis for clarity; for create-issues only two steps
-  const progressSteps = createIssues
-    ? [
-        '🔍 Gathering context',
-        '📝 Planning',
-      ]
-    : [
-        '🔍 Gathering context',
-        '📝 Planning',
-        '✨ Applying edits',
-        '🧪 Testing',
-      ];
+  // Define progress steps with emojis for clarity
+  const progressSteps = [
+    '🔍 Gathering context',
+    '📝 Planning',
+    '✨ Applying edits',
+    '🧪 Testing',
+  ];
   let progressCommentId: number | undefined;
   try {
     progressCommentId = await createProgressComment(
