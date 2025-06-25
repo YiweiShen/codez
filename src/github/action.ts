@@ -610,9 +610,15 @@ export async function runAction(
   core.info(`Output: \n${output}`);
 
   // Handle create issues intent: create issues from JSON output
-  if (createIssues) {
-    const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
-    await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
+    if (createIssues) {
+      const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
+      await createIssuesFromFeaturePlan(
+        octokit,
+        repo,
+        agentEvent.github,
+        output,
+        progressCommentId
+      );
     // After issues are created, mark all progress steps complete
     if (progressCommentId) {
       try {
