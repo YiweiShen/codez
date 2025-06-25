@@ -732,40 +732,86 @@ export async function runAction(
   await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
 
   core.info('Action completed successfully.');
-  // Change eye reaction to thumb up for the original issue
+  // Change eye reaction to thumbs-up for the original event
   try {
     const event = processedEvent.agentEvent.github;
-    const issueNumber = 'issue' in event
-      ? event.issue.number
-      : event.pull_request?.number;
-    if (issueNumber !== undefined) {
-      // List reactions on the original issue or PR
-      const reactions = await octokit.rest.reactions.listForIssue({
-        ...repo,
-        issue_number: issueNumber,
-      });
-      // Remove the eyes reaction added by the bot
-      for (const reaction of reactions.data) {
-        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
-          await octokit.rest.reactions.deleteForIssue({
-            ...repo,
-            issue_number: issueNumber,
-            reaction_id: reaction.id,
-          });
-          break;
+    if ('comment' in event) {
+      const commentId = event.comment.id;
+      if ('pull_request' in event) {
+        // Review comment
+        const reactions = await octokit.rest.reactions.listForPullRequestReviewComment({
+          ...repo,
+          comment_id: commentId,
+        });
+        for (const reaction of reactions.data) {
+          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+            await octokit.rest.reactions.deleteForPullRequestReviewComment({
+              ...repo,
+              comment_id: commentId,
+              reaction_id: reaction.id,
+            });
+            break;
+          }
         }
+        await octokit.rest.reactions.createForPullRequestReviewComment({
+          ...repo,
+          comment_id: commentId,
+          content: '+1',
+        });
+        core.info(`Changed reaction on review comment ${commentId} from eyes to +1`);
+      } else {
+        // Issue or PR conversation comment
+        const reactions = await octokit.rest.reactions.listForIssueComment({
+          ...repo,
+          comment_id: commentId,
+        });
+        for (const reaction of reactions.data) {
+          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+            await octokit.rest.reactions.deleteForIssueComment({
+              ...repo,
+              comment_id: commentId,
+              reaction_id: reaction.id,
+            });
+            break;
+          }
+        }
+        await octokit.rest.reactions.createForIssueComment({
+          ...repo,
+          comment_id: commentId,
+          content: '+1',
+        });
+        core.info(`Changed reaction on comment ${commentId} from eyes to +1`);
       }
-      // Add a thumbs up reaction
-      await octokit.rest.reactions.createForIssue({
-        ...repo,
-        issue_number: issueNumber,
-        content: '+1',
-      });
-      core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+    } else {
+      const issueNumber = 'issue' in event
+        ? event.issue.number
+        : event.pull_request?.number;
+      if (issueNumber !== undefined) {
+        const reactions = await octokit.rest.reactions.listForIssue({
+          ...repo,
+          issue_number: issueNumber,
+        });
+        for (const reaction of reactions.data) {
+          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+            await octokit.rest.reactions.deleteForIssue({
+              ...repo,
+              issue_number: issueNumber,
+              reaction_id: reaction.id,
+            });
+            break;
+          }
+        }
+        await octokit.rest.reactions.createForIssue({
+          ...repo,
+          issue_number: issueNumber,
+          content: '+1',
+        });
+        core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+      }
     }
   } catch (reactionError) {
     core.warning(
-      `Failed to update reaction on the original issue: ${
+      `Failed to update reaction on the original event: ${
         reactionError instanceof Error ? reactionError.message : reactionError
       }`,
     );
