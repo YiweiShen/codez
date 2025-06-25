@@ -11,6 +11,7 @@ export async function createIssuesFromFeaturePlan(
   repo: { owner: string; repo: string },
   event: GitHubEvent,
   output: string,
+  progressCommentId?: number,
 ): Promise<void> {
   let features: Array<{ title: string; description: string }>;
   try {
@@ -69,25 +70,38 @@ export async function createIssuesFromFeaturePlan(
       return;
     }
   }
-  for (const feature of features) {
+  for (const [index, feature] of features.entries()) {
     try {
       const issue = await octokit.rest.issues.create({
         ...repo,
         title: feature.title,
         body: feature.description,
       });
-      core.info(
-        `Created feature issue #${issue.data.number}: ${feature.title}`,
-      );
-      await postComment(
-        octokit,
-        repo,
-        event,
-        `Created new feature issue #${issue.data.number} for \"${feature.title}\"`,
-      );
+      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
+      const commentBody =
+        `Created new feature issue #${issue.data.number} for "${feature.title}"`;
+      if (index === 0 && progressCommentId) {
+        if ('issue' in event) {
+          await octokit.rest.issues.updateComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: commentBody,
+          });
+        } else if ('pull_request' in event && 'comment' in event) {
+          await octokit.rest.pulls.updateReviewComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: commentBody,
+          });
+        } else {
+          await postComment(octokit, repo, event, commentBody);
+        }
+      } else {
+        await postComment(octokit, repo, event, commentBody);
+      }
     } catch (error) {
       core.warning(
-        `Failed to create issue for feature \"${feature.title}\": ${
+        `Failed to create issue for feature "${feature.title}": ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
