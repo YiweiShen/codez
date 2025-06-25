@@ -383,7 +383,14 @@ export function extractText(event: GitHubEvent): string | null {
 }
 
 /**
- * Creates a Pull Request with the changes.
+ * Creates a Pull Request with the changes and updates or creates a comment.
+ * @param workspace Local repository path
+ * @param octokit Octokit client
+ * @param repo Repository context ({owner, repo})
+ * @param event GitHub event for issues or comment
+ * @param commitMessage Commit message and PR title
+ * @param output AI output or details for comment body
+ * @param progressCommentId Optional comment ID to update instead of creating a new one
  */
 export async function createPullRequest(
   workspace: string,
@@ -395,6 +402,7 @@ export async function createPullRequest(
     | GitHubEventIssuesAssigned,
   commitMessage: string,
   output: string,
+  progressCommentId?: number,
 ): Promise<void> {
   const issueNumber = event.issue.number;
   const branchType = getBranchType(commitMessage);
@@ -463,11 +471,19 @@ export async function createPullRequest(
     core.info(`Pull Request created: ${pr.data.html_url}`);
 
     const prCommentBody = `Created Pull Request: ${pr.data.html_url}`;
-    await octokit.rest.issues.createComment({
-      ...repo,
-      issue_number: issueNumber,
-      body: prCommentBody,
-    });
+    if (progressCommentId) {
+      await octokit.rest.issues.updateComment({
+        ...repo,
+        comment_id: progressCommentId,
+        body: prCommentBody,
+      });
+    } else {
+      await octokit.rest.issues.createComment({
+        ...repo,
+        issue_number: issueNumber,
+        body: prCommentBody,
+      });
+    }
 
     // Link PR to issue in development panel via GraphQL
     try {
