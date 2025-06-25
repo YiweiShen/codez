@@ -126,31 +126,7 @@ Comment on an existing Pull Request to request code modifications:
 /codex Please add unit tests to this code.
 ```
 
-To include full history in the prompt (both user and bot comments), use the `--full-history` flag:
-
-```
-/codex --full-history Please add unit tests to this code.
-```
-
-To skip pull request creation and only post AI output as a comment, use the `--no-pr` flag:
-
-```
-/codex --no-pr Please add unit tests to this code.
-```
-For fetching and including the latest failed CI build logs, use the `--fix-build` flag:
-
-```
-/codex --fix-build Please suggest changes to fix the build errors.
-```
-
-For fetching and including contents from URLs referenced in the prompt, use the `--fetch` flag:
-
-```
- /codex --fetch Please review the API docs at https://example.com/docs/api
- ```
- By default, URLs are fetched and preprocessed via the Jina Reader API by prefixing each URL with `https://r.jina.ai/`, which retrieves the processed content.
-
-Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
+All flags described in the Issues section apply (e.g., `--full-history`, `--no-pr`, `--fix-build`, `--fetch`).
 
 ### Example Usage: Creating Issues
 
