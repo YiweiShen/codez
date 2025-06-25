@@ -638,4 +638,42 @@ export async function runAction(
   await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
 
   core.info('Action completed successfully.');
+  // Change eye reaction to thumb up for the original issue
+  try {
+    const event = processedEvent.agentEvent.github;
+    const issueNumber = 'issue' in event
+      ? event.issue.number
+      : event.pull_request?.number;
+    if (issueNumber !== undefined) {
+      // List reactions on the original issue or PR
+      const reactions = await octokit.rest.reactions.listForIssue({
+        ...repo,
+        issue_number: issueNumber,
+      });
+      // Remove the eyes reaction added by the bot
+      for (const reaction of reactions.data) {
+        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+          await octokit.rest.reactions.deleteForIssue({
+            ...repo,
+            issue_number: issueNumber,
+            reaction_id: reaction.id,
+          });
+          break;
+        }
+      }
+      // Add a thumbs up reaction
+      await octokit.rest.reactions.createForIssue({
+        ...repo,
+        issue_number: issueNumber,
+        content: '+1',
+      });
+      core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+    }
+  } catch (reactionError) {
+    core.warning(
+      `Failed to update reaction on the original issue: ${
+        reactionError instanceof Error ? reactionError.message : reactionError
+      }`,
+    );
+  }
 }
