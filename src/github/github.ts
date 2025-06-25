@@ -347,7 +347,7 @@ export async function removeEyeReaction(
   event: GitHubEvent,
 ): Promise<void> {
   try {
-    if (event.action === 'opened' && 'issue' in event) {
+    if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
       const reactions = await octokit.rest.reactions.listForIssue({
         ...repo,
         issue_number: event.issue.number,
@@ -414,7 +414,7 @@ export async function addThumbUpReaction(
   event: GitHubEvent,
 ): Promise<void> {
   try {
-    if (event.action === 'opened' && 'issue' in event) {
+    if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
       await octokit.rest.reactions.createForIssue({
         ...repo,
         issue_number: event.issue.number,
@@ -638,34 +638,10 @@ export async function createPullRequest(
       );
     }
 
-    // Change eye reaction to thumb up for the original issue
+    // Update eye reaction to thumb up reaction on event source
     try {
-      // List reactions on the original issue
-      const issueReactions = await octokit.rest.reactions.listForIssue({
-        ...repo,
-        issue_number: issueNumber,
-      });
-      // Remove the eyes reaction added by the bot
-      for (const reaction of issueReactions.data) {
-        if (
-          reaction.content === 'eyes' &&
-          reaction.user?.login === 'github-actions[bot]'
-        ) {
-          await octokit.rest.reactions.deleteForIssue({
-            ...repo,
-            issue_number: issueNumber,
-            reaction_id: reaction.id,
-          });
-          break;
-        }
-      }
-      // Add a thumbs up reaction to indicate PR creation
-      await octokit.rest.reactions.createForIssue({
-        ...repo,
-        issue_number: issueNumber,
-        content: '+1',
-      });
-      core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+      await removeEyeReaction(octokit, repo, event);
+      await addThumbUpReaction(octokit, repo, event);
     } catch (reactionError) {
       core.warning(
         `Failed to update reaction on issue #${issueNumber}: ${
