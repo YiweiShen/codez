@@ -590,9 +590,6 @@ export async function runAction(
   const changedFiles = await detectChanges(workspace, originalFileState);
   core.info(`[perf] detectChanges end - ${Date.now() - _t_detect}ms`);
 
-  // Handle the results
-  await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
-
   // Update progress: applying edits complete
   if (progressCommentId) {
     try {
@@ -636,6 +633,9 @@ export async function runAction(
       );
     }
   }
+
+  // Handle the results
+  await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
 
   core.info('Action completed successfully.');
 }
