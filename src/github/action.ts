@@ -474,9 +474,6 @@ export async function runAction(
           let data = typeof response.data === 'string'
             ? response.data
             : JSON.stringify(response.data);
-          if (data.length > 2000) {
-            data = data.slice(0, 2000) + '\n...[truncated]';
-          }
           fetchedParts.push(`=== ${url} ===\n${data}`);
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
