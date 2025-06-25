@@ -26,6 +26,7 @@ import { runCodex } from '../client/codex.js';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
 import AdmZip from 'adm-zip';
+import axios from 'axios';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
@@ -375,6 +376,7 @@ export async function runAction(
     includeFullHistory,
     createIssues,
     includeFixBuild,
+    includeFetch,
   } = processedEvent;
 
   // Add eyes reaction (instrumented)
@@ -455,8 +457,39 @@ export async function runAction(
   const originalFileState = await captureFileState(workspace);
   core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
 
-  // generate Prompt (with special handling for --fix-build or create issues)
+  // generate Prompt (with special handling for --fetch, --fix-build, or create issues)
   let effectiveUserPrompt = userPrompt;
+  if (includeFetch) {
+    core.info('Fetching contents of URLs for --fetch flag');
+    const urlRegex = /(https?:\/\/[^\s)]+)/g;
+    const urls = userPrompt.match(urlRegex) || [];
+    if (urls.length > 0) {
+      const fetchedParts: string[] = [];
+      for (const url of urls) {
+        try {
+          const response = await axios.get<string>(url, {
+            responseType: 'text',
+            timeout: 10000,
+          });
+          let data = typeof response.data === 'string'
+            ? response.data
+            : JSON.stringify(response.data);
+          if (data.length > 2000) {
+            data = data.slice(0, 2000) + '\n...[truncated]';
+          }
+          fetchedParts.push(`=== ${url} ===\n${data}`);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          fetchedParts.push(`Failed to fetch ${url}: ${msg}`);
+        }
+      }
+      effectiveUserPrompt = `Contents from URLs:\n\n${fetchedParts.join(
+        '\n\n',
+      )}\n\n${effectiveUserPrompt}`;
+    } else {
+      core.info('No URLs found to fetch for --fetch flag');
+    }
+  }
   if (includeFixBuild) {
     core.info('Fetching latest failed CI build logs for --fix-build flag');
     let logs: string;

@@ -109,6 +109,12 @@ For fetching and including the latest failed CI build logs, use the `--fix-build
 /codex --fix-build Please suggest changes to fix the build errors.
 ```
 
+For fetching and including contents from URLs referenced in the prompt, use the `--fetch` flag:
+
+```
+/codex --fetch Please review the API docs at https://example.com/docs/api
+```
+
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
 ### Example Usage in PRs
@@ -134,6 +140,12 @@ For fetching and including the latest failed CI build logs, use the `--fix-build
 
 ```
 /codex --fix-build Please suggest changes to fix the build errors.
+```
+
+For fetching and including contents from URLs referenced in the prompt, use the `--fetch` flag:
+
+```
+/codex --fetch Please review the API docs at https://example.com/docs/api
 ```
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
