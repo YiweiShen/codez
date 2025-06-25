@@ -467,7 +467,9 @@ export async function runAction(
       const fetchedParts: string[] = [];
       for (const url of urls) {
         try {
-          const response = await axios.get<string>(url, {
+          // Use Jina Reader API to fetch and preprocess content
+          const readerUrl = `https://r.jina.ai/${url}`;
+          const response = await axios.get<string>(readerUrl, {
             responseType: 'text',
             timeout: 10000,
           });
