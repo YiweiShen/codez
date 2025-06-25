@@ -611,6 +611,62 @@ export async function runAction(
   if (createIssues) {
     const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
     await createIssuesFromFeaturePlan(octokit, repo, agentEvent.github, output);
+    // After issues are created, mark all progress steps complete
+    if (progressCommentId) {
+      try {
+        const finalSteps = progressSteps.map((s) => `- [x] ${s}`);
+        await updateProgressComment(
+          octokit,
+          repo,
+          agentEvent.github,
+          progressCommentId,
+          finalSteps,
+        );
+      } catch (err) {
+        core.warning(
+          `Failed to update progress for create-issues: ${
+            err instanceof Error ? err.message : err
+          }`,
+        );
+      }
+    }
+    // Then update the original reaction from eyes to thumbs up
+    try {
+      const evt = agentEvent.github;
+      const issueNumber = 'issue' in evt
+        ? evt.issue.number
+        : evt.pull_request?.number;
+      if (issueNumber !== undefined) {
+        // Remove the eyes reaction added earlier
+        const reactions = await octokit.rest.reactions.listForIssue({
+          ...repo,
+          issue_number: issueNumber,
+        });
+        for (const reaction of reactions.data) {
+          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+            await octokit.rest.reactions.deleteForIssue({
+              ...repo,
+              issue_number: issueNumber,
+              reaction_id: reaction.id,
+            });
+            break;
+          }
+        }
+        // Add a thumbs up reaction
+        await octokit.rest.reactions.createForIssue({
+          ...repo,
+          issue_number: issueNumber,
+          content: '+1',
+        });
+        core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
+      }
+    } catch (reactionError) {
+      core.warning(
+        `Failed to update reaction on the original issue: ${
+          reactionError instanceof Error ? reactionError.message : reactionError
+        }`
+      );
+    }
     return;
   }
 
