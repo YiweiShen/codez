@@ -29,6 +29,10 @@ export interface ProcessedEvent {
    * Whether to fetch and include the latest failed CI build logs as context.
    */
   includeFixBuild: boolean;
+  /**
+   * Whether to fetch known URLs referenced in the prompt and include their contents.
+   */
+  includeFetch: boolean;
 }
 
 /**
@@ -61,9 +65,14 @@ export async function processEvent(
   if (config.directPrompt) {
     let prompt = config.directPrompt;
     let includeFixBuild = false;
+    let includeFetch = false;
     if (prompt.split(/\s+/).includes('--fix-build')) {
       includeFixBuild = true;
       prompt = prompt.replace(/--fix-build\b/, '').trim();
+    }
+    if (prompt.split(/\s+/).includes('--fetch')) {
+      includeFetch = true;
+      prompt = prompt.replace(/--fetch\b/, '').trim();
     }
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
@@ -80,6 +89,7 @@ export async function processEvent(
       createIssues: false,
       noPr: false,
       includeFixBuild,
+      includeFetch,
     };
   }
   const eventPayload = await loadEventPayload(config.eventPath);
@@ -131,6 +141,8 @@ export async function processEvent(
   // --fix-build: fetch latest failed CI build logs and include as context
   const includeFixBuild = args.split(/\s+/).includes('--fix-build');
   args = args.replace(/--fix-build\b/, '').trim();
+  const includeFetch = args.split(/\s+/).includes('--fetch');
+  args = args.replace(/--fetch\b/, '').trim();
   let userPrompt = args;
 
   let title: string | undefined;
@@ -157,5 +169,6 @@ export async function processEvent(
     createIssues,
     noPr,
     includeFixBuild,
+    includeFetch,
   };
 }

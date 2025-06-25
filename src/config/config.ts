@@ -52,6 +52,10 @@ export interface ActionConfig {
    * Optional list of local image file paths to include in the Codex CLI invocation.
    */
   images: string[];
+  /**
+   * Whether to fetch known URLs referenced in the prompt and include their contents.
+   */
+  fetch: boolean;
 }
 
 /**
@@ -150,6 +154,7 @@ export function getConfig(): ActionConfig {
   const codexEnv = parseEnvInput(codexEnvInput);
   const imagesInput = core.getInput('images') || '';
   const images = parseListInput(imagesInput);
+  const fetch = core.getBooleanInput('fetch');
 
   if (!openaiApiKey) {
     throw new Error('OpenAI API key is required.');
@@ -181,5 +186,6 @@ export function getConfig(): ActionConfig {
     assigneeTrigger,
     codexEnv,
     images,
+    fetch,
   };
 }

@@ -49,6 +49,10 @@ inputs:
       Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc.
     required: false
     default: ''
+  fetch:
+    description: 'Fetch known URLs referenced in the prompt and include their contents in the prompt'
+    required: false
+    default: 'false'
 
 runs:
   using: 'docker'
