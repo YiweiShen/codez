@@ -17,6 +17,7 @@ An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Act
 - Support custom trigger phrases via the `trigger-phrase` input (default: `/codex`)
 - Support assignee-based triggers via the `assignee-trigger` input to invoke Codez on issue assignment
 - Support a `--fix-build` flag in the `/codex` command to fetch and include the latest failed CI build logs in the prompt
+- Support a `--fetch` flag in the `/codex` command to fetch and include contents from URLs referenced in the prompt
 - Support `pull_request`, `workflow_dispatch`, and `repository_dispatch` workflow triggers for automated workflows (e.g., on PR open/sync or manual dispatch).
 
 ## Usage
