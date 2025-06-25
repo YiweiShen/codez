@@ -114,6 +114,7 @@ For fetching and including contents from URLs referenced in the prompt, use the 
 ```
 /codex --fetch Please review the API docs at https://example.com/docs/api
 ```
+By default, URLs are fetched and preprocessed via the Jina Reader API by prefixing each URL with `https://r.jina.ai/`, which retrieves the processed content.
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
@@ -145,8 +146,9 @@ For fetching and including the latest failed CI build logs, use the `--fix-build
 For fetching and including contents from URLs referenced in the prompt, use the `--fetch` flag:
 
 ```
-/codex --fetch Please review the API docs at https://example.com/docs/api
-```
+ /codex --fetch Please review the API docs at https://example.com/docs/api
+ ```
+ By default, URLs are fetched and preprocessed via the Jina Reader API by prefixing each URL with `https://r.jina.ai/`, which retrieves the processed content.
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
 
