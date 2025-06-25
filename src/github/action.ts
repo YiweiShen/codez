@@ -13,6 +13,8 @@ import {
   commitAndPush,
   postComment,
   generatePrompt,
+  removeEyeReaction,
+  addThumbUpReaction,
 } from './github.js';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
@@ -605,6 +607,16 @@ export async function runAction(
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     await updateFinalComment(`CLI execution failed: ${msg}`);
+    try {
+      await removeEyeReaction(octokit, repo, agentEvent.github);
+      await addThumbUpReaction(octokit, repo, agentEvent.github);
+    } catch (reactionError) {
+      core.warning(
+        `Failed to update reaction on the original event: ${
+          reactionError instanceof Error ? reactionError.message : reactionError
+        }`
+      );
+    }
     return;
   }
   core.info(`Output: \n${output}`);
@@ -619,36 +631,10 @@ export async function runAction(
         output,
         progressCommentId
       );
-    // Then update the original reaction from eyes to thumbs up
+    // Update reaction from eyes to thumbs up
     try {
-      const evt = agentEvent.github;
-      const issueNumber = 'issue' in evt
-        ? evt.issue.number
-        : evt.pull_request?.number;
-      if (issueNumber !== undefined) {
-        // Remove the eyes reaction added earlier
-        const reactions = await octokit.rest.reactions.listForIssue({
-          ...repo,
-          issue_number: issueNumber,
-        });
-        for (const reaction of reactions.data) {
-          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
-            await octokit.rest.reactions.deleteForIssue({
-              ...repo,
-              issue_number: issueNumber,
-              reaction_id: reaction.id,
-            });
-            break;
-          }
-        }
-        // Add a thumbs up reaction
-        await octokit.rest.reactions.createForIssue({
-          ...repo,
-          issue_number: issueNumber,
-          content: '+1',
-        });
-        core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
-      }
+      await removeEyeReaction(octokit, repo, agentEvent.github);
+      await addThumbUpReaction(octokit, repo, agentEvent.github);
     } catch (reactionError) {
       core.warning(
         `Failed to update reaction on the original issue: ${
@@ -713,88 +699,15 @@ export async function runAction(
   await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
 
   core.info('Action completed successfully.');
-  // Change eye reaction to thumbs-up for the original event
+  // Update reaction from eyes to thumbs up for the original event
   try {
-    const event = processedEvent.agentEvent.github;
-    if ('comment' in event) {
-      const commentId = event.comment.id;
-      if ('pull_request' in event) {
-        // Review comment
-        const reactions = await octokit.rest.reactions.listForPullRequestReviewComment({
-          ...repo,
-          comment_id: commentId,
-        });
-        for (const reaction of reactions.data) {
-          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
-            await octokit.rest.reactions.deleteForPullRequestReviewComment({
-              ...repo,
-              comment_id: commentId,
-              reaction_id: reaction.id,
-            });
-            break;
-          }
-        }
-        await octokit.rest.reactions.createForPullRequestReviewComment({
-          ...repo,
-          comment_id: commentId,
-          content: '+1',
-        });
-        core.info(`Changed reaction on review comment ${commentId} from eyes to +1`);
-      } else {
-        // Issue or PR conversation comment
-        const reactions = await octokit.rest.reactions.listForIssueComment({
-          ...repo,
-          comment_id: commentId,
-        });
-        for (const reaction of reactions.data) {
-          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
-            await octokit.rest.reactions.deleteForIssueComment({
-              ...repo,
-              comment_id: commentId,
-              reaction_id: reaction.id,
-            });
-            break;
-          }
-        }
-        await octokit.rest.reactions.createForIssueComment({
-          ...repo,
-          comment_id: commentId,
-          content: '+1',
-        });
-        core.info(`Changed reaction on comment ${commentId} from eyes to +1`);
-      }
-    } else {
-      const issueNumber = 'issue' in event
-        ? event.issue.number
-        : event.pull_request?.number;
-      if (issueNumber !== undefined) {
-        const reactions = await octokit.rest.reactions.listForIssue({
-          ...repo,
-          issue_number: issueNumber,
-        });
-        for (const reaction of reactions.data) {
-          if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
-            await octokit.rest.reactions.deleteForIssue({
-              ...repo,
-              issue_number: issueNumber,
-              reaction_id: reaction.id,
-            });
-            break;
-          }
-        }
-        await octokit.rest.reactions.createForIssue({
-          ...repo,
-          issue_number: issueNumber,
-          content: '+1',
-        });
-        core.info(`Changed reaction on issue #${issueNumber} from eyes to +1`);
-      }
-    }
+    await removeEyeReaction(octokit, repo, processedEvent.agentEvent.github);
+    await addThumbUpReaction(octokit, repo, processedEvent.agentEvent.github);
   } catch (reactionError) {
     core.warning(
       `Failed to update reaction on the original event: ${
         reactionError instanceof Error ? reactionError.message : reactionError
-      }`,
+      }`
     );
   }
 }
