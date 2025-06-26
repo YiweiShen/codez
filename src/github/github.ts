@@ -886,7 +886,7 @@ export async function generatePrompt(
 
   // Exclude progress comments from context
   const filteredComments = contents.comments.filter(
-    (comment) => !comment.body.trim().startsWith('**Codez Progress**'),
+    (comment) => !comment.body.trim().startsWith('**🚀 Codez Progress**'),
   );
 
   let prFiles: string[] = [];

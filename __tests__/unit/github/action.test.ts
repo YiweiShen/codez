@@ -27,7 +27,7 @@ describe('createProgressComment', () => {
     expect(mockCreate).toHaveBeenCalledWith({
       ...repo,
       issue_number: 1,
-      body: expect.stringContaining('**Codez Progress**'),
+      body: expect.stringContaining('**🚀 Codez Progress**'),
     });
     const body = mockCreate.mock.calls[0][0].body;
     expect(body).toContain('- [ ] step1');
@@ -61,7 +61,7 @@ describe('updateProgressComment', () => {
     expect(mockUpdate).toHaveBeenCalledWith({
       ...repo,
       comment_id: 789,
-      body: expect.stringContaining('**Codez Progress**'),
+      body: expect.stringContaining('**🚀 Codez Progress**'),
     });
     const body = mockUpdate.mock.calls[0][0].body;
     expect(body).toContain(steps[0]);
@@ -76,7 +76,7 @@ describe('updateProgressComment', () => {
     expect(mockReview).toHaveBeenCalledWith({
       ...repo,
       comment_id: 321,
-      body: expect.stringContaining('**Codez Progress**'),
+      body: expect.stringContaining('**🚀 Codez Progress**'),
     });
   });
 });
