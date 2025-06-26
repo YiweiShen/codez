@@ -42,6 +42,7 @@ describe('processEvent', () => {
       createIssues: false,
       noPr: false,
       includeFixBuild: false,
+      includeFetch: false,
     });
   });
 
@@ -102,6 +103,7 @@ describe('processEvent', () => {
       createIssues: false,
       noPr: false,
       includeFixBuild: false,
+      includeFetch: false,
     });
   });
 

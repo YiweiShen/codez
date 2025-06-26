@@ -65,7 +65,7 @@ export async function processEvent(
   if (config.directPrompt) {
     let prompt = config.directPrompt;
     let includeFixBuild = false;
-    let includeFetch = false;
+    let includeFetch = Boolean(config.fetch);
     if (prompt.split(/\s+/).includes('--fix-build')) {
       includeFixBuild = true;
       prompt = prompt.replace(/--fix-build\b/, '').trim();
@@ -141,7 +141,7 @@ export async function processEvent(
   // --fix-build: fetch latest failed CI build logs and include as context
   const includeFixBuild = args.split(/\s+/).includes('--fix-build');
   args = args.replace(/--fix-build\b/, '').trim();
-  const includeFetch = args.split(/\s+/).includes('--fetch');
+  const includeFetch = config.fetch || args.split(/\s+/).includes('--fetch');
   args = args.replace(/--fetch\b/, '').trim();
   let userPrompt = args;
 
