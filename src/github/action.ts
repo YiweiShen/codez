@@ -103,7 +103,7 @@ async function createProgressComment(
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = '**🚀 Codez Progress**';
-  const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0%`, ''];
+  const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0% <image_0>`, ''];
   for (const step of steps) {
     bodyLines.push(`- [ ] ${step}`);
   }
@@ -152,7 +152,7 @@ async function updateProgressComment(
   const bodyLines: string[] = [
     title,
     '',
-    `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
+    `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ' <image_0>'}`,
     '',
   ];
   for (const s of steps) {
