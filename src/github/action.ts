@@ -465,6 +465,7 @@ export async function runAction(
     core.info('Fetching contents of URLs for --fetch flag');
     const urlRegex = /(https?:\/\/[^\s)]+)/g;
     const urls = userPrompt.match(urlRegex) || [];
+    core.info(`Matched URLs for --fetch: ${urls.join(', ')}`);
     if (urls.length > 0) {
       const fetchedParts: string[] = [];
       for (const url of urls) {
