@@ -87,6 +87,18 @@ function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 const PROGRESS_BAR_BLOCKS = 20;
+const SPINNER_ICON = '⏳';
+
+function formatProgressSteps(steps: string[], completedIndex: number): string[] {
+  return steps.map((step, idx) => {
+    const parts = step.split(' ');
+    const icon = parts[0];
+    const desc = parts.slice(1).join(' ');
+    const checked = idx <= completedIndex ? 'x' : ' ';
+    const displayIcon = idx === completedIndex + 1 ? SPINNER_ICON : icon;
+    return `- [${checked}] ${displayIcon} ${desc}`;
+  });
+}
 
 /**
  * Creates a progress comment with initial unchecked steps.
@@ -104,9 +116,9 @@ async function createProgressComment(
   const emptyBar = '░'.repeat(barBlocks);
   const title = '**🚀 Codez Progress**';
   const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0%`, ''];
-  for (const step of steps) {
-    bodyLines.push(`- [ ] ${step}`);
-  }
+  // Initial step display: show spinner on first step
+  const initialStepLines = formatProgressSteps(steps, -1);
+  bodyLines.push(...initialStepLines);
   bodyLines.push('');
   const body = bodyLines.join('\n');
   if ('issue' in event) {
@@ -550,9 +562,7 @@ export async function runAction(
   // Update progress: context gathering complete
   if (progressCommentId) {
     try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 0 ? 'x' : ' '}] ${s}`,
-      );
+      const steps = formatProgressSteps(progressSteps, 0);
       await updateProgressComment(
         octokit,
         repo,
@@ -586,9 +596,7 @@ export async function runAction(
     // Update progress: planning complete
     if (progressCommentId) {
       try {
-        const steps = progressSteps.map(
-          (s, i) => `- [${i <= 1 ? 'x' : ' '}] ${s}`,
-        );
+        const steps = formatProgressSteps(progressSteps, 1);
         await updateProgressComment(
           octokit,
           repo,
@@ -654,9 +662,7 @@ export async function runAction(
   // Update progress: applying edits complete
   if (progressCommentId) {
     try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 2 ? 'x' : ' '}] ${s}`,
-      );
+      const steps = formatProgressSteps(progressSteps, 2);
       await updateProgressComment(
         octokit,
         repo,
@@ -676,9 +682,7 @@ export async function runAction(
   // Update progress: testing complete
   if (progressCommentId) {
     try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 3 ? 'x' : ' '}] ${s}`,
-      );
+      const steps = formatProgressSteps(progressSteps, 3);
       await updateProgressComment(
         octokit,
         repo,
