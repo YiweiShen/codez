@@ -387,6 +387,11 @@ export async function runAction(
     includeFixBuild,
     includeFetch,
   } = processedEvent;
+  core.info(
+    `runAction flags: includeFullHistory=${includeFullHistory}, ` +
+      `createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, ` +
+      `includeFetch=${includeFetch}`
+  );
 
   // Add eyes reaction (instrumented)
   core.info('[perf] addEyeReaction start');
