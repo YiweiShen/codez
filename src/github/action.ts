@@ -106,13 +106,18 @@ async function createProgressComment(
     const bodyLines: string[] = [
       title,
       '',
-      `Progress: [${emptyBar}] 0% <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>`,
+      `Progress: [${emptyBar}] 0%`,
       '',
     ];
-  for (const step of steps) {
-    bodyLines.push(`- [ ] ${step}`);
-  }
-  bodyLines.push('');
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
+      const prefix = `- [ ] ${step}`;
+      const spinnerSuffix = i === 0
+        ? ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>'
+        : '';
+      bodyLines.push(prefix + spinnerSuffix);
+    }
+    bodyLines.push('');
   const body = bodyLines.join('\n');
   if ('issue' in event) {
     const { data } = await octokit.rest.issues.createComment({
@@ -157,13 +162,16 @@ async function updateProgressComment(
   const bodyLines: string[] = [
     title,
     '',
-    `Progress: ${bar} ${percent}%${percent === 100
-      ? ' ✅'
-      : ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>'}`,
+    `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
     '',
   ];
-  for (const s of steps) {
-    bodyLines.push(s);
+  for (let i = 0; i < steps.length; i++) {
+    let line = steps[i];
+    if (i === completed && completed !== total) {
+      line = line +
+        ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>';
+    }
+    bodyLines.push(line);
   }
   bodyLines.push('');
   const body = bodyLines.join('\n');
