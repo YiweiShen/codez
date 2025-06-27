@@ -106,7 +106,7 @@ async function createProgressComment(
     const bodyLines: string[] = [
       title,
       '',
-      `Progress: [${emptyBar}] 0% ![](https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590)`,
+      `Progress: [${emptyBar}] 0% <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner"/>`,
       '',
     ];
   for (const step of steps) {
@@ -159,7 +159,7 @@ async function updateProgressComment(
     '',
     `Progress: ${bar} ${percent}%${percent === 100
       ? ' ✅'
-      : ' ![](https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590)'}`,
+      : ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner"/>'}`,
     '',
   ];
   for (const s of steps) {
