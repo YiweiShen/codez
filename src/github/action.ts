@@ -113,7 +113,7 @@ async function createProgressComment(
       const step = steps[i];
       const prefix = `- [ ] ${step}`;
       const spinnerSuffix = i === 0
-        ? ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>'
+        ? ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>'
         : '';
       bodyLines.push(prefix + spinnerSuffix);
     }
@@ -167,9 +167,9 @@ async function updateProgressComment(
   ];
   for (let i = 0; i < steps.length; i++) {
     let line = steps[i];
-    if (i === completed && completed !== total) {
+      if (i === completed && completed !== total) {
       line = line +
-        ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="25" height="25"/>';
+        ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>';
     }
     bodyLines.push(line);
   }
