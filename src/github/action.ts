@@ -494,7 +494,7 @@ export async function runAction(
           const readerUrl = `https://r.jina.ai/${url}`;
           const response = await axios.get<string>(readerUrl, {
             responseType: 'text',
-            timeout: 10000,
+            timeout: 60000,
           });
           let data = typeof response.data === 'string'
             ? response.data
