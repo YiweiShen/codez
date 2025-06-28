@@ -120,6 +120,8 @@ export async function processEvent(
       includeFullHistory: false,
       createIssues: false,
       noPr: false,
+      includeFixBuild: false,
+      includeFetch: false,
     };
   }
 

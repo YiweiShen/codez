@@ -121,7 +121,8 @@ export function parseListInput(input: string): string[] {
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const eventPath = core.getInput('event-path');
-  const workspace = '/workspace/app';
+  // Use GitHub workspace environment or fallback to default
+  const workspace = process.env.GITHUB_WORKSPACE || '/workspace/app';
   const timeoutInput = core.getInput('timeout');
   let timeoutSeconds: number;
   if (timeoutInput) {
@@ -146,10 +147,8 @@ export function getConfig(): ActionConfig {
   const directPrompt = core.getInput('direct-prompt') || '';
   const triggerPhrase = core.getInput('trigger-phrase') || '/codex';
   const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
-  const assigneeTrigger = assigneeTriggerInput
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s);
+  // Parse comma- or newline-separated GitHub usernames
+  const assigneeTrigger = parseListInput(assigneeTriggerInput);
   const codexEnvInput = core.getInput('codex-env') || '';
   const codexEnv = parseEnvInput(codexEnvInput);
   const imagesInput = core.getInput('images') || '';
