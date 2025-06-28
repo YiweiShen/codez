@@ -14,6 +14,11 @@ import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
  */
 export const defaultModel = 'o4-mini';
 
+/**
+ * Create and configure an OpenAI API client instance.
+ * @param config - ActionConfig containing OpenAI API key and optional base URL.
+ * @returns A configured OpenAI client for making API calls.
+ */
 export function getOpenAIClient(config: ActionConfig): OpenAI {
   const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
   if (config.openaiBaseUrl) {

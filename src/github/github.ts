@@ -12,8 +12,13 @@ import { genContentsString, genFullContentsString } from '../utils/contents.js';
 import { Octokit } from 'octokit';
 import { promptBuilderConfig } from '../config/prompts.js';
 
+/**
+ * Infer a branch type keyword from a commit message header.
+ * Maps common Conventional Commit prefixes to branch categories.
+ * @param commitMessage - The commit message to analyze.
+ * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
+ */
 function getBranchType(commitMessage: string): string {
-  const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
   if (/^(fix|correct|resolve|patch|repair)/.test(cm)) return 'fix';
   if (/(docs?|documentation)/.test(cm)) return 'docs';
@@ -21,6 +26,12 @@ function getBranchType(commitMessage: string): string {
   return 'chore';
 }
 
+/**
+ * Convert a text string into a URL-friendly slug.
+ * Lowercases, replaces non-alphanumeric runs with '-', and trims '-' edges.
+ * @param text - The input text to slugify.
+ * @returns A slug string containing only lowercase letters, digits, and hyphens.
+ */
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -138,7 +149,13 @@ type RepoContext = { owner: string; repo: string };
 // --- Functions ---
 
 /**
- * Clones the repository based on the event type.
+ * Clone the target repository and checkout the appropriate branch based on event.
+ * @param workspace - Filesystem path to clone into.
+ * @param githubToken - GitHub token for authentication in clone URL.
+ * @param repo - Repository owner and name.
+ * @param context - GitHub Actions context containing payload data.
+ * @param octokit - Authenticated Octokit client for API calls.
+ * @param event - The AgentEvent indicating pull request or issue context.
  */
 export async function cloneRepository(
   workspace: string,
@@ -222,7 +239,9 @@ export async function cloneRepository(
 }
 
 /**
- * Determines the type of GitHub event.
+ * Determine the normalized AgentEvent type from a raw GitHub webhook payload.
+ * @param payload - The parsed GitHub event JSON.
+ * @returns An AgentEvent discriminator object, or null if unsupported.
  */
 export function getEventType(payload: any): AgentEvent | null {
   if (
