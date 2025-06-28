@@ -19,6 +19,7 @@ import { promptBuilderConfig } from '../config/prompts.js';
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
 function getBranchType(commitMessage: string): string {
+  const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
   if (/^(fix|correct|resolve|patch|repair)/.test(cm)) return 'fix';
   if (/(docs?|documentation)/.test(cm)) return 'docs';
