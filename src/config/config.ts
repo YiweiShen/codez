@@ -121,8 +121,7 @@ export function parseListInput(input: string): string[] {
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const eventPath = core.getInput('event-path');
-  // Use GitHub workspace environment or fallback to default
-  const workspace = process.env.GITHUB_WORKSPACE || '/workspace/app';
+  const workspace = '/workspace/app';
   const timeoutInput = core.getInput('timeout');
   let timeoutSeconds: number;
   if (timeoutInput) {
