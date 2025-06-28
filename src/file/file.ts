@@ -30,6 +30,11 @@ async function calculateFileHash(filePath: string): Promise<string> {
   }
 }
 
+/**
+ * Check if a file or directory exists at the given path.
+ * @param filePath - Absolute or relative path to check.
+ * @returns Promise resolving to true if the path exists, false otherwise.
+ */
 function pathExists(filePath: string): Promise<boolean> {
   return fs
     .access(filePath)

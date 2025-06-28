@@ -68,11 +68,10 @@ export async function downloadImages(
 }
 
 /**
- * Download a file from a URL to the specified destination path.
- *
- * @param {string} url - The URL of the file to download.
- * @param {string} dest - Destination file path.
- * @returns {Promise<void>} Promise that resolves when the download completes.
+ * Download a remote file via HTTP(S) stream and save it locally.
+ * @param url - Source file URL to fetch.
+ * @param dest - Local filesystem path where the file will be written.
+ * @returns Promise that resolves once the file has been fully written.
  */
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then((response) => {
