@@ -1,6 +1,5 @@
 /**
- * Error handling utilities module.
- *
+ * @fileoverview Error handling utilities module.
  * Provides functions to convert unknown errors safely to message and stack strings.
  */
 export function toErrorMessage(error: unknown): string {

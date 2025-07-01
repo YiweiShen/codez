@@ -1,6 +1,5 @@
 /**
- * GitHub client helper module.
- *
+ * @fileoverview GitHub client helper module.
  * Defines types and functions for interacting with GitHub events, issues,
  * comments, reactions, and repository operations.
  */

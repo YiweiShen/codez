@@ -1,6 +1,5 @@
 /**
- * Codex CLI integration module.
- *
+ * @fileoverview Codex CLI integration module.
  * Provides a function to invoke the Codex CLI tool with configured parameters
  * and return its output.
  */

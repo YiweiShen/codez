@@ -1,5 +1,5 @@
 /**
- * Event processing module.
+ * @fileoverview Event processing module.
  *
  * Provides functions and types to load GitHub event payloads and normalize
  * them into a consistent format for the action workflow.

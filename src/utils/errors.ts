@@ -1,6 +1,5 @@
 /**
- * Custom error subclasses for specific failure modes.
- *
+ * @fileoverview Custom error subclasses for specific failure modes.
  * These error types allow more granular error handling and clearer error semantics.
  */
 /** Error thrown when configuration inputs are invalid or missing. */

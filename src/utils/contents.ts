@@ -1,6 +1,5 @@
 /**
- * Content formatting utilities module.
- *
+ * @fileoverview Content formatting utilities module.
  * Provides functions to generate formatted content strings for GitHub comments.
  */
 /**
