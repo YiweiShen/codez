@@ -159,4 +159,56 @@ describe('processEvent', () => {
       github: payload,
     });
   });
+  it('returns null when only trigger phrase without prompt', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ev-'));
+    const filePath = path.join(tmpDir, 'comment3.json');
+    const payload = {
+      action: 'created',
+      issue: { number: 5, title: 'T5', body: 'B5', pull_request: null },
+      comment: { id: 6, body: '/codex' },
+    };
+    fs.writeFileSync(filePath, JSON.stringify(payload));
+    const config: any = {
+      directPrompt: '',
+      eventPath: filePath,
+      triggerPhrase: '/codex',
+      assigneeTrigger: [],
+    };
+    const result = await processEvent(config);
+    expect(result).toBeNull();
+  });
+  it('parses no-pr, fix-build, and fetch flags in comment event', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ev-'));
+    const filePath = path.join(tmpDir, 'comment4.json');
+    const payload = {
+      action: 'created',
+      issue: { number: 7, title: 'Title7', body: 'Body7', pull_request: null },
+      comment: { id: 8, body: '/codex --no-pr --fix-build --fetch do it' },
+    };
+    fs.writeFileSync(filePath, JSON.stringify(payload));
+    const config: any = {
+      directPrompt: '',
+      eventPath: filePath,
+      triggerPhrase: '/codex',
+      assigneeTrigger: [],
+    };
+    const result = (await processEvent(config))!;
+    expect(result.noPr).toBe(true);
+    expect(result.includeFixBuild).toBe(true);
+    expect(result.includeFetch).toBe(true);
+    expect(result.includeFullHistory).toBe(false);
+    expect(result.createIssues).toBe(false);
+    expect(result.userPrompt).toBe('Title7\n\ndo it');
+  });
+  it('parses directPrompt with fix-build and fetch flags', async () => {
+    const config: any = { directPrompt: '--fix-build --fetch my direct prompt' };
+    const result = await processEvent(config);
+    expect(result).not.toBeNull();
+    expect(result!.includeFixBuild).toBe(true);
+    expect(result!.includeFetch).toBe(true);
+    expect(result!.userPrompt).toBe('my direct prompt');
+    expect(result!.includeFullHistory).toBe(false);
+    expect(result!.createIssues).toBe(false);
+    expect(result!.noPr).toBe(false);
+  });
 });

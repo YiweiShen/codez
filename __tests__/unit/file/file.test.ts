@@ -96,4 +96,21 @@ describe('detectChanges', () => {
     const changes = await detectChanges(workspace, originalState);
     expect(changes).toEqual([]);
   });
+  it('detects multiple file changes (added, modified, deleted) in a single run', async () => {
+    const file1 = path.join(workspace, 'file1.txt');
+    const file2 = path.join(workspace, 'file2.txt');
+    fs.writeFileSync(file1, 'v1');
+    fs.writeFileSync(file2, 'v2');
+    const originalState = await captureFileState(workspace);
+    // Modify file1, delete file2, add file3
+    fs.writeFileSync(file1, 'v1-modified');
+    fs.unlinkSync(file2);
+    const file3 = path.join(workspace, 'file3.txt');
+    fs.writeFileSync(file3, 'v3');
+    const changes = await detectChanges(workspace, originalState);
+    expect(changes).toContain('file1.txt');
+    expect(changes).toContain('file2.txt');
+    expect(changes).toContain('file3.txt');
+    expect(changes.length).toBe(3);
+  });
 });
