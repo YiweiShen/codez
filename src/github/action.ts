@@ -52,7 +52,8 @@ async function fetchLatestFailedWorkflowLogs(
     if (!runs || runs.length === 0) {
       return 'No failed workflow runs found.';
     }
-    const latest = runs[0] as any;
+    // The workflow_runs array items are properly typed by Octokit
+    const latest = runs[0];
     const runId: number = latest.id;
     core.info(`[perf] downloading logs for run ${runId}`);
     const downloadResponse = await octokit.request(
