@@ -42,6 +42,42 @@ function pathExists(filePath: string): Promise<boolean> {
     .then(() => true)
     .catch(() => false);
 }
+/**
+ * List files in the workspace respecting .gitignore and default ignore rules.
+ *
+ * @param workspace - The root directory of the workspace.
+ * @returns Array of relative file paths to process.
+ */
+async function listWorkspaceFiles(workspace: string): Promise<string[]> {
+  const gitignorePath = path.join(workspace, '.gitignore');
+  const ig = ignore();
+
+  // Default ignore for Git metadata
+  ig.add('.git/**');
+
+  if (await pathExists(gitignorePath)) {
+    core.info(`Reading .gitignore rules from ${gitignorePath}`);
+    try {
+      const content = await fs.readFile(gitignorePath, 'utf8');
+      ig.add(content);
+    } catch (error) {
+      core.warning(
+        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
+      );
+    }
+  } else {
+    core.info('.gitignore not found in workspace root. Using default ignores.');
+  }
+
+  const allFiles = await fg(['**/*'], {
+    cwd: workspace,
+    onlyFiles: true,
+    dot: true,
+    ignore: ['.git/**', 'node_modules/**'],
+  });
+
+  return ig.filter(allFiles);
+}
 
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
@@ -54,43 +90,7 @@ export async function captureFileState(
 ): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const fileState = new Map<string, string>();
-  const gitignorePath = path.join(workspace, '.gitignore');
-  const ig = ignore();
-
-  // Add default ignores - crucial for avoiding git metadata and sensitive files
-  ig.add('.git/**');
-  // Consider adding other common ignores if necessary, e.g., node_modules, build artifacts
-  // ig.add('node_modules/**');
-
-  if (await pathExists(gitignorePath)) {
-    core.info(`Reading .gitignore rules from ${gitignorePath}`);
-    try {
-      const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
-      ig.add(gitignoreContent);
-    } catch (error) {
-      core.warning(
-        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
-      );
-    }
-  } else {
-    core.info('.gitignore not found in workspace root. Using default ignores.');
-  }
-
-  // Use async fast-glob to find all files, with include/exclude patterns for performance
-  const allFiles = await fg(['**/*'], {
-    cwd: workspace,
-    onlyFiles: true, // Only files, not directories
-    dot: true, // Include dotfiles
-    ignore: ['.git/**', 'node_modules/**'], // Ignore .git and node_modules directories
-  });
-
-  // Filter the glob results using the ignore instance
-  // Note: ignore() expects relative paths from the workspace root
-  const filesToProcess = ig.filter(allFiles);
-
-  core.info(
-    `Found ${allFiles.length} total entries (files/dirs), processing ${filesToProcess.length} files after applying ignore rules.`,
-  );
+  const filesToProcess = await listWorkspaceFiles(workspace);
 
   for (const relativeFilePath of filesToProcess) {
     const absoluteFilePath = path.join(workspace, relativeFilePath);
@@ -115,33 +115,39 @@ export async function captureFileState(
  * @param originalState - Initial state of files mapped to hashes.
  * @returns Array of relative file paths that have been added, modified, or deleted.
  */
-export async function detectChanges(
+ export async function detectChanges(
   workspace: string,
   originalState: Map<string, string>,
 ): Promise<string[]> {
   core.info('Detecting file changes by comparing states...');
-  const currentState = await captureFileState(workspace); // Recapture the current state
   const changedFiles = new Set<string>();
+  const seenFiles = new Set<string>();
 
-  // Check for changed or added files by iterating through the current state
-  for (const [file, currentHash] of currentState.entries()) {
-    const originalHash = originalState.get(file);
-    if (!originalHash) {
-      // File exists now but didn't before -> Added
-      core.info(`File added: ${file}`);
-      changedFiles.add(file);
-    } else if (originalHash !== currentHash) {
-      // File exists in both states but hash differs -> Modified
-      core.info(`File changed: ${file}`);
-      changedFiles.add(file);
+  const filesToProcess = await listWorkspaceFiles(workspace);
+  for (const relativeFilePath of filesToProcess) {
+    seenFiles.add(relativeFilePath);
+    const absoluteFilePath = path.join(workspace, relativeFilePath);
+    try {
+      const stats = await fs.stat(absoluteFilePath);
+      if (stats.isFile()) {
+        const currentHash = await calculateFileHash(absoluteFilePath);
+        const originalHash = originalState.get(relativeFilePath);
+        if (!originalHash) {
+          core.info(`File added: ${relativeFilePath}`);
+          changedFiles.add(relativeFilePath);
+        } else if (originalHash !== currentHash) {
+          core.info(`File changed: ${relativeFilePath}`);
+          changedFiles.add(relativeFilePath);
+        }
+      }
+    } catch (error) {
+      core.warning(`Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`);
     }
-    // If hashes match, the file is unchanged, do nothing.
   }
 
-  // Check for deleted files by iterating through the original state
+  // Detect deleted files
   for (const file of originalState.keys()) {
-    if (!currentState.has(file)) {
-      // File existed before but doesn't now -> Deleted
+    if (!seenFiles.has(file)) {
       core.info(`File deleted: ${file}`);
       changedFiles.add(file);
     }
