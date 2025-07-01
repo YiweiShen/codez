@@ -33,11 +33,11 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
  *
  * The generated commit message follows the Conventional Commits specification.
  *
- * @param {string[]} changedFiles - List of modified file paths.
- * @param {string} userPrompt - The original user request or description.
- * @param {{ prNumber?: number; issueNumber?: number }} context - Pull request or issue context.
- * @param {ActionConfig} config - Action configuration settings for API client.
- * @returns {Promise<string>} A promise that resolves to the generated commit message.
+ * @param changedFiles - List of modified file paths.
+ * @param userPrompt - The original user request or description.
+ * @param context - Pull request or issue context.
+ * @param config - Action configuration settings for API client.
+ * @returns A promise that resolves to the generated commit message.
  *
  * @example
  * const message = await generateCommitMessage(

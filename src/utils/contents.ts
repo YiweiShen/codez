@@ -8,8 +8,8 @@
  *
  * Prefixes each line of the body with "> " if the author is the GitHub Actions bot.
  *
- * @param {{ body: string; login: string }} content - Object containing body text and user login.
- * @returns {string} Quoted body string for bot comments or empty string otherwise.
+ * @param content - Object containing body text and user login.
+ * @returns Quoted body string for bot comments or empty string otherwise.
  */
 export function genContentsString(content: {
   body: string;
@@ -38,8 +38,8 @@ export function genContentsString(content: {
  *
  * Prefixes each line of the body with "> " and retains all content.
  *
- * @param {{ body: string; login: string }} content - Object containing body text and user login.
- * @returns {string} Fully quoted body string or empty string if the body is empty.
+ * @param content - Object containing body text and user login.
+ * @returns Fully quoted body string or empty string if the body is empty.
  */
 export function genFullContentsString(content: {
   body: string;

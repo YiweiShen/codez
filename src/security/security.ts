@@ -10,8 +10,8 @@ import type { Octokit } from 'octokit';
 /**
  * Check if the user has appropriate permissions to run the action.
  *
- * @param {ActionConfig} config - Action configuration object containing GitHub context.
- * @returns {Promise<boolean>} True if the user has permission; false otherwise.
+ * @param config - Action configuration object containing GitHub context.
+ * @returns True if the user has permission; false otherwise.
  */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
@@ -33,10 +33,10 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
 /**
  * Check if a GitHub user has appropriate permissions for the repository.
  *
- * @param {Octokit} octokit - GitHub API client instance.
- * @param {{ owner: string; repo: string }} repo - Repository information.
- * @param {string} username - GitHub username to check permissions for.
- * @returns {Promise<boolean>} True if the user has write or admin permissions; false otherwise.
+ * @param octokit - GitHub API client instance.
+ * @param repo - Repository information.
+ * @param username - GitHub username to check permissions for.
+ * @returns True if the user has write or admin permissions; false otherwise.
  */
 async function checkUserPermissionGithub(
   octokit: Octokit,
@@ -66,9 +66,9 @@ async function checkUserPermissionGithub(
 /**
  * Mask sensitive information (GitHub token and OpenAI API key) within a string.
  *
- * @param {string} text - Input text that may contain sensitive data.
- * @param {ActionConfig} config - Action configuration containing sensitive keys.
- * @returns {string} The text with sensitive information replaced by '***'.
+ * @param text - Input text that may contain sensitive data.
+ * @param config - Action configuration containing sensitive keys.
+ * @returns The text with sensitive information replaced by '***'.
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;

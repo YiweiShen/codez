@@ -61,8 +61,8 @@ export interface ActionConfig {
 /**
  * Parse custom environment variables input from YAML mapping or comma-separated key=value pairs.
  *
- * @param {string} input - Raw input string (multiline YAML or comma-separated key=value pairs).
- * @returns {Record<string, string>} A map of environment variable names to values.
+ * @param input - Raw input string (multiline YAML or comma-separated key=value pairs).
+ * @returns A map of environment variable names to values.
  */
 export function parseEnvInput(input: string): Record<string, string> {
   const result: Record<string, string> = {};
@@ -95,8 +95,8 @@ export function parseEnvInput(input: string): Record<string, string> {
 /**
  * Parse list input into an array of trimmed, non-empty strings.
  *
- * @param {string} input - String containing list items.
- * @returns {string[]} Array of trimmed non-empty strings.
+ * @param input - String containing list items.
+ * @returns Array of trimmed non-empty strings.
  */
 export function parseListInput(input: string): string[] {
   if (!input) {
