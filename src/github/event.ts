@@ -6,8 +6,9 @@
  */
 import * as core from '@actions/core';
 import { promises as fs } from 'fs';
-import { AgentEvent, getEventType, extractText } from './github.js';
-import { ActionConfig } from '../config/config.js';
+import { getEventType, extractText } from './github.js';
+import type { AgentEvent } from './github.js';
+import type { ActionConfig } from '../config/config.js';
 
 /**
  * Represents a normalized event to trigger the Codex workflow.
