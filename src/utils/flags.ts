@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Utility for parsing boolean flags from input strings.
+ *
+ * Provides functions to parse flags and return remaining content.
+ */
 export interface ParsedFlags {
   /**
    * Map of flag names to boolean indicating presence.

@@ -1,5 +1,5 @@
 /**
- * Image utilities module.
+ * @fileoverview Image utilities module.
  *
  * Provides functions to extract image URLs from text and download images to a local directory.
  */

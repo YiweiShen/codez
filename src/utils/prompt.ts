@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Prompt utilities module.
+ *
+ * Extracts flags and remaining prompt text from user input.
+ */
 import { parseFlags } from './flags.js';
 
 export interface PromptFlagOptions {

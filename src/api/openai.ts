@@ -1,6 +1,5 @@
 /**
- * OpenAI API wrapper for generating commit messages.
- *
+ * @fileoverview OpenAI API wrapper for generating commit messages.
  * Provides functionality to interface with the OpenAI API and generate
  * Conventional Commits formatted messages based on user input and changed files.
  */
