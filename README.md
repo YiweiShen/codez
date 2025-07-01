@@ -154,6 +154,13 @@ This project uses [Prettier](https://prettier.io/) to format code consistently. 
 ```bash
 npm run format
 ```
+## Linting
+
+This project uses [ESLint](https://eslint.org/) with the [`eslint-plugin-jsdoc`](https://github.com/gajus/eslint-plugin-jsdoc) plugin to enforce JSDoc block tag formatting and an 80-character line length. To run linting:
+
+```bash
+npm run lint
+```
 
 ## Branch Naming
 

@@ -7,6 +7,7 @@
     "format": "prettier --write .",
     "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --minify --outfile=dist/index.js",
     "test": "jest",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "release": "npx bumpp"
   },
   "keywords": [
@@ -33,6 +34,11 @@
     "bumpp": "^10.1.1",
     "esbuild": "^0.25.5",
     "jest": "^29.7.0",
-    "prettier": "^2.8.0"
+    "prettier": "^2.8.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "eslint-plugin-jsdoc": "^39.0.0",
+    "eslint-config-prettier": "^8.0.0"
   }
 }
