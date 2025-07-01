@@ -6,6 +6,7 @@
  */
 import * as core from '@actions/core';
 import { toErrorMessage } from '../utils/error.js';
+import { parseFlags } from '../utils/flags.js';
 import { promises as fs } from 'fs';
 import { getEventType, extractText } from './github.js';
 import type { AgentEvent } from './github.js';
@@ -74,16 +75,13 @@ export async function processEvent(
 ): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
     let prompt = config.directPrompt;
-    let includeFixBuild = false;
-    let includeFetch = false;
-    if (prompt.split(/\s+/).includes('--fix-build')) {
-      includeFixBuild = true;
-      prompt = prompt.replace(/--fix-build\b/, '').trim();
-    }
-    if (prompt.split(/\s+/).includes('--fetch')) {
-      includeFetch = true;
-      prompt = prompt.replace(/--fetch\b/, '').trim();
-    }
+    const { flags: directFlags, rest: promptRest } = parseFlags(
+      prompt,
+      ['fix-build', 'fetch'],
+    );
+    const includeFixBuild = directFlags['fix-build'];
+    const includeFetch = directFlags['fetch'];
+    prompt = promptRest;
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
       type: 'codex',
@@ -144,18 +142,19 @@ export async function processEvent(
   }
 
   let args = text.replace(trigger, '').trim();
-  const includeFullHistory = args.split(/\s+/).includes('--full-history');
-  args = args.replace(/--full-history\b/, '').trim();
-  const createIssues = args.split(/\s+/).includes('--create-issues');
-  args = args.replace(/--create-issues\b/, '').trim();
-  const noPr = args.split(/\s+/).includes('--no-pr');
-  args = args.replace(/--no-pr\b/, '').trim();
-  // --fix-build: fetch latest failed CI build logs and include as context
-  const includeFixBuild = args.split(/\s+/).includes('--fix-build');
-  args = args.replace(/--fix-build\b/, '').trim();
-  const includeFetch = args.split(/\s+/).includes('--fetch');
-  args = args.replace(/--fetch\b/, '').trim();
-  let userPrompt = args;
+  const { flags, rest: promptRest } = parseFlags(args, [
+    'full-history',
+    'create-issues',
+    'no-pr',
+    'fix-build',
+    'fetch',
+  ]);
+  const includeFullHistory = flags['full-history'];
+  const createIssues = flags['create-issues'];
+  const noPr = flags['no-pr'];
+  const includeFixBuild = flags['fix-build'];
+  const includeFetch = flags['fetch'];
+  let userPrompt = promptRest;
 
   let title: string | undefined;
   if ('issue' in agentEvent.github) {
