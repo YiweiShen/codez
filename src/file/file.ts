@@ -14,8 +14,8 @@ import * as core from '@actions/core';
 /**
  * Calculate the SHA-256 hash of the specified file.
  *
- * @param {string} filePath - Absolute path to the file.
- * @returns {string} The SHA-256 hash of the file content.
+ * @param filePath - Absolute path to the file.
+ * @returns The SHA-256 hash of the file content.
  */
 async function calculateFileHash(filePath: string): Promise<string> {
   try {
@@ -45,8 +45,8 @@ function pathExists(filePath: string): Promise<boolean> {
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
  *
- * @param {string} workspace - The root directory of the workspace.
- * @returns {Map<string, string>} Map of relative file paths to their SHA-256 hashes.
+ * @param workspace - The root directory of the workspace.
+ * @returns Map of relative file paths to their SHA-256 hashes.
  */
 export async function captureFileState(
   workspace: string,
@@ -110,9 +110,9 @@ export async function captureFileState(
 /**
  * Detect file changes by comparing two file state maps.
  *
- * @param {string} workspace - The root directory of the workspace.
- * @param {Map<string, string>} originalState - Initial state of files mapped to hashes.
- * @returns {string[]} Array of relative file paths that have been added, modified, or deleted.
+ * @param workspace - The root directory of the workspace.
+ * @param originalState - Initial state of files mapped to hashes.
+ * @returns Array of relative file paths that have been added, modified, or deleted.
  */
 export async function detectChanges(
   workspace: string,

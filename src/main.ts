@@ -16,7 +16,7 @@ import { checkPermission } from './security/security.js';
  * Retrieves configuration, processes the event, checks permissions,
  * and executes the main action logic.
  *
- * @returns {Promise<void>} A promise that resolves when the action completes.
+ * @returns A promise that resolves when the action completes.
  */
 export async function run(): Promise<void> {
   try {

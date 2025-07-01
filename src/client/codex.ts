@@ -11,12 +11,12 @@ import { ActionConfig } from '../config/config.js';
 /**
  * Invoke the Codex CLI with the specified parameters.
  *
- * @param {string} workspace - Directory in which to run the Codex CLI.
- * @param {ActionConfig} config - Configuration containing API keys and environment settings.
- * @param {string} prompt - User-provided prompt string for Codex.
- * @param {number} timeout - Maximum time in milliseconds to wait for the CLI to complete.
- * @param {string[]} [images] - Optional array of image file paths to include in the invocation.
- * @returns {Promise<string>} A promise resolving to the formatted output from Codex.
+ * @param workspace - Directory in which to run the Codex CLI.
+ * @param config - Configuration containing API keys and environment settings.
+ * @param prompt - User-provided prompt string for Codex.
+ * @param timeout - Maximum time in milliseconds to wait for the CLI to complete.
+ * @param [images] - Optional array of image file paths to include in the invocation.
+ * @returns A promise resolving to the formatted output from Codex.
  */
 export async function runCodex(
   workspace: string,

@@ -16,8 +16,8 @@ const htmlRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
 /**
  * Extract image URLs from Markdown and HTML <img> tags in the given text.
  *
- * @param {string} text - Text to search for image URLs.
- * @returns {string[]} Array of unique image URLs.
+ * @param text - Text to search for image URLs.
+ * @returns Array of unique image URLs.
  */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
@@ -36,9 +36,9 @@ export function extractImageUrls(text: string): string[] {
 /**
  * Download images from the given URLs into a local directory.
  *
- * @param {string[]} urls - Array of image URLs to download.
- * @param {string} downloadDir - Directory path where images will be saved.
- * @returns {Promise<string[]>} Array of relative file paths for downloaded images.
+ * @param urls - Array of image URLs to download.
+ * @param downloadDir - Directory path where images will be saved.
+ * @returns Array of relative file paths for downloaded images.
  */
 export async function downloadImages(
   urls: string[],
