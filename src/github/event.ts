@@ -43,10 +43,18 @@ export interface ProcessedEvent {
  * @returns Parsed event payload object.
  * @throws If the file cannot be read or parsed.
  */
-export async function loadEventPayload(eventPath: string): Promise<any> {
+/**
+ * Load and parse the event payload from the specified file path.
+ *
+ * @param eventPath - Path to the event payload file.
+ * @returns Parsed event payload object as a generic record.
+ * @throws If the file cannot be read or parsed.
+ */
+export async function loadEventPayload(eventPath: string): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(eventPath, 'utf8');
-    return JSON.parse(content);
+    // JSON.parse returns any; cast to a generic object to avoid untyped any
+    return JSON.parse(content) as Record<string, unknown>;
   } catch (error) {
     throw new Error(
       `Failed to read or parse event payload at ${eventPath}: ${error}`,

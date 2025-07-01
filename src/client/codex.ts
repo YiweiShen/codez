@@ -130,7 +130,8 @@ export async function runCodex(
     if (
       error instanceof Error &&
       'timedOut' in error &&
-      (error as any).timedOut
+      // Cast through a typed interface to avoid untyped any
+      (error as { timedOut?: boolean }).timedOut
     ) {
       throw new Error(`Codex command timed out after ${timeout}ms.`);
     }
