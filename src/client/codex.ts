@@ -28,7 +28,7 @@ export async function runCodex(
   // Added async and Promise<>
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
-    prompt = prompt.replace(/"/g, '\\"');
+const sanitizedPrompt = prompt.replace(/"/g, '\\"');
     // Build CLI arguments
     const cliArgs: string[] = [];
     // Include image flags if provided
@@ -43,7 +43,7 @@ export async function runCodex(
       '--full-auto',
       '--dangerously-auto-approve-everything',
       '--quiet',
-      `"${prompt}"`,
+      `"${sanitizedPrompt}"`,
     );
 
     // Set up environment variables
