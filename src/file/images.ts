@@ -45,26 +45,34 @@ export async function downloadImages(
   downloadDir: string,
 ): Promise<string[]> {
   await fsp.mkdir(downloadDir, { recursive: true });
-  const downloaded: string[] = [];
-  for (const url of urls) {
-    try {
-      const parsed = new URL(url);
-      const filename = path.basename(parsed.pathname);
-      const destPath = path.join(downloadDir, filename);
-      await downloadFile(url, destPath);
-      const stats = await fsp.stat(destPath);
-      const fileSize = stats.size;
-      downloaded.push(path.relative(process.cwd(), destPath));
-      core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
-    } catch (err) {
-      core.warning(
-        `Failed to download image ${url}: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
+  const concurrency = 5;
+  const results: (string | undefined)[] = new Array(urls.length);
+  for (let i = 0; i < urls.length; i += concurrency) {
+    const batch = urls.slice(i, i + concurrency);
+    await Promise.all(
+      batch.map(async (url, idx) => {
+        const index = i + idx;
+        try {
+          const parsed = new URL(url);
+          const filename = path.basename(parsed.pathname);
+          const destPath = path.join(downloadDir, filename);
+          await downloadFile(url, destPath);
+          const stats = await fsp.stat(destPath);
+          const fileSize = stats.size;
+          const relPath = path.relative(process.cwd(), destPath);
+          results[index] = relPath;
+          core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
+        } catch (err) {
+          core.warning(
+            `Failed to download image ${url}: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+      }),
+    );
   }
-  return downloaded;
+  return results.filter((p): p is string => p !== undefined);
 }
 
 /**
