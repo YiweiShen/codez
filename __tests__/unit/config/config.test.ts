@@ -48,6 +48,13 @@ VAR2: value2
 `;
     expect(parseEnvInput(input)).toEqual({ VAR1: 'value1', VAR2: 'value2' });
   });
+  it('parses single env var without comma or newline', () => {
+    expect(parseEnvInput('KEY=value')).toEqual({ KEY: 'value' });
+  });
+  it('parses YAML mapping value containing colon', () => {
+    const input = 'KEY: value:with:colon\n';
+    expect(parseEnvInput(input)).toEqual({ KEY: 'value:with:colon' });
+  });
 });
 
 describe('parseListInput', () => {
@@ -71,6 +78,15 @@ describe('parseListInput', () => {
 
   it('parses single-item input', () => {
     expect(parseListInput('single')).toEqual(['single']);
+  });
+  it('returns empty array for separators only', () => {
+    expect(parseListInput(' , , ')).toEqual([]);
+  });
+  it('parses input with no separators as single item including spaces', () => {
+    expect(parseListInput(' a b c ')).toEqual(['a b c']);
+  });
+  it('parses newline-separated list even if items contain commas', () => {
+    expect(parseListInput('a\nb,c')).toEqual(['a', 'b,c']);
   });
 });
 
