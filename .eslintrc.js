@@ -2,49 +2,45 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2022,
+    project: './tsconfig.json',
     sourceType: 'module',
+    ecmaVersion: 2021
   },
-  plugins: ['@typescript-eslint', 'jsdoc', 'import'],
+  plugins: ['@typescript-eslint', 'import', 'jsdoc'],
   extends: [
+    'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
     'plugin:jsdoc/recommended',
-    'prettier',
+    'prettier'
   ],
-  settings: {
-    jsdoc: {
-      mode: 'typescript',
-    },
-  },
   rules: {
-    'jsdoc/check-multiline-blocks': 'error',
-    'jsdoc/newline-after-description': 'error',
-    'jsdoc/require-param': 'error',
-    'jsdoc/require-returns': 'error',
-    'max-len': ['error', { code: 80, ignoreComments: false }],
-    'import/order': ['error', { 'groups': ['builtin', 'external', 'parent', 'sibling', 'index'], 'newlines-between': 'always', 'alphabetize': { order: 'asc', caseInsensitive: true } }],
-    'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1, maxBOF: 0 }],
-    'padding-line-between-statements': [
-      'error',
-      { blankLine: 'always', prev: 'import', next: '*' },
-      { blankLine: 'always', prev: '*', next: 'import' },
-    ],
-    'lines-around-comment': [
+    'no-var': 'error',
+    'import/order': [
       'error',
       {
-        beforeBlockComment: true,
-        afterBlockComment: true,
-        beforeLineComment: false,
-        afterLineComment: false,
-        allowBlockStart: true,
-        allowBlockEnd: true,
-        allowClassStart: true,
-        allowClassEnd: true,
-        allowObjectStart: true,
-        allowObjectEnd: true,
-        allowArrayStart: true,
-        allowArrayEnd: true,
-      },
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        alphabetize: { order: 'asc', caseInsensitive: true },
+        'newlines-between': 'always'
+      }
     ],
+    'import/no-default-export': 'error',
+    'import/no-unresolved': 'off'
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.ts']
+      }
+    }
+  },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.ts', '**/*.test.tsx'],
+      rules: {
+        'jsdoc/require-jsdoc': 'off'
+      }
+    }
+  ]
 };

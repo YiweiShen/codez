@@ -8,6 +8,7 @@
     "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --minify --outfile=dist/index.js",
     "test": "jest",
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"__tests__/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" \"__tests__/**/*.{ts,tsx}\" --fix",
     "release": "npx bumpp"
   },
   "keywords": [
