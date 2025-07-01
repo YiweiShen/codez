@@ -43,13 +43,6 @@ export interface ProcessedEvent {
  * Load and parse the event payload from the specified file path.
  *
  * @param eventPath - Path to the event payload file.
- * @returns Parsed event payload object.
- * @throws If the file cannot be read or parsed.
- */
-/**
- * Load and parse the event payload from the specified file path.
- *
- * @param eventPath - Path to the event payload file.
  * @returns Parsed event payload object as a generic record.
  * @throws If the file cannot be read or parsed.
  */

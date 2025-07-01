@@ -990,21 +990,21 @@ export async function generatePrompt(
     }
   }
 
-  let historyPropmt = '';
+  let historyPrompt = '';
   const formatter = includeFullHistory
     ? genFullContentsString
     : genContentsString;
-  historyPropmt += formatter(contents.content);
+  historyPrompt += formatter(contents.content);
   for (const comment of filteredComments) {
-    historyPropmt += formatter(comment);
+    historyPrompt += formatter(comment);
   }
 
   let prompt = '';
   if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
     prompt += `${promptBuilderConfig.titleLabel}\n${contents.content.title}\n\n`;
   }
-  if (historyPropmt) {
-    prompt += `${promptBuilderConfig.historyLabel}\n${historyPropmt}\n\n`;
+  if (historyPrompt) {
+    prompt += `${promptBuilderConfig.historyLabel}\n${historyPrompt}\n\n`;
   }
   if (contextInfo) {
     prompt += `${promptBuilderConfig.contextLabel}\n${contextInfo}\n\n`;
