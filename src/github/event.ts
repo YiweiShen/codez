@@ -6,7 +6,7 @@
  */
 import * as core from '@actions/core';
 import { toErrorMessage } from '../utils/error.js';
-import { parseFlags } from '../utils/flags.js';
+import { extractPromptFlags } from '../utils/prompt.js';
 import { ParseError } from '../utils/errors.js';
 import { promises as fs } from 'fs';
 import { getEventType, extractText } from './github.js';
@@ -75,14 +75,8 @@ export async function processEvent(
   config: ActionConfig,
 ): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
-    let prompt = config.directPrompt;
-    const { flags: directFlags, rest: promptRest } = parseFlags(
-      prompt,
-      ['fix-build', 'fetch'],
-    );
-    const includeFixBuild = directFlags['fix-build'];
-    const includeFetch = directFlags['fetch'];
-    prompt = promptRest;
+    const { prompt: userPrompt, includeFixBuild, includeFetch } =
+      extractPromptFlags(config.directPrompt, true);
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
       type: 'codex',
@@ -93,7 +87,7 @@ export async function processEvent(
           issue: { number: 0, title: '', body: '', pull_request: null },
         },
       },
-      userPrompt: prompt,
+      userPrompt,
       includeFullHistory: false,
       createIssues: false,
       noPr: false,
@@ -142,19 +136,15 @@ export async function processEvent(
     return null;
   }
 
-  let args = text.replace(trigger, '').trim();
-  const { flags, rest: promptRest } = parseFlags(args, [
-    'full-history',
-    'create-issues',
-    'no-pr',
-    'fix-build',
-    'fetch',
-  ]);
-  const includeFullHistory = flags['full-history'];
-  const createIssues = flags['create-issues'];
-  const noPr = flags['no-pr'];
-  const includeFixBuild = flags['fix-build'];
-  const includeFetch = flags['fetch'];
+  const args = text.replace(trigger, '').trim();
+  const {
+    includeFullHistory,
+    createIssues,
+    noPr,
+    includeFixBuild,
+    includeFetch,
+    prompt: promptRest,
+  } = extractPromptFlags(args, false);
   let userPrompt = promptRest;
 
   let title: string | undefined;
