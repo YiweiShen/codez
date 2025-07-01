@@ -8,6 +8,7 @@ import { promises as fs } from 'fs';
 import * as crypto from 'crypto';
 import fg from 'fast-glob';
 import * as path from 'path';
+import * as os from 'os';
 import ignore from 'ignore';
 import * as core from '@actions/core';
 import { toErrorMessage } from '../utils/error.js';
@@ -91,19 +92,35 @@ export async function captureFileState(
   core.info(
     `Found ${allFiles.length} total entries (files/dirs), processing ${filesToProcess.length} files after applying ignore rules.`,
   );
-
-  for (const relativeFilePath of filesToProcess) {
-    const absoluteFilePath = path.join(workspace, relativeFilePath);
-    try {
-      const stats = await fs.stat(absoluteFilePath);
-      if (stats.isFile()) {
-        const hash = await calculateFileHash(absoluteFilePath);
-        fileState.set(relativeFilePath, hash);
-      }
-    } catch (error) {
-      core.warning(`Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`);
-    }
+  // Hash files in parallel with a limit on concurrency
+  const concurrency = os.cpus().length;
+  const workerCount = Math.min(concurrency, filesToProcess.length);
+  let idx = 0;
+  const workers: Promise<void>[] = [];
+  for (let w = 0; w < workerCount; w++) {
+    workers.push(
+      (async () => {
+        while (true) {
+          const i = idx++;
+          if (i >= filesToProcess.length) break;
+          const relativeFilePath = filesToProcess[i];
+          const absoluteFilePath = path.join(workspace, relativeFilePath);
+          try {
+            const stats = await fs.stat(absoluteFilePath);
+            if (stats.isFile()) {
+              const hash = await calculateFileHash(absoluteFilePath);
+              fileState.set(relativeFilePath, hash);
+            }
+          } catch (error) {
+            core.warning(
+              `Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`,
+            );
+          }
+        }
+      })(),
+    );
   }
+  await Promise.all(workers);
   core.info(`Captured state of ${fileState.size} files.`);
   return fileState;
 }
