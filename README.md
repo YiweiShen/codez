@@ -156,7 +156,7 @@ npm run format
 ```
 ## Linting
 
-This project uses [ESLint](https://eslint.org/) with the [`eslint-plugin-jsdoc`](https://github.com/gajus/eslint-plugin-jsdoc) plugin to enforce JSDoc block tag formatting and an 80-character line length. To run linting:
+This project uses [ESLint](https://eslint.org/) with the [`eslint-plugin-jsdoc`](https://github.com/gajus/eslint-plugin-jsdoc) and [`eslint-plugin-security`](https://github.com/nodesecurity/eslint-plugin-security) plugins to enforce JSDoc block tag formatting, an 80-character line length, and security best practices (no `eval`, no prototype modification, safe child process usage). To run linting:
 
 ```bash
 npm run lint
