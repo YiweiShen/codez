@@ -61,7 +61,9 @@ export async function downloadImages(
           const fileSize = stats.size;
           const relPath = path.relative(process.cwd(), destPath);
           results[index] = relPath;
-          core.info(`Downloaded image ${url} to ${destPath} (${fileSize} bytes)`);
+          core.info(
+            `Downloaded image ${url} to ${destPath} (${fileSize} bytes)`,
+          );
         } catch (err) {
           core.warning(
             `Failed to download image ${url}: ${

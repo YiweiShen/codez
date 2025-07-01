@@ -113,12 +113,12 @@ export async function runCodex(
       core.error(
         `Failed to parse JSON output from Codex: ${
           parseError instanceof Error ? parseError.message : String(parseError)
-        }. Last line: ${lastLine}`
+        }. Last line: ${lastLine}`,
       );
       throw new Error(
         `Failed to parse JSON output from Codex: ${
           parseError instanceof Error ? parseError.message : String(parseError)
-        }`
+        }`,
       );
     }
     let textResult = '';

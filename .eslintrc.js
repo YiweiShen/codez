@@ -22,7 +22,14 @@ module.exports = {
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
     'max-len': ['error', { code: 80, ignoreComments: false }],
-    'import/order': ['error', { 'groups': ['builtin', 'external', 'parent', 'sibling', 'index'], 'newlines-between': 'always', 'alphabetize': { order: 'asc', caseInsensitive: true } }],
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1, maxBOF: 0 }],
     'padding-line-between-statements': [
       'error',

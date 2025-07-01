@@ -53,14 +53,18 @@ export interface ProcessedEvent {
  * @returns Parsed event payload object as a generic record.
  * @throws If the file cannot be read or parsed.
  */
-export async function loadEventPayload(eventPath: string): Promise<Record<string, unknown>> {
+export async function loadEventPayload(
+  eventPath: string,
+): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(eventPath, 'utf8');
     // JSON.parse returns any; cast to a generic object to avoid untyped any
     return JSON.parse(content) as Record<string, unknown>;
   } catch (error) {
     throw new ParseError(
-      `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(error)}`,
+      `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(
+        error,
+      )}`,
     );
   }
 }
@@ -75,8 +79,11 @@ export async function processEvent(
   config: ActionConfig,
 ): Promise<ProcessedEvent | null> {
   if (config.directPrompt) {
-    const { prompt: userPrompt, includeFixBuild, includeFetch } =
-      extractPromptFlags(config.directPrompt, true);
+    const {
+      prompt: userPrompt,
+      includeFixBuild,
+      includeFetch,
+    } = extractPromptFlags(config.directPrompt, true);
     core.info('Direct prompt provided. Bypassing GitHub event trigger.');
     return {
       type: 'codex',

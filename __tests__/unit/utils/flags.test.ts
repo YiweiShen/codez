@@ -28,7 +28,8 @@ describe('extractPromptFlags', () => {
     expect(opts.prompt).toBe('prompt text');
   });
   it('extracts all flags for trigger-based prompts', () => {
-    const input = '--full-history --create-issues --no-pr --fix-build --fetch do work';
+    const input =
+      '--full-history --create-issues --no-pr --fix-build --fetch do work';
     const opts = extractPromptFlags(input, false);
     expect(opts.includeFullHistory).toBe(true);
     expect(opts.createIssues).toBe(true);

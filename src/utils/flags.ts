@@ -21,10 +21,7 @@ export interface ParsedFlags {
  * @param flagNames - Array of flag names (without leading dashes) to parse.
  * @returns An object with flags map and remaining content string.
  */
-export function parseFlags(
-  input: string,
-  flagNames: string[],
-): ParsedFlags {
+export function parseFlags(input: string, flagNames: string[]): ParsedFlags {
   const tokens = input.split(/\s+/).filter(Boolean);
   const flags: Record<string, boolean> = {};
   flagNames.forEach((name) => {

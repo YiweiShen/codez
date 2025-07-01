@@ -80,9 +80,10 @@ export async function createIssuesFromFeaturePlan(
         title: feature.title,
         body: feature.description,
       });
-      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
-      const commentBody =
-        `Created new feature issue #${issue.data.number} for "${feature.title}"`;
+      core.info(
+        `Created feature issue #${issue.data.number}: ${feature.title}`,
+      );
+      const commentBody = `Created new feature issue #${issue.data.number} for "${feature.title}"`;
       if (index === 0 && progressCommentId) {
         if ('issue' in event) {
           await octokit.rest.issues.updateComment({

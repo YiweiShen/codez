@@ -25,7 +25,9 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
   try {
     return await checkUserPermissionGithub(octokit, repo, actor);
   } catch (error) {
-    core.warning(`Exception occurred during permission check: ${toErrorMessage(error)}`);
+    core.warning(
+      `Exception occurred during permission check: ${toErrorMessage(error)}`,
+    );
     return false;
   }
 }

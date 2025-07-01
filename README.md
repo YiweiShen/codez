@@ -104,6 +104,7 @@ To skip pull request creation and only post AI output as a comment, use the `--n
 ```
 /codex --no-pr Please update the README formatting.
 ```
+
 For fetching and including the latest failed CI build logs, use the `--fix-build` flag:
 
 ```
@@ -115,6 +116,7 @@ For fetching and including contents from URLs referenced in the prompt, use the 
 ```
 /codex --fetch Please review the API docs at https://example.com/docs/api
 ```
+
 By default, URLs are fetched and preprocessed via the Jina Reader API by prefixing each URL with `https://r.jina.ai/`, which retrieves the processed content.
 
 Codex will analyze the request and create a new Pull Request with the code changes. The AI will also post a comment with the generated code.
@@ -154,6 +156,7 @@ This project uses [Prettier](https://prettier.io/) to format code consistently. 
 ```bash
 npm run format
 ```
+
 ## Linting
 
 This project uses [ESLint](https://eslint.org/) with the [`eslint-plugin-jsdoc`](https://github.com/gajus/eslint-plugin-jsdoc) plugin to enforce JSDoc block tag formatting and an 80-character line length. To run linting:

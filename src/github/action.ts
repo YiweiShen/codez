@@ -113,21 +113,17 @@ async function createProgressComment(
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = '**🚀 Codez Progress**';
-    const bodyLines: string[] = [
-      title,
-      '',
-      `Progress: [${emptyBar}] 0%`,
-      '',
-    ];
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i];
-      const prefix = `- [ ] ${step}`;
-      const spinnerSuffix = i === 0
+  const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0%`, ''];
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    const prefix = `- [ ] ${step}`;
+    const spinnerSuffix =
+      i === 0
         ? ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>'
         : '';
-      bodyLines.push(prefix + spinnerSuffix);
-    }
-    bodyLines.push('');
+    bodyLines.push(prefix + spinnerSuffix);
+  }
+  bodyLines.push('');
   const body = bodyLines.join('\n');
   if ('issue' in event) {
     const { data } = await octokit.rest.issues.createComment({
@@ -183,8 +179,9 @@ async function updateProgressComment(
   ];
   for (let i = 0; i < steps.length; i++) {
     let line = steps[i];
-      if (i === completed && completed !== total) {
-      line = line +
+    if (i === completed && completed !== total) {
+      line =
+        line +
         ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>';
     }
     bodyLines.push(line);
@@ -204,7 +201,7 @@ async function updateProgressComment(
       body,
     });
   } else {
-  throw new GitHubError('Unsupported event for updating progress comment');
+    throw new GitHubError('Unsupported event for updating progress comment');
   }
 }
 
@@ -252,7 +249,11 @@ async function handleResult(
         await postComment(octokit, repo, event, body);
       }
     } catch (err) {
-      core.warning(`Failed to update comment: ${err instanceof Error ? err.message : String(err)}`);
+      core.warning(
+        `Failed to update comment: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     }
   }
   if (noPr) {
@@ -292,7 +293,7 @@ async function handleResult(
       core.warning(
         `Failed to remove image artifacts directory: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -416,7 +417,7 @@ export async function runAction(
   core.info(
     `runAction flags: includeFullHistory=${includeFullHistory}, ` +
       `createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, ` +
-      `includeFetch=${includeFetch}`
+      `includeFetch=${includeFetch}`,
   );
 
   // Add eyes reaction (instrumented)
@@ -474,7 +475,11 @@ export async function runAction(
         await postComment(octokit, repo, event, body);
       }
     } catch (err) {
-      core.warning(`Failed to update comment: ${err instanceof Error ? err.message : String(err)}`);
+      core.warning(
+        `Failed to update comment: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     }
   }
 
@@ -514,9 +519,10 @@ export async function runAction(
             responseType: 'text',
             timeout: 60000,
           });
-          let data = typeof response.data === 'string'
-            ? response.data
-            : JSON.stringify(response.data);
+          let data =
+            typeof response.data === 'string'
+              ? response.data
+              : JSON.stringify(response.data);
           fetchedParts.push(`=== ${url} ===\n${data}`);
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
@@ -653,7 +659,7 @@ export async function runAction(
       core.warning(
         `Failed to update reaction on the original event: ${
           reactionError instanceof Error ? reactionError.message : reactionError
-        }`
+        }`,
       );
     }
     return;
@@ -661,15 +667,15 @@ export async function runAction(
   core.info(`Output: \n${output}`);
 
   // Handle create issues intent: create issues from JSON output
-    if (createIssues) {
-      const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
-      await createIssuesFromFeaturePlan(
-        octokit,
-        repo,
-        agentEvent.github,
-        output,
-        progressCommentId
-      );
+  if (createIssues) {
+    const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
+    await createIssuesFromFeaturePlan(
+      octokit,
+      repo,
+      agentEvent.github,
+      output,
+      progressCommentId,
+    );
     // Update reaction from eyes to thumbs up
     try {
       await removeEyeReaction(octokit, repo, agentEvent.github);
@@ -678,7 +684,7 @@ export async function runAction(
       core.warning(
         `Failed to update reaction on the original issue: ${
           reactionError instanceof Error ? reactionError.message : reactionError
-        }`
+        }`,
       );
     }
     return;
@@ -735,7 +741,13 @@ export async function runAction(
   }
 
   // Handle the results
-  await handleResult(config, processedEvent, output, changedFiles, progressCommentId);
+  await handleResult(
+    config,
+    processedEvent,
+    output,
+    changedFiles,
+    progressCommentId,
+  );
 
   core.info('Action completed successfully.');
   // Update reaction from eyes to thumbs up for the original event
@@ -746,7 +758,7 @@ export async function runAction(
     core.warning(
       `Failed to update reaction on the original event: ${
         reactionError instanceof Error ? reactionError.message : reactionError
-      }`
+      }`,
     );
   }
 }

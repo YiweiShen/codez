@@ -28,7 +28,9 @@ async function calculateFileHash(filePath: string): Promise<string> {
     return hashSum.digest('hex');
   } catch (error) {
     // Log error but rethrow to be handled by caller, as hash calculation is critical
-    core.error(`Failed to calculate hash for ${filePath}: ${toErrorMessage(error)}`);
+    core.error(
+      `Failed to calculate hash for ${filePath}: ${toErrorMessage(error)}`,
+    );
     throw error;
   }
 }
@@ -69,7 +71,9 @@ export async function captureFileState(
       ig.add(gitignoreContent);
     } catch (error) {
       core.warning(
-        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
+        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(
+          error,
+        )}. Proceeding with default ignores.`,
       );
     }
   } else {
@@ -112,7 +116,9 @@ export async function captureFileState(
             }
           } catch (error) {
             core.warning(
-              `Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`,
+              `Could not process file ${relativeFilePath}: ${toErrorMessage(
+                error,
+              )}`,
             );
           }
         }

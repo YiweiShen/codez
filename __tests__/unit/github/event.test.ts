@@ -201,7 +201,9 @@ describe('processEvent', () => {
     expect(result.userPrompt).toBe('Title7\n\ndo it');
   });
   it('parses directPrompt with fix-build and fetch flags', async () => {
-    const config: any = { directPrompt: '--fix-build --fetch my direct prompt' };
+    const config: any = {
+      directPrompt: '--fix-build --fetch my direct prompt',
+    };
     const result = await processEvent(config);
     expect(result).not.toBeNull();
     expect(result!.includeFixBuild).toBe(true);

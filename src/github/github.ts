@@ -368,13 +368,19 @@ export async function removeEyeReaction(
   event: GitHubEvent,
 ): Promise<void> {
   try {
-    if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
+    if (
+      (event.action === 'opened' || event.action === 'assigned') &&
+      'issue' in event
+    ) {
       const reactions = await octokit.rest.reactions.listForIssue({
         ...repo,
         issue_number: event.issue.number,
       });
       for (const reaction of reactions.data) {
-        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+        if (
+          reaction.content === 'eyes' &&
+          reaction.user?.login === 'github-actions[bot]'
+        ) {
           await octokit.rest.reactions.deleteForIssue({
             ...repo,
             issue_number: event.issue.number,
@@ -384,35 +390,54 @@ export async function removeEyeReaction(
           break;
         }
       }
-    } else if (event.action === 'created' && 'comment' in event && 'issue' in event) {
+    } else if (
+      event.action === 'created' &&
+      'comment' in event &&
+      'issue' in event
+    ) {
       const reactions = await octokit.rest.reactions.listForIssueComment({
         ...repo,
         comment_id: event.comment.id,
       });
       for (const reaction of reactions.data) {
-        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+        if (
+          reaction.content === 'eyes' &&
+          reaction.user?.login === 'github-actions[bot]'
+        ) {
           await octokit.rest.reactions.deleteForIssueComment({
             ...repo,
             comment_id: event.comment.id,
             reaction_id: reaction.id,
           });
-          core.info(`Removed eye reaction from comment on issue/PR #${event.issue.number}`);
+          core.info(
+            `Removed eye reaction from comment on issue/PR #${event.issue.number}`,
+          );
           break;
         }
       }
-    } else if (event.action === 'created' && 'comment' in event && 'pull_request' in event) {
-      const reactions = await octokit.rest.reactions.listForPullRequestReviewComment({
-        ...repo,
-        comment_id: event.comment.id,
-      });
+    } else if (
+      event.action === 'created' &&
+      'comment' in event &&
+      'pull_request' in event
+    ) {
+      const reactions =
+        await octokit.rest.reactions.listForPullRequestReviewComment({
+          ...repo,
+          comment_id: event.comment.id,
+        });
       for (const reaction of reactions.data) {
-        if (reaction.content === 'eyes' && reaction.user?.login === 'github-actions[bot]') {
+        if (
+          reaction.content === 'eyes' &&
+          reaction.user?.login === 'github-actions[bot]'
+        ) {
           await octokit.rest.reactions.deleteForPullRequestReviewComment({
             ...repo,
             comment_id: event.comment.id,
             reaction_id: reaction.id,
           });
-          core.info(`Removed eye reaction from review comment on PR #${event.pull_request.number}`);
+          core.info(
+            `Removed eye reaction from review comment on PR #${event.pull_request.number}`,
+          );
           break;
         }
       }
@@ -435,27 +460,42 @@ export async function addThumbUpReaction(
   event: GitHubEvent,
 ): Promise<void> {
   try {
-    if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
+    if (
+      (event.action === 'opened' || event.action === 'assigned') &&
+      'issue' in event
+    ) {
       await octokit.rest.reactions.createForIssue({
         ...repo,
         issue_number: event.issue.number,
         content: '+1',
       });
       core.info(`Added thumbs up reaction to issue #${event.issue.number}`);
-    } else if (event.action === 'created' && 'comment' in event && 'issue' in event) {
+    } else if (
+      event.action === 'created' &&
+      'comment' in event &&
+      'issue' in event
+    ) {
       await octokit.rest.reactions.createForIssueComment({
         ...repo,
         comment_id: event.comment.id,
         content: '+1',
       });
-      core.info(`Added thumbs up reaction to comment on issue/PR #${event.issue.number}`);
-    } else if (event.action === 'created' && 'comment' in event && 'pull_request' in event) {
+      core.info(
+        `Added thumbs up reaction to comment on issue/PR #${event.issue.number}`,
+      );
+    } else if (
+      event.action === 'created' &&
+      'comment' in event &&
+      'pull_request' in event
+    ) {
       await octokit.rest.reactions.createForPullRequestReviewComment({
         ...repo,
         comment_id: event.comment.id,
         content: '+1',
       });
-      core.info(`Added thumbs up reaction to review comment on PR #${event.pull_request.number}`);
+      core.info(
+        `Added thumbs up reaction to review comment on PR #${event.pull_request.number}`,
+      );
     }
   } catch (error) {
     core.warning(
@@ -672,7 +712,9 @@ export async function createPullRequest(
     }
   } catch (error) {
     core.error(`Error creating Pull Request: ${toErrorMessage(error)}`);
-    throw new GitHubError(`Failed to create Pull Request: ${toErrorMessage(error)}`);
+    throw new GitHubError(
+      `Failed to create Pull Request: ${toErrorMessage(error)}`,
+    );
   }
 }
 
@@ -807,7 +849,9 @@ export async function commitAndPush(
       await postComment(octokit, repo, event, output);
     }
   } catch (error) {
-    core.error(`Error committing and pushing changes: ${toErrorMessage(error)}`);
+    core.error(
+      `Error committing and pushing changes: ${toErrorMessage(error)}`,
+    );
     // Attempt to post an error comment
     try {
       await postComment(
@@ -819,9 +863,13 @@ export async function commitAndPush(
         }`,
       );
     } catch (commentError) {
-      core.error(`Failed to post error comment: ${toErrorMessage(commentError)}`);
+      core.error(
+        `Failed to post error comment: ${toErrorMessage(commentError)}`,
+      );
     }
-    throw new GitHubError(`Failed to commit and push changes: ${toErrorMessage(error)}`);
+    throw new GitHubError(
+      `Failed to commit and push changes: ${toErrorMessage(error)}`,
+    );
   }
 }
 
@@ -968,7 +1016,9 @@ export async function getChangedFiles(
   } else if (event.type === 'pullRequestReviewCommentCreated') {
     prNumber = event.github.pull_request.number;
   } else {
-    throw new GitHubError(`Cannot get changed files for event type: ${event.type}`);
+    throw new GitHubError(
+      `Cannot get changed files for event type: ${event.type}`,
+    );
   }
 
   const prFilesResponse = await octokit.rest.pulls.listFiles({
@@ -1056,8 +1106,14 @@ async function getIssueData(
     core.info(`Fetched ${comments.length} comments for issue #${issueNumber}.`);
     return { content, comments };
   } catch (error) {
-    core.error(`Failed to get data for issue #${issueNumber}: ${toErrorMessage(error)}`);
-    throw new GitHubError(`Could not retrieve data for issue #${issueNumber}: ${toErrorMessage(error)}`);
+    core.error(
+      `Failed to get data for issue #${issueNumber}: ${toErrorMessage(error)}`,
+    );
+    throw new GitHubError(
+      `Could not retrieve data for issue #${issueNumber}: ${toErrorMessage(
+        error,
+      )}`,
+    );
   }
 }
 
@@ -1112,8 +1168,16 @@ async function getPullRequestReviewCommentsData(
 
     return { content, comments };
   } catch (error) {
-    core.error(`Failed to get data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
-    throw new GitHubError(`Could not retrieve data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
+    core.error(
+      `Failed to get data for pull request review comments #${pullNumber}: ${toErrorMessage(
+        error,
+      )}`,
+    );
+    throw new GitHubError(
+      `Could not retrieve data for pull request review comments #${pullNumber}: ${toErrorMessage(
+        error,
+      )}`,
+    );
   }
 }
 
@@ -1175,8 +1239,16 @@ async function getPullRequestData(
     core.info(`Fetched ${comments.length} comments for PR #${pullNumber}.`);
     return { content, comments };
   } catch (error) {
-    core.error(`Failed to get data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
-    throw new GitHubError(`Could not retrieve data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
+    core.error(
+      `Failed to get data for pull request #${pullNumber}: ${toErrorMessage(
+        error,
+      )}`,
+    );
+    throw new GitHubError(
+      `Could not retrieve data for pull request #${pullNumber}: ${toErrorMessage(
+        error,
+      )}`,
+    );
   }
 }
 
