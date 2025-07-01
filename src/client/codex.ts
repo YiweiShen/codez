@@ -18,6 +18,7 @@ import type { ActionConfig } from '../config/config.js';
  * @param [images] - Optional array of image file paths to include in the invocation.
  * @returns A promise resolving to the formatted output from Codex.
  */
+import { CliError, TimeoutError } from '../utils/errors.js';
 export async function runCodex(
   workspace: string,
   config: ActionConfig,
@@ -78,7 +79,7 @@ export async function runCodex(
         core.error(
           `Codex command failed with stderr. Exit code: ${result.exitCode}, stderr: ${result.stderr}`,
         );
-        throw new Error(
+        throw new CliError(
           `Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`,
         );
       } else {
@@ -95,7 +96,7 @@ export async function runCodex(
       const errorMessage = result.stderr
         ? `Stderr: ${result.stderr}`
         : `Stdout: ${result.stdout}`; // Use already captured stderr if available
-      throw new Error(
+      throw new CliError(
         `Codex command failed with exit code ${result.exitCode}. ${errorMessage}`,
       );
     }
@@ -132,9 +133,9 @@ export async function runCodex(
       // Cast through a typed interface to avoid untyped any
       (error as { timedOut?: boolean }).timedOut
     ) {
-      throw new Error(`Codex command timed out after ${timeout}ms.`);
+      throw new TimeoutError(`Codex command timed out after ${timeout}ms.`);
     }
-    throw new Error(
+    throw new CliError(
       `Failed to execute Codex command: ${
         error instanceof Error ? error.message : String(error)
       }`,

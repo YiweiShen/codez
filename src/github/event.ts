@@ -6,6 +6,7 @@
  */
 import * as core from '@actions/core';
 import { toErrorMessage } from '../utils/error.js';
+import { ParseError } from '../utils/errors.js';
 import { promises as fs } from 'fs';
 import { getEventType, extractText } from './github.js';
 import type { AgentEvent } from './github.js';
@@ -57,7 +58,7 @@ export async function loadEventPayload(eventPath: string): Promise<Record<string
     // JSON.parse returns any; cast to a generic object to avoid untyped any
     return JSON.parse(content) as Record<string, unknown>;
   } catch (error) {
-    throw new Error(
+    throw new ParseError(
       `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(error)}`,
     );
   }

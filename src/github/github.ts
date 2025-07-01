@@ -12,6 +12,7 @@ import { genContentsString, genFullContentsString } from '../utils/contents.js';
 import { toErrorMessage } from '../utils/error.js';
 import { Octokit } from 'octokit';
 import { promptBuilderConfig } from '../config/prompts.js';
+import { GitHubError } from '../utils/errors.js';
 
 /**
  * Infer a branch type keyword from a commit message header.
@@ -169,7 +170,7 @@ export async function cloneRepository(
 ): Promise<void> {
   const cloneUrl = context.payload.repository?.clone_url;
   if (!cloneUrl) {
-    throw new Error('Repository clone URL not found');
+    throw new GitHubError('Repository clone URL not found');
   }
 
   // Determine branch to clone
@@ -191,13 +192,13 @@ export async function cloneRepository(
       branchToClone = prData.data.head.ref;
       core.info(`Cloning PR branch: ${branchToClone}`);
     } catch (e) {
-      throw new Error(`Could not get PR branch from API: ${e}`);
+      throw new GitHubError(`Could not get PR branch from API: ${e}`);
     }
   } else {
     // For issues or other events, clone the default branch
     branchToClone = context.payload.repository?.default_branch;
     if (!branchToClone) {
-      throw new Error('Default branch not found');
+      throw new GitHubError('Default branch not found');
     }
     core.info(`Cloning default branch: ${branchToClone}`);
   }
@@ -232,7 +233,7 @@ export async function cloneRepository(
     );
     core.info('Repository cloned successfully.');
   } catch (error) {
-    throw new Error(
+    throw new GitHubError(
       `Failed to clone repository: ${
         error instanceof Error ? error.message : error
       }`,
@@ -545,7 +546,7 @@ export async function createPullRequest(
   const baseBranch = github.context.payload.repository?.default_branch; // Get default branch for base
 
   if (!baseBranch) {
-    throw new Error(
+    throw new GitHubError(
       'Could not determine the default branch to use as base for the PR.',
     );
   }
@@ -672,7 +673,7 @@ export async function createPullRequest(
     }
   } catch (error) {
     core.error(`Error creating Pull Request: ${toErrorMessage(error)}`);
-    throw new Error(`Failed to create Pull Request: ${toErrorMessage(error)}`);
+    throw new GitHubError(`Failed to create Pull Request: ${toErrorMessage(error)}`);
   }
 }
 
@@ -821,7 +822,7 @@ export async function commitAndPush(
     } catch (commentError) {
       core.error(`Failed to post error comment: ${toErrorMessage(commentError)}`);
     }
-    throw new Error(`Failed to commit and push changes: ${toErrorMessage(error)}`);
+    throw new GitHubError(`Failed to commit and push changes: ${toErrorMessage(error)}`);
   }
 }
 
@@ -968,7 +969,7 @@ export async function getChangedFiles(
   } else if (event.type === 'pullRequestReviewCommentCreated') {
     prNumber = event.github.pull_request.number;
   } else {
-    throw new Error(`Cannot get changed files for event type: ${event.type}`);
+    throw new GitHubError(`Cannot get changed files for event type: ${event.type}`);
   }
 
   const prFilesResponse = await octokit.rest.pulls.listFiles({
@@ -995,7 +996,7 @@ export async function getContentsData(
       event.github.comment.in_reply_to_id ?? event.github.comment.id,
     );
   }
-  throw new Error('Invalid event type for data retrieval');
+  throw new GitHubError('Invalid event type for data retrieval');
 }
 
 /**
@@ -1057,7 +1058,7 @@ async function getIssueData(
     return { content, comments };
   } catch (error) {
     core.error(`Failed to get data for issue #${issueNumber}: ${toErrorMessage(error)}`);
-    throw new Error(`Could not retrieve data for issue #${issueNumber}: ${toErrorMessage(error)}`);
+    throw new GitHubError(`Could not retrieve data for issue #${issueNumber}: ${toErrorMessage(error)}`);
   }
 }
 
@@ -1113,7 +1114,7 @@ async function getPullRequestReviewCommentsData(
     return { content, comments };
   } catch (error) {
     core.error(`Failed to get data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
-    throw new Error(`Could not retrieve data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
+    throw new GitHubError(`Could not retrieve data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
   }
 }
 
@@ -1176,7 +1177,7 @@ async function getPullRequestData(
     return { content, comments };
   } catch (error) {
     core.error(`Failed to get data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
-    throw new Error(`Could not retrieve data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
+    throw new GitHubError(`Could not retrieve data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
   }
 }
 

@@ -5,6 +5,7 @@
  * change detection, and result handling including pull requests and comments.
  */
 import * as core from '@actions/core';
+import { GitHubError } from '../utils/errors.js';
 import { execa } from 'execa';
 import {
   cloneRepository,
@@ -79,7 +80,7 @@ async function fetchLatestFailedWorkflowLogs(
     return logs.join('\n\n');
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`Error fetching workflow runs: ${msg}`);
+    throw new GitHubError(`Error fetching workflow runs: ${msg}`);
   }
 }
 export { createIssuesFromFeaturePlan } from './createIssues.js';
@@ -147,7 +148,7 @@ async function createProgressComment(
     core.info(`Created progress comment with id: ${data.id}`);
     return data.id;
   }
-  throw new Error('Unsupported event for progress comment');
+  throw new GitHubError('Unsupported event for progress comment');
 }
 
 /**
@@ -203,7 +204,7 @@ async function updateProgressComment(
       body,
     });
   } else {
-    throw new Error('Unsupported event for updating progress comment');
+  throw new GitHubError('Unsupported event for updating progress comment');
   }
 }
 
