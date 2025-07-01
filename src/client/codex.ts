@@ -106,7 +106,21 @@ export async function runCodex(
     const codeResult = `\`\`\`\n${result.stdout}\n\`\`\``;
 
     const lastLine = codeResult.split('\n').slice(-2, -1)[0];
-    const jsonResult = JSON.parse(lastLine);
+    let jsonResult: unknown;
+    try {
+      jsonResult = JSON.parse(lastLine);
+    } catch (parseError) {
+      core.error(
+        `Failed to parse JSON output from Codex: ${
+          parseError instanceof Error ? parseError.message : String(parseError)
+        }. Last line: ${lastLine}`
+      );
+      throw new Error(
+        `Failed to parse JSON output from Codex: ${
+          parseError instanceof Error ? parseError.message : String(parseError)
+        }`
+      );
+    }
     let textResult = '';
     if (
       jsonResult &&
@@ -120,12 +134,18 @@ export async function runCodex(
     // return textResult + "<details><summary>Codex Result</summary>\n\n" + codeResult + "\n</details>";
     return textResult;
   } catch (error) {
-    // Log the full error for debugging, check for timeout
+    // Log the full error for debugging
     core.error(
       `Error executing Codex command: ${
         error instanceof Error ? error.stack : String(error)
       }`,
     );
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Failed to parse JSON output')
+    ) {
+      throw error;
+    }
     if (
       error instanceof Error &&
       'timedOut' in error &&
