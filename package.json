@@ -8,7 +8,8 @@
     "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --minify --outfile=dist/index.js",
     "test": "jest",
     "lint": "eslint \"src/**/*.{ts,tsx}\" \"__tests__/**/*.{ts,tsx}\"",
-    "release": "npx bumpp"
+    "release": "npx bumpp",
+    "prepare": "husky install"
   },
   "keywords": [
     "github",
@@ -40,6 +41,16 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "eslint-plugin-jsdoc": "^39.0.0",
     "eslint-config-prettier": "^8.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npm run format",
+      "eslint --fix",
+      "npm test -- --findRelatedTests",
+      "git add"
+    ]
   }
 }
