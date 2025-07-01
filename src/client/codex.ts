@@ -57,7 +57,9 @@ export async function runCodex(
       envVars.OPENAI_API_BASE_URL = config.openaiBaseUrl;
     }
 
-    core.info(`Run command: codex ${cliArgs.join(' ')}`);
+    // Redact prompt argument when logging CLI invocation
+    const argsForLog = cliArgs.slice(0, -1).join(' ');
+    core.info(`Run command: codex ${argsForLog} <prompt redacted>`);
     const result = await execa(
       'codex', // Assuming 'codex' is in the PATH
       cliArgs,

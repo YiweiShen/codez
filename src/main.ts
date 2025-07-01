@@ -8,7 +8,7 @@ import * as core from '@actions/core';
 import { getConfig } from './config/config.js';
 import { processEvent } from './github/event.js';
 import { runAction } from './github/action.js';
-import { checkPermission } from './security/security.js';
+import { checkPermission, initLogMasking } from './security/security.js';
 
 /**
  * Orchestrate the action's workflow.
@@ -22,6 +22,8 @@ export async function run(): Promise<void> {
   try {
     // Get Configuration
     const config = getConfig();
+    // Initialize log masking to scrub sensitive data in logs
+    initLogMasking(config);
 
     // Process Event
     const processedEvent = await processEvent(config);

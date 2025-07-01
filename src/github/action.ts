@@ -584,7 +584,9 @@ export async function runAction(
       );
     }
   }
-  core.info(`Prompt: \n${prompt}`);
+  core.info(
+    `Prompt generated (length ${prompt.length} characters)`
+  );
   // Update progress: context gathering complete
   if (progressCommentId) {
     try {

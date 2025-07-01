@@ -83,6 +83,53 @@ export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   if (config.openaiBaseUrl) {
     maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
   }
+  // Mask any custom environment variable values (e.g., codexEnv) that may be sensitive
+  if (config.codexEnv) {
+    for (const val of Object.values(config.codexEnv)) {
+      if (val) {
+        maskedText = maskedText.replaceAll(val, '***');
+      }
+    }
+  }
 
   return maskedText;
+}
+/**
+ * Initialize log masking by patching core and console methods
+ * to scrub sensitive information from all log messages.
+ * @param config - Action configuration containing secrets to mask
+ */
+export function initLogMasking(config: ActionConfig): void {
+  const coreMethods: Array<'info' | 'warning' | 'error' | 'debug'> = [
+    'info',
+    'warning',
+    'error',
+    'debug',
+  ];
+  for (const method of coreMethods) {
+    // @ts-ignore override
+    const original = (core as any)[method] as (msg: string, ...args: any[]) => void;
+    // @ts-ignore
+    (core as any)[method] = (message: string, ...args: any[]) => {
+      const scrubbed =
+        typeof message === 'string'
+          ? maskSensitiveInfo(message, config)
+          : message;
+      return original(scrubbed, ...args);
+    };
+  }
+  const consoleMethods: Array<'log' | 'warn' | 'error'> = [
+    'log',
+    'warn',
+    'error',
+  ];
+  for (const method of consoleMethods) {
+    const original = (console as any)[method] as (...args: any[]) => void;
+    (console as any)[method] = (...args: any[]) => {
+      const scrubbedArgs = args.map((arg) =>
+        typeof arg === 'string' ? maskSensitiveInfo(arg, config) : arg,
+      );
+      return original(...scrubbedArgs);
+    };
+  }
 }
