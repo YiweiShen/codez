@@ -5,8 +5,9 @@
  * Conventional Commits formatted messages based on user input and changed files.
  */
 import * as core from '@actions/core';
-import OpenAI, { ClientOptions } from 'openai';
-import { ActionConfig } from '../config/config.js';
+import OpenAI from 'openai';
+import type { ClientOptions } from 'openai';
+import type { ActionConfig } from '../config/config.js';
 import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
 
 /**

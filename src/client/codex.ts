@@ -6,7 +6,7 @@
  */
 import { execa } from 'execa'; // Changed from execaSync
 import * as core from '@actions/core';
-import { ActionConfig } from '../config/config.js';
+import type { ActionConfig } from '../config/config.js';
 
 /**
  * Invoke the Codex CLI with the specified parameters.

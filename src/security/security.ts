@@ -4,8 +4,8 @@
  * Provides functions for permission checks and masking sensitive information.
  */
 import * as core from '@actions/core';
-import { ActionConfig } from '../config/config.js';
-import { Octokit } from 'octokit';
+import type { ActionConfig } from '../config/config.js';
+import type { Octokit } from 'octokit';
 
 /**
  * Check if the user has appropriate permissions to run the action.
