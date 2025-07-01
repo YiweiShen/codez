@@ -10,6 +10,7 @@ import fg from 'fast-glob';
 import * as path from 'path';
 import ignore from 'ignore';
 import * as core from '@actions/core';
+import { toErrorMessage } from '../utils/error.js';
 
 /**
  * Calculate the SHA-256 hash of the specified file.
@@ -25,7 +26,7 @@ async function calculateFileHash(filePath: string): Promise<string> {
     return hashSum.digest('hex');
   } catch (error) {
     // Log error but rethrow to be handled by caller, as hash calculation is critical
-    core.error(`Failed to calculate hash for ${filePath}: ${error}`);
+    core.error(`Failed to calculate hash for ${filePath}: ${toErrorMessage(error)}`);
     throw error;
   }
 }
@@ -68,7 +69,7 @@ export async function captureFileState(
       ig.add(gitignoreContent);
     } catch (error) {
       core.warning(
-        `Failed to read .gitignore at ${gitignorePath}: ${error}. Proceeding with default ignores.`,
+        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
       );
     }
   } else {
@@ -100,7 +101,7 @@ export async function captureFileState(
         fileState.set(relativeFilePath, hash);
       }
     } catch (error) {
-      core.warning(`Could not process file ${relativeFilePath}: ${error}`);
+      core.warning(`Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`);
     }
   }
   core.info(`Captured state of ${fileState.size} files.`);

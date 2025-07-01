@@ -9,6 +9,7 @@ import { getConfig } from './config/config.js';
 import { processEvent } from './github/event.js';
 import { runAction } from './github/action.js';
 import { checkPermission } from './security/security.js';
+import { toErrorMessage, toErrorStack } from './utils/error.js';
 
 /**
  * Orchestrate the action's workflow.
@@ -41,11 +42,8 @@ export async function run(): Promise<void> {
     // Event is valid and prompt exists, run the main action logic
     await runAction(config, processedEvent);
   } catch (error) {
-    // Catch errors from anywhere in the run function
-    if (error instanceof Error) {
-      core.setFailed(`Action failed: ${error.message}\n${error.stack}`);
-    } else {
-      core.setFailed(`An unknown error occurred: ${error}`);
-    }
+    core.setFailed(
+      `Action failed: ${toErrorMessage(error)}\n${toErrorStack(error) ?? ''}`,
+    );
   }
 }
