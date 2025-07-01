@@ -12,6 +12,7 @@ import * as os from 'os';
 import ignore from 'ignore';
 import * as core from '@actions/core';
 import { toErrorMessage } from '../utils/error.js';
+import { DEFAULT_IGNORE_PATTERNS } from './constants.js';
 
 /**
  * Calculate the SHA-256 hash of the specified file.
@@ -58,10 +59,8 @@ export async function captureFileState(
   const gitignorePath = path.join(workspace, '.gitignore');
   const ig = ignore();
 
-  // Add default ignores - crucial for avoiding git metadata and sensitive files
-  ig.add('.git/**');
-  // Consider adding other common ignores if necessary, e.g., node_modules, build artifacts
-  // ig.add('node_modules/**');
+  // Add default ignore patterns (e.g., .git, node_modules)
+  ig.add(DEFAULT_IGNORE_PATTERNS);
 
   if (await pathExists(gitignorePath)) {
     core.info(`Reading .gitignore rules from ${gitignorePath}`);
@@ -82,7 +81,7 @@ export async function captureFileState(
     cwd: workspace,
     onlyFiles: true, // Only files, not directories
     dot: true, // Include dotfiles
-    ignore: ['.git/**', 'node_modules/**'], // Ignore .git and node_modules directories
+    ignore: DEFAULT_IGNORE_PATTERNS, // Use default ignore patterns
   });
 
   // Filter the glob results using the ignore instance
