@@ -22,5 +22,31 @@ module.exports = {
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
     'max-len': ['error', { code: 80, ignoreComments: false }],
+
+    'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1, maxBOF: 0 }],
+
+    'padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', prev: 'import', next: '*' },
+      { blankLine: 'always', prev: '*', next: 'import' },
+    ],
+
+    'lines-around-comment': [
+      'error',
+      {
+        beforeBlockComment: true,
+        afterBlockComment: true,
+        beforeLineComment: false,
+        afterLineComment: false,
+        allowBlockStart: true,
+        allowBlockEnd: true,
+        allowClassStart: true,
+        allowClassEnd: true,
+        allowObjectStart: true,
+        allowObjectEnd: true,
+        allowArrayStart: true,
+        allowArrayEnd: true,
+      },
+    ],
   },
 };
