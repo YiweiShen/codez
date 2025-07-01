@@ -6,6 +6,14 @@
 
 An AI Agent that operates [Codex](https://github.com/openai/codex) on GitHub Actions. By using this action, you can directly invoke Codex from GitHub Issues or Pull Request comments and automate code changes.
 
+## Prerequisites & Assumptions
+
+- The GitHub Actions workspace is mounted at an absolute path and accessible to the action (configured via the `event-path` and internal `workspace` settings).
+- The Codex CLI (`codex`) is installed and available in the system `PATH` (the Docker image includes `@openai/codex` by default).
+- `git` must be available in the runner environment for branch creation, diffs, and archive operations.
+- Required secrets (`OPENAI_API_KEY`, `GITHUB_TOKEN`) must be configured in the repository's settings.
+- The repository must be checked out before invoking the action (e.g., using `actions/checkout`).
+
 ## Features
 
 - Start Codex with the `/codex` command from GitHub Issues or PR comments
