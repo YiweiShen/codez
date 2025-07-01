@@ -8,6 +8,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 import { defaultModel } from '../api/openai.js';
+import { ConfigError } from '../utils/errors.js';
 
 /**
  * Defines configuration inputs for the GitHub Action.
@@ -127,7 +128,7 @@ export function getConfig(): ActionConfig {
   if (timeoutInput) {
     timeoutSeconds = parseInt(timeoutInput, 10);
     if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
-      throw new Error(
+      throw new ConfigError(
         `Invalid timeout value: ${timeoutInput}. Timeout must be a positive integer.`,
       );
     }
@@ -155,16 +156,16 @@ export function getConfig(): ActionConfig {
   const fetch = core.getBooleanInput('fetch');
 
   if (!openaiApiKey) {
-    throw new Error('OpenAI API key is required.');
+    throw new ConfigError('OpenAI API key is required.');
   }
   if (!githubToken) {
-    throw new Error('GitHub Token is required.');
+    throw new ConfigError('GitHub Token is required.');
   }
   if (!eventPath) {
-    throw new Error('GitHub event path is missing.');
+    throw new ConfigError('GitHub event path is missing.');
   }
   if (!workspace) {
-    throw new Error('GitHub workspace path is missing.');
+    throw new ConfigError('GitHub workspace path is missing.');
   }
 
   return {

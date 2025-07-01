@@ -9,6 +9,7 @@ import OpenAI from 'openai';
 import type { ClientOptions } from 'openai';
 import type { ActionConfig } from '../config/config.js';
 import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
+import { ParseError } from '../utils/errors.js';
 
 /**
  * Default model identifier for OpenAI provider.
@@ -94,7 +95,7 @@ ${changedFiles.join('\n')}
       core.warning(
         `Generated commit message was empty or too long: "${commitMessage}". Falling back.`,
       );
-      throw new Error('Generated commit message invalid.'); // Trigger fallback
+      throw new ParseError('Generated commit message invalid.'); // Trigger fallback
     }
 
     core.info(`Generated commit message: ${commitMessage}`);
