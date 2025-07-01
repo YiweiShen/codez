@@ -9,6 +9,7 @@ import * as github from '@actions/github';
 import { execa } from 'execa';
 import { promises as fs } from 'fs';
 import { genContentsString, genFullContentsString } from '../utils/contents.js';
+import { toErrorMessage } from '../utils/error.js';
 import { Octokit } from 'octokit';
 import { promptBuilderConfig } from '../config/prompts.js';
 
@@ -670,12 +671,8 @@ export async function createPullRequest(
       );
     }
   } catch (error) {
-    core.error(`Error creating Pull Request: ${error}`);
-    throw new Error(
-      `Failed to create Pull Request: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.error(`Error creating Pull Request: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to create Pull Request: ${toErrorMessage(error)}`);
   }
 }
 
@@ -810,7 +807,7 @@ export async function commitAndPush(
       await postComment(octokit, repo, event, output);
     }
   } catch (error) {
-    core.error(`Error committing and pushing changes: ${error}`);
+    core.error(`Error committing and pushing changes: ${toErrorMessage(error)}`);
     // Attempt to post an error comment
     try {
       await postComment(
@@ -822,13 +819,9 @@ export async function commitAndPush(
         }`,
       );
     } catch (commentError) {
-      core.error(`Failed to post error comment: ${commentError}`);
+      core.error(`Failed to post error comment: ${toErrorMessage(commentError)}`);
     }
-    throw new Error(
-      `Failed to commit and push changes: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    throw new Error(`Failed to commit and push changes: ${toErrorMessage(error)}`);
   }
 }
 
@@ -1063,12 +1056,8 @@ async function getIssueData(
     core.info(`Fetched ${comments.length} comments for issue #${issueNumber}.`);
     return { content, comments };
   } catch (error) {
-    core.error(`Failed to get data for issue #${issueNumber}: ${error}`);
-    throw new Error(
-      `Could not retrieve data for issue #${issueNumber}: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.error(`Failed to get data for issue #${issueNumber}: ${toErrorMessage(error)}`);
+    throw new Error(`Could not retrieve data for issue #${issueNumber}: ${toErrorMessage(error)}`);
   }
 }
 
@@ -1123,14 +1112,8 @@ async function getPullRequestReviewCommentsData(
 
     return { content, comments };
   } catch (error) {
-    core.error(
-      `Failed to get data for pull request review comments #${pullNumber}: ${error}`,
-    );
-    throw new Error(
-      `Could not retrieve data for pull request review comments #${pullNumber}: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.error(`Failed to get data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
+    throw new Error(`Could not retrieve data for pull request review comments #${pullNumber}: ${toErrorMessage(error)}`);
   }
 }
 
@@ -1192,12 +1175,8 @@ async function getPullRequestData(
     core.info(`Fetched ${comments.length} comments for PR #${pullNumber}.`);
     return { content, comments };
   } catch (error) {
-    core.error(`Failed to get data for pull request #${pullNumber}: ${error}`);
-    throw new Error(
-      `Could not retrieve data for pull request #${pullNumber}: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.error(`Failed to get data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
+    throw new Error(`Could not retrieve data for pull request #${pullNumber}: ${toErrorMessage(error)}`);
   }
 }
 

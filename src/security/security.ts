@@ -4,6 +4,7 @@
  * Provides functions for permission checks and masking sensitive information.
  */
 import * as core from '@actions/core';
+import { toErrorMessage } from '../utils/error.js';
 import type { ActionConfig } from '../config/config.js';
 import type { Octokit } from 'octokit';
 
@@ -25,7 +26,7 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
   try {
     return await checkUserPermissionGithub(octokit, repo, actor);
   } catch (error) {
-    core.warning(`Exception occurred during permission check: ${error}`);
+    core.warning(`Exception occurred during permission check: ${toErrorMessage(error)}`);
     return false;
   }
 }
@@ -58,7 +59,7 @@ async function checkUserPermissionGithub(
     // Permission levels include `admin, write, read, none`
     return ['admin', 'write'].includes(permission);
   } catch (error) {
-    core.warning(`Error checking user permission: ${error}`);
+    core.warning(`Error checking user permission: ${toErrorMessage(error)}`);
     return false;
   }
 }
