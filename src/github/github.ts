@@ -611,6 +611,26 @@ export async function createPullRequest(
 
     core.info('Adding changed files to Git...');
     await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
+    // Check for any changes before committing
+    const statusResult = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+    if (!statusResult.stdout.trim()) {
+      core.info('No changes to commit. Skipping pull request creation.');
+      const body = truncateOutput(output);
+      if (progressCommentId) {
+        await octokit.rest.issues.updateComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body,
+        });
+      } else {
+        await octokit.rest.issues.createComment({
+          ...repo,
+          issue_number: issueNumber,
+          body,
+        });
+      }
+      return;
+    }
 
     core.info('Committing changes...');
     await execa('git', ['commit', '-m', commitMessage], {
