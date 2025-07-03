@@ -131,7 +131,6 @@ export async function runCodex(
       textResult = jsonResult.content[0].text + '\n\n';
     }
 
-    // return textResult + "<details><summary>Codex Result</summary>\n\n" + codeResult + "\n</details>";
     return textResult;
   } catch (error) {
     // Log the full error for debugging

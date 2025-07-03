@@ -3,8 +3,7 @@
  *
  * Provides functions to extract image URLs from text and download images to a local directory.
  */
-import * as fs from 'fs';
-import { promises as fsp } from 'fs';
+import { createWriteStream, promises as fsPromises } from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import * as core from '@actions/core';
@@ -44,7 +43,7 @@ export async function downloadImages(
   urls: string[],
   downloadDir: string,
 ): Promise<string[]> {
-  await fsp.mkdir(downloadDir, { recursive: true });
+  await fsPromises.mkdir(downloadDir, { recursive: true });
   const concurrency = 5;
   const results: (string | undefined)[] = new Array(urls.length);
   for (let i = 0; i < urls.length; i += concurrency) {
@@ -57,7 +56,7 @@ export async function downloadImages(
           const filename = path.basename(parsed.pathname);
           const destPath = path.join(downloadDir, filename);
           await downloadFile(url, destPath);
-          const stats = await fsp.stat(destPath);
+          const stats = await fsPromises.stat(destPath);
           const fileSize = stats.size;
           const relPath = path.relative(process.cwd(), destPath);
           results[index] = relPath;
@@ -86,7 +85,7 @@ export async function downloadImages(
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then((response) => {
     return new Promise<void>((resolve, reject) => {
-      const stream = fs.createWriteStream(dest);
+      const stream = createWriteStream(dest);
       response.data.pipe(stream);
       stream.on('finish', resolve);
       stream.on('error', reject);
