@@ -93,6 +93,10 @@ function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '$\\$&');
 }
 const PROGRESS_BAR_BLOCKS = 20;
+/**
+ * Title used for Codez progress comments.
+ */
+const PROGRESS_TITLE = '**🚀 Codez Progress**';
 
 /**
  * Create a GitHub comment to display initial progress steps with checkboxes.
@@ -112,7 +116,7 @@ async function createProgressComment(
   const total = steps.length;
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
-  const title = '**🚀 Codez Progress**';
+  const title = PROGRESS_TITLE;
   const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0%`, ''];
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
@@ -170,7 +174,7 @@ async function updateProgressComment(
   const filled = Math.round((completed / total) * barBlocks);
   const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
   const percent = Math.round((completed / total) * 100);
-  const title = '**🚀 Codez Progress**';
+  const title = PROGRESS_TITLE;
   const bodyLines: string[] = [
     title,
     '',
