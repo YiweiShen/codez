@@ -21,6 +21,7 @@ import type { ActionConfig } from '../config/config.js';
  * @property userPrompt - Extracted prompt text for processing.
  * @property includeFullHistory - Whether to include full conversation history.
  * @property createIssues - Whether to create issues based on the output.
+ * @property noPr - Whether to skip pull request creation and only post AI output as a comment.
  */
 export interface ProcessedEvent {
   type: 'codex';
@@ -28,6 +29,9 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
+  /**
+   * Whether to skip pull request creation and only post AI output as a comment.
+   */
   noPr: boolean;
   /**
    * Whether to fetch and include the latest failed CI build logs as context.
