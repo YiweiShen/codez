@@ -3,9 +3,10 @@
  * Provides a function to invoke the Codex CLI tool with configured parameters
  * and return its output.
  */
-import { execa } from 'execa'; // Changed from execaSync
+import { execa } from 'execa';
 import * as core from '@actions/core';
 import type { ActionConfig } from '../config/config.js';
+import { CliError, TimeoutError } from '../utils/errors.js';
 
 /**
  * Invoke the Codex CLI with the specified parameters.
@@ -17,7 +18,6 @@ import type { ActionConfig } from '../config/config.js';
  * @param [images] - Optional array of image file paths to include in the invocation.
  * @returns A promise resolving to the formatted output from Codex.
  */
-import { CliError, TimeoutError } from '../utils/errors.js';
 export async function runCodex(
   workspace: string,
   config: ActionConfig,
@@ -25,7 +25,7 @@ export async function runCodex(
   timeout: number,
   images: string[] = [],
 ): Promise<string> {
-  // Added async and Promise<>
+  
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
     // Build CLI arguments (let execa handle argument quoting)
