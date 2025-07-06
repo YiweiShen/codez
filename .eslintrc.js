@@ -15,6 +15,13 @@ module.exports = {
     jsdoc: {
       mode: 'typescript',
     },
+    // Recognize extensions for import resolution and enforce consistent usage
+    'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
   },
   rules: {
     'jsdoc/check-multiline-blocks': 'error',
@@ -29,6 +36,19 @@ module.exports = {
         'newlines-between': 'always',
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
+    ],
+    // Enforce consistent import extensions: require .js for JavaScript, disallow .ts/.tsx/.jsx extensions
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'always',
+        mjs: 'always',
+        cjs: 'always',
+        ts: 'never',
+        tsx: 'never',
+        jsx: 'never'
+      }
     ],
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1, maxBOF: 0 }],
     'padding-line-between-statements': [
