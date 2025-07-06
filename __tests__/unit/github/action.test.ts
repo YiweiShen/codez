@@ -13,7 +13,6 @@ describe('escapeRegExp', () => {
     expect(escapeRegExp('abc123')).toBe('abc123');
   });
 });
-
 describe('createProgressComment', () => {
   const repo = { owner: 'owner', repo: 'repo' };
   const steps = ['step1', 'step2'];
@@ -128,3 +127,4 @@ describe('createIssuesFromFeaturePlan', () => {
       'Feature plan JSON is not an array. Please output an array of feature objects.',
     );
   });
+});
