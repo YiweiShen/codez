@@ -5,7 +5,7 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'jsdoc', 'import'],
+  plugins: ['@typescript-eslint', 'jsdoc', 'import', 'unused-imports'],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:jsdoc/recommended',
@@ -72,6 +72,12 @@ module.exports = {
         allowArrayStart: true,
         allowArrayEnd: true,
       },
+    ],
+    // Remove unused imports and variables
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'error',
+      { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }
     ],
   },
 };
