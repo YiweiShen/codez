@@ -612,7 +612,9 @@ export async function createPullRequest(
     core.info('Adding changed files to Git...');
     await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
     // Check for any changes before committing
-    const statusResult = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+    const statusResult = await execa('git', ['status', '--porcelain'], {
+      cwd: workspace,
+    });
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit. Skipping pull request creation.');
       const body = truncateOutput(output);

@@ -25,7 +25,6 @@ export async function runCodex(
   timeout: number,
   images: string[] = [],
 ): Promise<string> {
-  
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
   try {
     // Build CLI arguments (let execa handle argument quoting)

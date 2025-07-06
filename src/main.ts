@@ -41,13 +41,9 @@ export async function run(): Promise<void> {
     await runAction(config, processedEvent);
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(
-        `Action failed: ${error.message}\n${error.stack ?? ''}`
-      );
+      core.setFailed(`Action failed: ${error.message}\n${error.stack ?? ''}`);
     } else {
-      core.setFailed(
-        `An unknown error occurred: ${String(error)}`
-      );
+      core.setFailed(`An unknown error occurred: ${String(error)}`);
     }
   }
 }
