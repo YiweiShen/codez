@@ -18,9 +18,6 @@ export const conventionalCommitsSystemPrompt = `You are an AI assistant that gen
 Provide only the single-line commit header as the complete output.`;
 
 /**
- * Configuration for building prompts in the Codex CLI.
- */
-/**
  * Configuration settings for building prompts in the Codex CLI.
  *
  * Defines labels and separators for structuring the generated prompt content.

@@ -83,9 +83,8 @@ export async function captureFileState(
   // Use async fast-glob to find all files, with include/exclude patterns for performance
   const allFiles = await fg(['**/*'], {
     cwd: workspace,
-    onlyFiles: true, // Only files, not directories
-    dot: true, // Include dotfiles
-    ignore: DEFAULT_IGNORE_PATTERNS, // Use default ignore patterns
+    onlyFiles: true,
+    dot: true,
   });
 
   // Filter the glob results using the ignore instance
