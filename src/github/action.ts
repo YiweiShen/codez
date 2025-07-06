@@ -310,10 +310,35 @@ async function handleResult(
 
   if (!noPr && effectiveChangedFiles.length > 0) {
     core.info(
-      `Detected changes in ${
-        effectiveChangedFiles.length
-      } files:\n${effectiveChangedFiles.join('\n')}`,
+      `Detected changes in ${effectiveChangedFiles.length} files:\n${effectiveChangedFiles.join('\n')}`,
     );
+    core.info('Autofixing changed files with Prettier and ESLint');
+    for (const filePath of effectiveChangedFiles) {
+      try {
+        await execa('npx', ['prettier', '--write', filePath], {
+          cwd: workspace,
+          stdio: 'inherit',
+        });
+      } catch (err) {
+        core.warning(
+          `Prettier autofix failed for ${filePath}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+      try {
+        await execa('npx', ['eslint', '--fix', filePath], {
+          cwd: workspace,
+          stdio: 'inherit',
+        });
+      } catch (err) {
+        core.warning(
+          `ESLint autofix failed for ${filePath}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
 
     const generateCommitMessage = generateCommitMessageOpenAI;
     // Generate commit message

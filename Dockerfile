@@ -9,7 +9,6 @@ RUN npm install
 COPY . .
 
  RUN npm run build
- RUN npm prune --production
 
 FROM node:22-slim AS runner
 
