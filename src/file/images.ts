@@ -9,8 +9,8 @@ import axios from 'axios';
 import * as core from '@actions/core';
 
 // Precompiled regular expressions for Markdown and HTML image tags
-const mdRegex = /!\[[\s\S]*?\]\((https?:\/\/[^)]+)\)/g;
-const htmlRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
+const markdownImageRegex = /!\[[\s\S]*?\]\((https?:\/\/[^)]+)\)/g;
+const htmlImageRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
 
 /**
  * Extract image URLs from Markdown and HTML <img> tags in the given text.
@@ -21,12 +21,12 @@ const htmlRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
   let match: RegExpExecArray | null;
-  mdRegex.lastIndex = 0;
-  while ((match = mdRegex.exec(text)) !== null) {
+  markdownImageRegex.lastIndex = 0;
+  while ((match = markdownImageRegex.exec(text)) !== null) {
     urls.push(match[1]);
   }
-  htmlRegex.lastIndex = 0;
-  while ((match = htmlRegex.exec(text)) !== null) {
+  htmlImageRegex.lastIndex = 0;
+  while ((match = htmlImageRegex.exec(text)) !== null) {
     urls.push(match[1]);
   }
   return Array.from(new Set(urls));

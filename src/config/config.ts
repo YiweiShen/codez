@@ -16,7 +16,6 @@ import { ConfigError } from '../utils/errors.js';
  * Includes GitHub authentication, workspace settings, and Codex/OpenAI parameters.
  */
 export interface ActionConfig {
-  // Common settings
   githubToken: string;
   eventPath: string;
   workspace: string;
@@ -25,7 +24,6 @@ export interface ActionConfig {
   context: typeof github.context;
   repo: { owner: string; repo: string };
 
-  // Codex / OpenAI settings
   openaiApiKey: string;
   openaiBaseUrl: string;
   /**
