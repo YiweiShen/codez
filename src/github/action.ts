@@ -319,7 +319,7 @@ async function handleResult(
     // Generate commit message
     // Generate commit message via OpenAI (instrumented)
     core.info('[perf] generateCommitMessage start');
-    const _t_commitMsg = Date.now();
+    const startGenerateCommitMessage = Date.now();
     const commitMessage = await generateCommitMessage(
       effectiveChangedFiles,
       userPrompt,
@@ -340,7 +340,7 @@ async function handleResult(
       config,
     );
     core.info(
-      `[perf] generateCommitMessage end - ${Date.now() - _t_commitMsg}ms`,
+      `[perf] generateCommitMessage end - ${Date.now() - startGenerateCommitMessage}ms`,
     );
 
     // Handle changes based on event type
@@ -426,9 +426,9 @@ export async function runAction(
 
   // Add eyes reaction (instrumented)
   core.info('[perf] addEyeReaction start');
-  const _t_addEye = Date.now();
+  const startAddEyeReaction = Date.now();
   await addEyeReaction(octokit, repo, agentEvent.github);
-  core.info(`[perf] addEyeReaction end - ${Date.now() - _t_addEye}ms`);
+  core.info(`[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`);
 
   // Initialize progress UI
   // Define progress steps with emojis for clarity
@@ -489,7 +489,7 @@ export async function runAction(
 
   // Clone repository (instrumented)
   core.info('[perf] cloneRepository start');
-  const _t_clone = Date.now();
+  const startCloneRepository = Date.now();
   await cloneRepository(
     workspace,
     githubToken,
@@ -498,13 +498,13 @@ export async function runAction(
     octokit,
     agentEvent,
   );
-  core.info(`[perf] cloneRepository end - ${Date.now() - _t_clone}ms`);
+  core.info(`[perf] cloneRepository end - ${Date.now() - startCloneRepository}ms`);
 
   // Capture initial file state (instrumented)
   core.info('[perf] captureFileState start');
-  const _t_captureState = Date.now();
+  const startCaptureFileState = Date.now();
   const originalFileState = await captureFileState(workspace);
-  core.info(`[perf] captureFileState end - ${Date.now() - _t_captureState}ms`);
+  core.info(`[perf] captureFileState end - ${Date.now() - startCaptureFileState}ms`);
 
   // generate Prompt (with special handling for --fetch, --fix-build, or create issues)
   let effectiveUserPrompt = userPrompt;
@@ -562,7 +562,7 @@ export async function runAction(
 
   // Generate prompt for Codex (instrumented)
   core.info('[perf] generatePrompt start');
-  const _t_prompt = Date.now();
+  const startGeneratePrompt = Date.now();
   let prompt = await generatePrompt(
     octokit,
     repo,
@@ -570,7 +570,7 @@ export async function runAction(
     effectiveUserPrompt,
     includeFullHistory,
   );
-  core.info(`[perf] generatePrompt end - ${Date.now() - _t_prompt}ms`);
+  core.info(`[perf] generatePrompt end - ${Date.now() - startGeneratePrompt}ms`);
 
   // Handle any images in the prompt by downloading and replacing embeds with placeholders
   const imageUrls = extractImageUrls(prompt);
@@ -622,7 +622,7 @@ export async function runAction(
     const allImages = [...config.images, ...downloadedImageFiles];
     // Execute Codex CLI (instrumented)
     core.info('[perf] runCodex start');
-    const _t_codex = Date.now();
+    const startRunCodex = Date.now();
     const rawOutput: string = await runCodex(
       workspace,
       config,
@@ -630,7 +630,7 @@ export async function runAction(
       timeoutSeconds * 1000,
       allImages,
     );
-    core.info(`[perf] runCodex end - ${Date.now() - _t_codex}ms`);
+    core.info(`[perf] runCodex end - ${Date.now() - startRunCodex}ms`);
     output = maskSensitiveInfo(rawOutput, config);
     // Update progress: planning complete
     if (progressCommentId) {
@@ -696,9 +696,9 @@ export async function runAction(
 
   // Detect file changes (instrumented)
   core.info('[perf] detectChanges start');
-  const _t_detect = Date.now();
+  const startDetectChanges = Date.now();
   const changedFiles = await detectChanges(workspace, originalFileState);
-  core.info(`[perf] detectChanges end - ${Date.now() - _t_detect}ms`);
+  core.info(`[perf] detectChanges end - ${Date.now() - startDetectChanges}ms`);
 
   // Update progress: applying edits complete
   if (progressCommentId) {
