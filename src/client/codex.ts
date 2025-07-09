@@ -38,6 +38,7 @@ export async function runCodex(
     // Model and auto flags
     cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
+      'exec', // headless
       '--ask-for-approval',
       'never',
       '--sandbox',
@@ -59,7 +60,6 @@ export async function runCodex(
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
     const result = await execa(
       'codex', // Assuming 'codex' is in the PATH
-      'exec', // head-less
       cliArgs,
       {
         timeout: timeout,
