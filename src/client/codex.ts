@@ -39,10 +39,7 @@ export async function runCodex(
     cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
       'exec', // headless
-      '--ask-for-approval',
-      'never',
-      '--sandbox',
-      'workspace-write',
+      '--full-auto',
       prompt,
     );
 
