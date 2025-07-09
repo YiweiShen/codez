@@ -12,10 +12,10 @@ import {
   addEyeReaction,
   createPullRequest,
   commitAndPush,
-  postComment,
   generatePrompt,
   removeEyeReaction,
   addThumbUpReaction,
+  upsertComment,
 } from './github.js';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 import { captureFileState, detectChanges } from '../file/file.js';
@@ -228,38 +228,6 @@ async function handleResult(
   const { octokit, repo, workspace } = config;
   const { agentEvent, userPrompt, noPr } = processedEvent;
   const event = agentEvent.github;
-  /**
-   * Update the progress comment in place or create a new comment if none exists.
-   */
-  async function updateOrCreateComment(body: string): Promise<void> {
-    if (!progressCommentId) {
-      await postComment(octokit, repo, event, body);
-      return;
-    }
-    try {
-      if ('issue' in event) {
-        await octokit.rest.issues.updateComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else if ('pull_request' in event) {
-        await octokit.rest.pulls.updateReviewComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else {
-        await postComment(octokit, repo, event, body);
-      }
-    } catch (err) {
-      core.warning(
-        `Failed to update comment: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
-  }
   if (noPr) {
     core.info('Flag --no-pr detected; skipping pull request creation.');
   }
@@ -394,10 +362,10 @@ async function handleResult(
       );
     }
     const commentBody = `${output}\n\n**Proposed changes:**\n\`\`\`diff\n${diffOutput}\n\`\`\``;
-    await updateOrCreateComment(commentBody);
+    await upsertComment(octokit, repo, event, progressCommentId, commentBody);
   } else {
     // No non-workflow file changes, update progress comment with AI output
-    await updateOrCreateComment(output);
+    await upsertComment(octokit, repo, event, progressCommentId, output);
   }
 }
 
@@ -457,41 +425,6 @@ export async function runAction(
       }`,
     );
   }
-  /**
-   * Updates the progress comment in place to display the final result.
-   */
-  async function updateFinalComment(body: string): Promise<void> {
-    if (!progressCommentId) {
-      await postComment(octokit, repo, agentEvent.github, body);
-      return;
-    }
-    const event = agentEvent.github;
-    try {
-      if ('issue' in event) {
-        await octokit.rest.issues.updateComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else if ('pull_request' in event && 'comment' in event) {
-        await octokit.rest.pulls.updateReviewComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else {
-        await postComment(octokit, repo, event, body);
-      }
-    } catch (err) {
-      core.warning(
-        `Failed to update comment: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
-  }
-
-  // Clone repository (instrumented)
   core.info('[perf] cloneRepository start');
   const startCloneRepository = Date.now();
   await cloneRepository(
@@ -665,7 +598,13 @@ export async function runAction(
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    await updateFinalComment(`CLI execution failed: ${msg}`);
+    await upsertComment(
+      octokit,
+      repo,
+      agentEvent.github,
+      progressCommentId,
+      `CLI execution failed: ${msg}`,
+    );
     try {
       await removeEyeReaction(octokit, repo, agentEvent.github);
       await addThumbUpReaction(octokit, repo, agentEvent.github);
