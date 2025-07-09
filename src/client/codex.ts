@@ -102,6 +102,7 @@ export async function runCodex(
 
     // stdout parse
     const codeResult = `\`\`\`\n${result.stdout}\n\`\`\``;
+    core.info(`Codex output:\n${codeResult}`);
 
     const lastLine = codeResult.split('\n').slice(-2, -1)[0];
     let jsonResult: unknown;
