@@ -40,7 +40,7 @@ export async function runCodex(
     cliArgs.push(
       '--full-auto',
       '--dangerously-bypass-approvals-and-sandbox',
-      '--quiet',
+      '-- --quiet',
       prompt,
     );
 
