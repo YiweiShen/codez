@@ -63,11 +63,11 @@ export interface ActionConfig {
  * @param input - Raw input string (multiline YAML or comma-separated key=value pairs).
  * @returns A map of environment variable names to values.
  */
-export function parseEnvInput(input: string): Record<string, string> {
+export function parseKeyValueMap(input: string): Record<string, string> {
   const result: Record<string, string> = {};
   if (!input) return result;
   // Split input into items based on newlines or commas
-  const items = parseListInput(input);
+  const items = parseStringList(input);
   for (const item of items) {
     // YAML-style mapping: key: value
     const colonIdx = item.indexOf(':');
@@ -103,7 +103,7 @@ export function parseEnvInput(input: string): Record<string, string> {
  * @param input - String containing list items.
  * @returns Array of trimmed non-empty strings.
  */
-export function parseListInput(input: string): string[] {
+export function parseStringList(input: string): string[] {
   if (!input) {
     return [];
   }
@@ -152,11 +152,11 @@ export function getConfig(): ActionConfig {
   const triggerPhrase = core.getInput('trigger-phrase') || '/codex';
   const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
   // Parse comma- or newline-separated GitHub usernames
-  const assigneeTrigger = parseListInput(assigneeTriggerInput);
+  const assigneeTrigger = parseStringList(assigneeTriggerInput);
   const codexEnvInput = core.getInput('codex-env') || '';
-  const codexEnv = parseEnvInput(codexEnvInput);
+  const codexEnv = parseKeyValueMap(codexEnvInput);
   const imagesInput = core.getInput('images') || '';
-  const images = parseListInput(imagesInput);
+  const images = parseStringList(imagesInput);
   const fetch = core.getBooleanInput('fetch');
 
   if (!openaiApiKey) {
