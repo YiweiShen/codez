@@ -1,6 +1,6 @@
 import {
-  parseEnvInput,
-  parseListInput,
+  parseKeyValueMap,
+  parseStringList,
   getConfig,
 } from '../../../src/config/config';
 import * as core from '@actions/core';
@@ -8,20 +8,20 @@ import * as github from '@actions/github';
 import { defaultModel } from '../../../src/api/openai';
 import { Octokit } from 'octokit';
 
-describe('parseEnvInput', () => {
+describe('parseKeyValueMap', () => {
   it('returns empty object for empty input', () => {
-    expect(parseEnvInput('')).toEqual({});
+    expect(parseKeyValueMap('')).toEqual({});
   });
 
   it('parses comma-separated key=value pairs', () => {
-    expect(parseEnvInput('VAR1=value1,VAR2=value2')).toEqual({
+    expect(parseKeyValueMap('VAR1=value1,VAR2=value2')).toEqual({
       VAR1: 'value1',
       VAR2: 'value2',
     });
   });
 
   it('trims whitespace around keys and values', () => {
-    expect(parseEnvInput('VAR1 = value1 , VAR2= value2 ')).toEqual({
+    expect(parseKeyValueMap('VAR1 = value1 , VAR2= value2 ')).toEqual({
       VAR1: 'value1',
       VAR2: 'value2',
     });
@@ -33,7 +33,7 @@ VAR1: value1
 VAR2: "value2"
 VAR3: 'value3'
 `;
-    expect(parseEnvInput(input)).toEqual({
+    expect(parseKeyValueMap(input)).toEqual({
       VAR1: 'value1',
       VAR2: 'value2',
       VAR3: 'value3',
@@ -46,24 +46,24 @@ VAR1: value1
 invalid line
 VAR2: value2
 `;
-    expect(parseEnvInput(input)).toEqual({ VAR1: 'value1', VAR2: 'value2' });
+    expect(parseKeyValueMap(input)).toEqual({ VAR1: 'value1', VAR2: 'value2' });
   });
   it('parses single env var without comma or newline', () => {
-    expect(parseEnvInput('KEY=value')).toEqual({ KEY: 'value' });
+    expect(parseKeyValueMap('KEY=value')).toEqual({ KEY: 'value' });
   });
   it('parses YAML mapping value containing colon', () => {
     const input = 'KEY: value:with:colon\n';
-    expect(parseEnvInput(input)).toEqual({ KEY: 'value:with:colon' });
+    expect(parseKeyValueMap(input)).toEqual({ KEY: 'value:with:colon' });
   });
 });
 
-describe('parseListInput', () => {
+describe('parseStringList', () => {
   it('returns empty array for empty input', () => {
-    expect(parseListInput('')).toEqual([]);
+    expect(parseStringList('')).toEqual([]);
   });
 
   it('parses comma-separated list', () => {
-    expect(parseListInput('a,b, c ,, d')).toEqual(['a', 'b', 'c', 'd']);
+    expect(parseStringList('a,b, c ,, d')).toEqual(['a', 'b', 'c', 'd']);
   });
 
   it('parses newline-separated list', () => {
@@ -73,20 +73,20 @@ describe('parseListInput', () => {
 
   c
   `;
-    expect(parseListInput(input)).toEqual(['a', 'b', 'c']);
+    expect(parseStringList(input)).toEqual(['a', 'b', 'c']);
   });
 
   it('parses single-item input', () => {
-    expect(parseListInput('single')).toEqual(['single']);
+    expect(parseStringList('single')).toEqual(['single']);
   });
   it('returns empty array for separators only', () => {
-    expect(parseListInput(' , , ')).toEqual([]);
+    expect(parseStringList(' , , ')).toEqual([]);
   });
   it('parses input with no separators as single item including spaces', () => {
-    expect(parseListInput(' a b c ')).toEqual(['a b c']);
+    expect(parseStringList(' a b c ')).toEqual(['a b c']);
   });
   it('parses newline-separated list even if items contain commas', () => {
-    expect(parseListInput('a\nb,c')).toEqual(['a', 'b,c']);
+    expect(parseStringList('a\nb,c')).toEqual(['a', 'b,c']);
   });
 });
 
