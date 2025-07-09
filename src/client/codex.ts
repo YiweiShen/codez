@@ -59,6 +59,7 @@ export async function runCodex(
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
     const result = await execa(
       'codex', // Assuming 'codex' is in the PATH
+      'exec', // head-less
       cliArgs,
       {
         timeout: timeout,
