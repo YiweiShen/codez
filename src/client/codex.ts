@@ -38,8 +38,10 @@ export async function runCodex(
     // Model and auto flags
     cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
-      '--ask-for-approval never',
-      '--sandbox workspace-write',
+      '--ask-for-approval',
+      'never',
+      '--sandbox',
+      'workspace-write',
       prompt,
     );
 
