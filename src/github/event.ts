@@ -57,8 +57,8 @@ export async function loadEventPayload(
 ): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(eventPath, 'utf8');
-    // Parse JSON using core.getInputJson for consistent error handling
-    return core.getInputJson<Record<string, unknown>>(content);
+    // JSON.parse returns any; cast to a generic object to avoid untyped any
+    return JSON.parse(content) as Record<string, unknown>;
   } catch (error) {
     throw new ParseError(
       `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(
