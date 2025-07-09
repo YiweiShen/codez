@@ -340,7 +340,9 @@ async function handleResult(
       config,
     );
     core.info(
-      `[perf] generateCommitMessage end - ${Date.now() - startGenerateCommitMessage}ms`,
+      `[perf] generateCommitMessage end - ${
+        Date.now() - startGenerateCommitMessage
+      }ms`,
     );
 
     // Handle changes based on event type
@@ -428,7 +430,9 @@ export async function runAction(
   core.info('[perf] addEyeReaction start');
   const startAddEyeReaction = Date.now();
   await addEyeReaction(octokit, repo, agentEvent.github);
-  core.info(`[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`);
+  core.info(
+    `[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`,
+  );
 
   // Initialize progress UI
   // Define progress steps with emojis for clarity
@@ -498,13 +502,17 @@ export async function runAction(
     octokit,
     agentEvent,
   );
-  core.info(`[perf] cloneRepository end - ${Date.now() - startCloneRepository}ms`);
+  core.info(
+    `[perf] cloneRepository end - ${Date.now() - startCloneRepository}ms`,
+  );
 
   // Capture initial file state (instrumented)
   core.info('[perf] captureFileState start');
   const startCaptureFileState = Date.now();
   const originalFileState = await captureFileState(workspace);
-  core.info(`[perf] captureFileState end - ${Date.now() - startCaptureFileState}ms`);
+  core.info(
+    `[perf] captureFileState end - ${Date.now() - startCaptureFileState}ms`,
+  );
 
   // generate Prompt (with special handling for --fetch, --fix-build, or create issues)
   let effectiveUserPrompt = userPrompt;
@@ -570,7 +578,9 @@ export async function runAction(
     effectiveUserPrompt,
     includeFullHistory,
   );
-  core.info(`[perf] generatePrompt end - ${Date.now() - startGeneratePrompt}ms`);
+  core.info(
+    `[perf] generatePrompt end - ${Date.now() - startGeneratePrompt}ms`,
+  );
 
   // Handle any images in the prompt by downloading and replacing embeds with placeholders
   const imageUrls = extractImageUrls(prompt);

@@ -47,8 +47,8 @@ module.exports = {
         cjs: 'always',
         ts: 'never',
         tsx: 'never',
-        jsx: 'never'
-      }
+        jsx: 'never',
+      },
     ],
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1, maxBOF: 0 }],
     'padding-line-between-statements': [
@@ -77,7 +77,12 @@ module.exports = {
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
       'error',
-      { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' }
+      {
+        vars: 'all',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
+      },
     ],
   },
 };
