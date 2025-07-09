@@ -520,7 +520,7 @@ export function extractText(event: GitHubEvent): string | null {
     'pull_request' in event
   ) {
     const title = event.pull_request.title.trim();
-    const body = (event.pull_request.body || '').trim();
+    const body = event.pull_request.body?.trim() ?? '';
     if (body.startsWith('/codex')) {
       return body + (title ? '\n\n' + title : '');
     }
@@ -534,7 +534,7 @@ export function extractText(event: GitHubEvent): string | null {
     'issue' in event
   ) {
     const title = event.issue.title.trim();
-    const body = event.issue.body.trim();
+    const body = event.issue.body?.trim() ?? '';
     if (body.startsWith('/codex')) {
       return body + (title ? '\n\n' + title : '');
     }

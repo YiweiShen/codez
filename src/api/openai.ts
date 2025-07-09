@@ -85,7 +85,7 @@ ${changedFiles.join('\n')}
     });
 
     // Extract commit message from response
-    let commitMessage = response.choices[0]?.message?.content?.trim() || '';
+    let commitMessage = response.choices[0]?.message?.content?.trim() ?? '';
     commitMessage = commitMessage.split('\n')[0]; // Take the first line
 
     // Fallback if the message is empty or too long (adjust length check if needed)
