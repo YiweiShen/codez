@@ -107,30 +107,26 @@ export async function runCodex(
     const lastLine = codeResult.split('\n').slice(-2, -1)[0];
     core.info(`Last line of Codex output: ${lastLine}`);
 
-    let jsonResult: unknown;
-    try {
-      jsonResult = JSON.parse(lastLine);
-    } catch (parseError) {
-      core.error(
-        `Failed to parse JSON output from Codex: ${
-          parseError instanceof Error ? parseError.message : String(parseError)
-        }. Last line: ${lastLine}`,
-      );
-      throw new Error(
-        `Failed to parse JSON output from Codex: ${
-          parseError instanceof Error ? parseError.message : String(parseError)
-        }`,
-      );
+    const lines = codeResult.split('\n');
+
+    // Find all timestamp line indices
+    const timestampRegex = /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}]/;
+    const timestampIndices = lines
+      .map((line, index) => (timestampRegex.test(line) ? index : -1))
+      .filter(index => index !== -1);
+
+    if (timestampIndices.length < 2) {
+      throw new Error('Not enough timestamped blocks found in Codex output.');
     }
-    let textResult = '';
-    if (
-      jsonResult &&
-      jsonResult.type === 'message' &&
-      jsonResult.content &&
-      jsonResult.content.length > 0
-    ) {
-      textResult = jsonResult.content[0].text + '\n\n';
-    }
+
+    // Get range for second-last timestamp block
+    const startIndex = timestampIndices[timestampIndices.length - 2];
+    const endIndex = timestampIndices[timestampIndices.length - 1];
+
+    const blockLines = lines.slice(startIndex + 1, endIndex);
+    const textResult = blockLines.join('\n').trim();
+
+    core.info(`Extracted second-last block:\n${textResult}`);
 
     return textResult;
   } catch (error) {
