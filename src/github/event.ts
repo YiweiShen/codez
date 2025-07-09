@@ -22,6 +22,8 @@ import type { ActionConfig } from '../config/config.js';
  * @property includeFullHistory - Whether to include full conversation history.
  * @property createIssues - Whether to create issues based on the output.
  * @property noPr - Whether to skip pull request creation and only post AI output as a comment.
+ * @property includeFixBuild - Whether to fetch and include the latest failed CI build logs as context.
+ * @property includeFetch - Whether to fetch known URLs referenced in the prompt and include their contents.
  */
 export interface ProcessedEvent {
   type: 'codex';
