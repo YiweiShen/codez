@@ -105,6 +105,8 @@ export async function runCodex(
     core.info(`Codex output:\n${codeResult}`);
 
     const lastLine = codeResult.split('\n').slice(-2, -1)[0];
+    core.info(`Last line of Codex output: ${lastLine}`);
+
     let jsonResult: unknown;
     try {
       jsonResult = JSON.parse(lastLine);
