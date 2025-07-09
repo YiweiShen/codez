@@ -1,7 +1,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import * as core from '@actions/core';
 import { loadEventPayload, processEvent } from '../../../src/github/event';
+
+jest.mock('@actions/core', () => ({
+  info: jest.fn(),
+  getInputJson: jest.fn((input: string) => JSON.parse(input)),
+}));
 
 describe('loadEventPayload', () => {
   it('parses valid JSON', async () => {
