@@ -39,7 +39,7 @@ export async function runCodex(
     cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
       '--full-auto',
-      '--dangerously-auto-approve-everything',
+      '--dangerously-bypass-approvals-and-sandbox',
       '--quiet',
       prompt,
     );
