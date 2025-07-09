@@ -120,8 +120,9 @@ export function parseStringList(input: string): string[] {
 
 /**
  * Gets and validates the inputs for the GitHub Action.
- * @returns ActionConfig object
- * @throws Error if required inputs are missing
+ *
+ * @returns {ActionConfig} Validated configuration inputs for the GitHub Action.
+ * @throws {ConfigError} If required inputs are missing or invalid.
  */
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });

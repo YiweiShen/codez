@@ -49,8 +49,8 @@ export interface ProcessedEvent {
  * Load and parse the event payload from the specified file path.
  *
  * @param eventPath - Path to the event payload file.
- * @returns Parsed event payload object as a generic record.
- * @throws If the file cannot be read or parsed.
+ * @returns {Promise<Record<string, unknown>>} Parsed event payload object.
+ * @throws {ParseError} If the file cannot be read or parsed.
  */
 export async function loadEventPayload(
   eventPath: string,
@@ -72,7 +72,8 @@ export async function loadEventPayload(
  * Process the GitHub event to determine the type and extract the user prompt.
  *
  * @param config - Action configuration object.
- * @returns The processed event data or null if unsupported.
+ * @returns {Promise<ProcessedEvent|null>} The processed event data or null if unsupported.
+ * @throws {ParseError} If the event payload cannot be loaded or parsed.
  */
 export async function processEvent(
   config: ActionConfig,
