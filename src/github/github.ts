@@ -12,6 +12,7 @@ import { toErrorMessage } from '../utils/error.js';
 import { Octokit } from 'octokit';
 import { promptBuilderConfig } from '../config/prompts.js';
 import { GitHubError } from '../utils/errors.js';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
 
 /**
  * Infer a branch type keyword from a commit message header.
@@ -509,8 +510,8 @@ export async function addThumbUpReaction(
 /**
  * Extracts the relevant text (body, title or comment) from the event payload.
  * For issue-opened events:
- *   - If the body starts with '/codex', returns the body and appends the title.
- *   - Else if the title starts with '/codex', returns the title and appends the body.
+ *   - If the body starts with `DEFAULT_TRIGGER_PHRASE`, returns the body and appends the title.
+ *   - Else if the title starts with `DEFAULT_TRIGGER_PHRASE`, returns the title and appends the body.
  *   - Otherwise, returns the body.
  * Comment events remain unchanged.
  */
@@ -521,10 +522,10 @@ export function extractText(event: GitHubEvent): string | null {
   ) {
     const title = event.pull_request.title.trim();
     const body = (event.pull_request.body || '').trim();
-    if (body.startsWith('/codex')) {
+    if (body.startsWith(DEFAULT_TRIGGER_PHRASE)) {
       return body + (title ? '\n\n' + title : '');
     }
-    if (title.startsWith('/codex')) {
+    if (title.startsWith(DEFAULT_TRIGGER_PHRASE)) {
       return title + (body ? '\n\n' + body : '');
     }
     return body;
@@ -535,10 +536,10 @@ export function extractText(event: GitHubEvent): string | null {
   ) {
     const title = event.issue.title.trim();
     const body = event.issue.body.trim();
-    if (body.startsWith('/codex')) {
+    if (body.startsWith(DEFAULT_TRIGGER_PHRASE)) {
       return body + (title ? '\n\n' + title : '');
     }
-    if (title.startsWith('/codex')) {
+    if (title.startsWith(DEFAULT_TRIGGER_PHRASE)) {
       return title + (body ? '\n\n' + body : '');
     }
     return body;
