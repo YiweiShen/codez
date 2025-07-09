@@ -13,6 +13,7 @@ import {
   createPullRequest,
   commitAndPush,
   postComment,
+  updateOrCreateComment,
   generatePrompt,
   removeEyeReaction,
   addThumbUpReaction,
@@ -228,38 +229,6 @@ async function handleResult(
   const { octokit, repo, workspace } = config;
   const { agentEvent, userPrompt, noPr } = processedEvent;
   const event = agentEvent.github;
-  /**
-   * Update the progress comment in place or create a new comment if none exists.
-   */
-  async function updateOrCreateComment(body: string): Promise<void> {
-    if (!progressCommentId) {
-      await postComment(octokit, repo, event, body);
-      return;
-    }
-    try {
-      if ('issue' in event) {
-        await octokit.rest.issues.updateComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else if ('pull_request' in event) {
-        await octokit.rest.pulls.updateReviewComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else {
-        await postComment(octokit, repo, event, body);
-      }
-    } catch (err) {
-      core.warning(
-        `Failed to update comment: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
-  }
   if (noPr) {
     core.info('Flag --no-pr detected; skipping pull request creation.');
   }
@@ -394,10 +363,10 @@ async function handleResult(
       );
     }
     const commentBody = `${output}\n\n**Proposed changes:**\n\`\`\`diff\n${diffOutput}\n\`\`\``;
-    await updateOrCreateComment(commentBody);
+    await updateOrCreateComment(octokit, repo, event, commentBody, progressCommentId);
   } else {
     // No non-workflow file changes, update progress comment with AI output
-    await updateOrCreateComment(output);
+    await updateOrCreateComment(octokit, repo, event, output, progressCommentId);
   }
 }
 

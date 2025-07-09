@@ -618,19 +618,7 @@ export async function createPullRequest(
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit. Skipping pull request creation.');
       const body = truncateOutput(output);
-      if (progressCommentId) {
-        await octokit.rest.issues.updateComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body,
-        });
-      } else {
-        await octokit.rest.issues.createComment({
-          ...repo,
-          issue_number: issueNumber,
-          body,
-        });
-      }
+      await updateOrCreateComment(octokit, repo, event, body, progressCommentId);
       return;
     }
 
@@ -661,19 +649,7 @@ export async function createPullRequest(
     core.info(`Pull Request created: ${pr.data.html_url}`);
 
     const prCommentBody = `Created Pull Request: ${pr.data.html_url}`;
-    if (progressCommentId) {
-      await octokit.rest.issues.updateComment({
-        ...repo,
-        comment_id: progressCommentId,
-        body: prCommentBody,
-      });
-    } else {
-      await octokit.rest.issues.createComment({
-        ...repo,
-        issue_number: issueNumber,
-        body: prCommentBody,
-      });
-    }
+    await updateOrCreateComment(octokit, repo, event, prCommentBody, progressCommentId);
 
     // Link PR to issue in development panel via GraphQL
     try {
@@ -814,25 +790,7 @@ export async function commitAndPush(
     });
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit.');
-      if (progressCommentId) {
-        if ('issue' in event) {
-          await octokit.rest.issues.updateComment({
-            ...repo,
-            comment_id: progressCommentId,
-            body: truncateOutput(output),
-          });
-        } else if ('pull_request' in event && 'comment' in event) {
-          await octokit.rest.pulls.updateReviewComment({
-            ...repo,
-            comment_id: progressCommentId,
-            body: truncateOutput(output),
-          });
-        } else {
-          await postComment(octokit, repo, event, output);
-        }
-      } else {
-        await postComment(octokit, repo, event, output);
-      }
+      await updateOrCreateComment(octokit, repo, event, output, progressCommentId);
       return; // Exit early if no changes
     }
 
@@ -851,25 +809,7 @@ export async function commitAndPush(
     core.info('Changes committed and pushed.');
 
     // Update existing progress comment or post a new comment confirming the changes
-    if (progressCommentId) {
-      if ('issue' in event) {
-        await octokit.rest.issues.updateComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body: truncateOutput(output),
-        });
-      } else if ('pull_request' in event && 'comment' in event) {
-        await octokit.rest.pulls.updateReviewComment({
-          ...repo,
-          comment_id: progressCommentId,
-          body: truncateOutput(output),
-        });
-      } else {
-        await postComment(octokit, repo, event, output);
-      }
-    } else {
-      await postComment(octokit, repo, event, output);
-    }
+    await updateOrCreateComment(octokit, repo, event, output, progressCommentId);
   } catch (error) {
     core.error(
       `Error committing and pushing changes: ${toErrorMessage(error)}`,
@@ -955,6 +895,55 @@ export async function postComment(
       }`,
     );
     // Don't re-throw here, as posting a comment failure might not be critical
+  }
+}
+
+/**
+ * Update an existing comment or create a new comment on an issue or PR.
+ * Automatically truncates the body if it exceeds length limits.
+ * @param octokit Octokit client instance.
+ * @param repo Repository context ({ owner, repo }).
+ * @param event GitHub event context for issue or PR.
+ * @param body Comment body text.
+ * @param commentId Optional existing comment ID to update.
+ * @returns New comment ID if a comment was created.
+ */
+export async function updateOrCreateComment(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: GitHubEvent,
+  body: string,
+  commentId?: number,
+): Promise<number | void> {
+  const content = truncateOutput(body);
+  if (commentId) {
+    if ('issue' in event) {
+      await octokit.rest.issues.updateComment({ ...repo, comment_id: commentId, body: content });
+    } else if ('pull_request' in event && 'comment' in event) {
+      await octokit.rest.pulls.updateReviewComment({ ...repo, comment_id: commentId, body: content });
+    } else {
+      await postComment(octokit, repo, event, body);
+    }
+    return;
+  }
+  if ('issue' in event) {
+    const { data } = await octokit.rest.issues.createComment({
+      ...repo,
+      issue_number: event.issue.number,
+      body: content,
+    });
+    return data.id;
+  } else if ('pull_request' in event && 'comment' in event) {
+    const inReplyTo = event.comment.in_reply_to_id ?? event.comment.id;
+    const { data } = await octokit.rest.pulls.createReplyForReviewComment({
+      ...repo,
+      pull_number: event.pull_request.number,
+      comment_id: inReplyTo,
+      body: content,
+    });
+    return data.id;
+  } else {
+    await postComment(octokit, repo, event, body);
   }
 }
 
