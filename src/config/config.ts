@@ -66,27 +66,33 @@ export interface ActionConfig {
 export function parseEnvInput(input: string): Record<string, string> {
   const result: Record<string, string> = {};
   if (!input) return result;
-  if (input.includes('\n')) {
-    for (const line of input.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const idx = trimmed.indexOf(':');
-      if (idx < 0) continue;
-      const key = trimmed.slice(0, idx).trim();
-      let val = trimmed.slice(idx + 1).trim();
+  // Split input into items based on newlines or commas
+  const items = parseListInput(input);
+  for (const item of items) {
+    // YAML-style mapping: key: value
+    const colonIdx = item.indexOf(':');
+    if (colonIdx > 0) {
+      const key = item.slice(0, colonIdx).trim();
+      let val = item.slice(colonIdx + 1).trim();
       if (
         (val.startsWith('"') && val.endsWith('"')) ||
         (val.startsWith("'") && val.endsWith("'"))
       ) {
         val = val.slice(1, -1);
       }
-      if (key) result[key] = val;
+      if (key) {
+        result[key] = val;
+      }
+      continue;
     }
-  } else {
-    for (const part of input.split(',')) {
-      const [key, ...rest] = part.split('=');
-      if (!key) continue;
-      result[key.trim()] = rest.join('=').trim();
+    // CSV-style mapping: key=value
+    const eqIdx = item.indexOf('=');
+    if (eqIdx > 0) {
+      const key = item.slice(0, eqIdx).trim();
+      const val = item.slice(eqIdx + 1).trim();
+      if (key) {
+        result[key] = val;
+      }
     }
   }
   return result;
