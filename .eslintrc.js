@@ -85,4 +85,13 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.[jt]s?(x)'],
+      rules: {
+        'import/order': 'off',
+        'padding-line-between-statements': 'off',
+      },
+    },
+  ],
 };
