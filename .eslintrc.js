@@ -24,8 +24,6 @@ module.exports = {
     },
   },
   rules: {
-    'jsdoc/check-multiline-blocks': 'error',
-    'jsdoc/newline-after-description': 'error',
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
     'max-len': ['error', { code: 80, ignoreComments: false }],
@@ -87,8 +85,9 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/__tests__/**/*.{ts,tsx}'],
+      files: ['**/__tests__/**/*.{js,jsx,ts,tsx}'],
       rules: {
+        'max-len': ['error', { code: 120, ignoreComments: false }],
         '@typescript-eslint/no-explicit-any': 'off',
       },
     },
