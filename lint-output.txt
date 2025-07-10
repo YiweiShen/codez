@@ -1,0 +1,875 @@
+
+> codez@0.3.8 lint
+> eslint "src/**/*.{ts,tsx}" "__tests__/**/*.{ts,tsx}"
+
+
+/workspace/app/__tests__/src/api/openai.test.ts
+   1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                         jsdoc/check-multiline-blocks
+   1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found                      jsdoc/newline-after-description
+   6:12  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   7:9   warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+   8:24  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  19:26  error    'defaultModel' is assigned a value but never used. Allowed unused vars must match /^_/u  unused-imports/no-unused-vars
+  19:26  warning  'defaultModel' is assigned a value but never used                                        @typescript-eslint/no-unused-vars
+  28:1   error    This line has a length of 84. Maximum allowed is 80                                      max-len
+  29:71  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  39:10  warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+  51:8   warning  Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/client/codex.test.ts
+   1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                  jsdoc/check-multiline-blocks
+   1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found               jsdoc/newline-after-description
+   1:1   error    There should be at least one empty line between import groups                     import/order
+   2:1   error    Expected blank line before this statement                                         padding-line-between-statements
+   2:1   error    `execa` import should occur before import of `../../../src/client/codex`          import/order
+   3:1   error    Expected blank line before this statement                                         padding-line-between-statements
+   3:1   error    There should be at least one empty line between import groups                     import/order
+   3:1   error    `@actions/core` import should occur before import of `../../../src/client/codex`  import/order
+   4:1   error    Expected blank line before this statement                                         padding-line-between-statements
+  58:1   error    This line has a length of 86. Maximum allowed is 80                               max-len
+  97:15  warning  Unexpected any. Specify a different type                                          @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/config/config.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found            jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found         jsdoc/newline-after-description
+    1:1   error    There should be at least one empty line between import groups               import/order
+    1:1   error    `../../../src/config/config` import should occur after import of `octokit`  import/order
+    6:1   error    Expected blank line before this statement                                   padding-line-between-statements
+    7:1   error    Expected blank line before this statement                                   padding-line-between-statements
+    7:1   error    There should be at least one empty line between import groups               import/order
+    8:1   error    Expected blank line before this statement                                   padding-line-between-statements
+    8:1   error    There should be at least one empty line between import groups               import/order
+    8:1   error    `../../../src/api/openai` import should occur after import of `octokit`     import/order
+    9:1   error    Expected blank line before this statement                                   padding-line-between-statements
+   98:16  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+  170:47  warning  Unexpected any. Specify a different type                                    @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/config/prompts.test.ts
+  1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+  1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+
+/workspace/app/__tests__/unit/file/file.test.ts
+   1:1   error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+   1:1   error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+   2:1   error  Expected blank line before this statement                            padding-line-between-statements
+   3:1   error  Expected blank line before this statement                            padding-line-between-statements
+   3:1   error  `os` import should occur before import of `path`                     import/order
+   4:1   error  Expected blank line before this statement                            padding-line-between-statements
+   4:1   error  There should be at least one empty line between import groups        import/order
+   4:1   error  `crypto` import should occur before import of `fs`                   import/order
+   5:1   error  Expected blank line before this statement                            padding-line-between-statements
+   5:1   error  There should be at least one empty line between import groups        import/order
+   6:1   error  Expected blank line before this statement                            padding-line-between-statements
+  49:77  error  Unexpected empty arrow function                                      @typescript-eslint/no-empty-function
+  99:1   error  This line has a length of 94. Maximum allowed is 80                  max-len
+
+/workspace/app/__tests__/unit/file/images.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found       jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found    jsdoc/newline-after-description
+    2:1   error    Expected blank line before this statement                              padding-line-between-statements
+    3:1   error    Expected blank line before this statement                              padding-line-between-statements
+    3:1   error    There should be at least one empty line between import groups          import/order
+    4:1   error    Expected blank line before this statement                              padding-line-between-statements
+    5:1   error    Expected blank line before this statement                              padding-line-between-statements
+    5:1   error    There should be at least one empty line between import groups          import/order
+    5:1   error    `@actions/core` import should occur before import of `axios`           import/order
+    6:1   error    Expected blank line before this statement                              padding-line-between-statements
+    6:1   error    There should be at least one empty line between import groups          import/order
+    6:1   error    `stream` import should occur before import of `axios`                  import/order
+    7:1   error    Expected blank line before this statement                              padding-line-between-statements
+   19:1   warning  Missing JSDoc comment                                                  jsdoc/require-jsdoc
+   63:1   error    This line has a length of 83. Maximum allowed is 80                    max-len
+   68:41  error    'url' is defined but never used. Allowed unused args must match /^_/u  unused-imports/no-unused-vars
+   68:41  warning  'url' is defined but never used                                        @typescript-eslint/no-unused-vars
+   69:64  warning  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+   94:1   error    This line has a length of 81. Maximum allowed is 80                    max-len
+  101:68  warning  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/github/action.test.ts
+    1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found                  jsdoc/check-multiline-blocks
+    1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found               jsdoc/newline-after-description
+    7:1  error  Expected blank line before this statement                                         padding-line-between-statements
+    7:1  error  There should be at least one empty line between import groups                     import/order
+    8:1  error  Expected blank line before this statement                                         padding-line-between-statements
+    8:1  error  There should be at least one empty line between import groups                     import/order
+    8:1  error  `octokit` type import should occur before import of `../../../src/github/action`  import/order
+    9:1  error  Expected blank line before this statement                                         padding-line-between-statements
+   25:1  error  This line has a length of 88. Maximum allowed is 80                               max-len
+   43:1  error  This line has a length of 97. Maximum allowed is 80                               max-len
+  184:1  error  This line has a length of 86. Maximum allowed is 80                               max-len
+
+/workspace/app/__tests__/unit/github/event.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+    2:1   error    Expected blank line before this statement                            padding-line-between-statements
+    3:1   error    Expected blank line before this statement                            padding-line-between-statements
+    3:1   error    There should be at least one empty line between import groups        import/order
+    4:1   error    Expected blank line before this statement                            padding-line-between-statements
+   28:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   53:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   72:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   91:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  119:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  146:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  152:20  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  171:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  189:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  195:20  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  204:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  209:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  210:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  211:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  212:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  213:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+  214:12  warning  Forbidden non-null assertion                                         @typescript-eslint/no-non-null-assertion
+
+/workspace/app/__tests__/unit/github/generatePrompt.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+    1:1   error    There should be at least one empty line between import groups        import/order
+    2:1   error    Expected blank line before this statement                            padding-line-between-statements
+    2:1   error    There should be no empty line within import group                    import/order
+    8:29  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+    9:49  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   29:12  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   36:1   error    This line has a length of 81. Maximum allowed is 80                  max-len
+   53:12  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   57:1   error    This line has a length of 81. Maximum allowed is 80                  max-len
+   81:12  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  102:10  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  125:10  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/github/github.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+   55:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   63:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   72:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   81:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+   90:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  102:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  107:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  112:20  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  119:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  126:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  133:18  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  140:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  149:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  158:19  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  169:16  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  173:16  warning  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+
+/workspace/app/__tests__/unit/main.test.ts
+   1:1   error  Definition for rule 'jsdoc/check-multiline-blocks' was not found                          jsdoc/check-multiline-blocks
+   1:1   error  Definition for rule 'jsdoc/newline-after-description' was not found                       jsdoc/newline-after-description
+   1:1   error  There should be at least one empty line between import groups                             import/order
+   2:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+   2:21  error  Missing file extension for "../../../src/main"                                            import/extensions
+   4:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+  17:1   error  There should be at least one empty line between import groups                             import/order
+  17:1   error  `@actions/core` import should occur before import of `@jest/globals`                      import/order
+  18:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+  18:1   error  `../../../src/config/config.js` import should occur before import of `../../../src/main`  import/order
+  19:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+  19:1   error  `../../../src/github/event.js` import should occur before import of `../../../src/main`   import/order
+  20:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+  21:1   error  Expected blank line before this statement                                                 padding-line-between-statements
+  21:1   error  `../../../src/github/action.js` import should occur before import of `../../../src/main`  import/order
+
+/workspace/app/__tests__/unit/placeholder.test.ts
+  1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+  1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+
+/workspace/app/__tests__/unit/security/security.test.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                                         jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found                                      jsdoc/newline-after-description
+    5:1   error    Expected blank line before this statement                                                                padding-line-between-statements
+    5:1   error    `../../../src/config/config` type import should occur before import of `../../../src/security/security`  import/order
+   22:10  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+   47:10  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+   66:12  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+   85:10  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  110:1   error    This line has a length of 95. Maximum allowed is 80                                                      max-len
+
+/workspace/app/__tests__/unit/utils/contents.test.ts
+   1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+   1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+  21:1  error  This line has a length of 85. Maximum allowed is 80                  max-len
+  27:1  error  This line has a length of 115. Maximum allowed is 80                 max-len
+  47:1  error  This line has a length of 101. Maximum allowed is 80                 max-len
+
+/workspace/app/__tests__/unit/utils/flags.test.ts
+  1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+  1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+  2:1  error  Expected blank line before this statement                            padding-line-between-statements
+
+/workspace/app/src/api/openai.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   4:1  error    This line has a length of 81. Maximum allowed is 80                           max-len
+   7:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   8:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   8:1  error    There should be at least one empty line between import groups                 import/order
+   9:1  error    Expected blank line before this statement                                     padding-line-between-statements
+  10:1  error    Expected blank line before this statement                                     padding-line-between-statements
+  11:1  error    Expected blank line before this statement                                     padding-line-between-statements
+  13:1  error    Expected line after comment                                                   lines-around-comment
+  18:1  error    Expected line after comment                                                   lines-around-comment
+  20:1  warning  Missing JSDoc @param "config" type                                            jsdoc/require-param-type
+  21:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  31:1  error    Expected line after comment                                                   lines-around-comment
+  31:1  error    Missing JSDoc @param "context.prNumber" declaration                           jsdoc/require-param
+  31:1  error    Missing JSDoc @param "context.issueNumber" declaration                        jsdoc/require-param
+  34:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  36:1  warning  Missing JSDoc @param "changedFiles" type                                      jsdoc/require-param-type
+  37:1  warning  Missing @param "context.prNumber"                                             jsdoc/check-param-names
+  37:1  warning  Missing @param "context.issueNumber"                                          jsdoc/check-param-names
+  37:1  warning  Missing JSDoc @param "userPrompt" type                                        jsdoc/require-param-type
+  38:1  warning  Missing JSDoc @param "context" type                                           jsdoc/require-param-type
+  39:1  warning  Missing JSDoc @param "config" type                                            jsdoc/require-param-type
+  40:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  41:1  warning  Expected no lines between tags                                                jsdoc/tag-lines
+  73:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+  91:1  error    This line has a length of 83. Maximum allowed is 80                           max-len
+  95:1  error    This line has a length of 92. Maximum allowed is 80                           max-len
+  97:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+
+/workspace/app/src/client/codex.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   7:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   7:1  error    There should be at least one empty line between import groups                 import/order
+   7:1  error    `@actions/core` import should occur before import of `execa`                  import/order
+   8:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   9:1  error    Expected blank line before this statement                                     padding-line-between-statements
+  11:1  error    Expected line after comment                                                   lines-around-comment
+  12:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  14:1  warning  Missing JSDoc @param "workspace" type                                         jsdoc/require-param-type
+  15:1  warning  Missing JSDoc @param "config" type                                            jsdoc/require-param-type
+  16:1  warning  Missing JSDoc @param "prompt" type                                            jsdoc/require-param-type
+  17:1  error    This line has a length of 81. Maximum allowed is 80                           max-len
+  17:1  warning  Missing JSDoc @param "timeout" type                                           jsdoc/require-param-type
+  18:1  error    This line has a length of 85. Maximum allowed is 80                           max-len
+  18:1  warning  Missing JSDoc @param "images" type                                            jsdoc/require-param-type
+  19:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  77:1  error    This line has a length of 102. Maximum allowed is 80                          max-len
+  80:1  error    This line has a length of 93. Maximum allowed is 80                           max-len
+  84:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+  91:1  error    This line has a length of 88. Maximum allowed is 80                           max-len
+  95:1  error    This line has a length of 81. Maximum allowed is 80                           max-len
+  97:1  error    This line has a length of 82. Maximum allowed is 80                           max-len
+
+/workspace/app/src/config/config.ts
+    1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+    1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+    1:1  error    Expected line after comment                                                   lines-around-comment
+    2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+    8:1  error    Expected blank line before this statement                                     padding-line-between-statements
+    9:1  error    Expected blank line before this statement                                     padding-line-between-statements
+    9:1  error    There should be at least one empty line between import groups                 import/order
+   10:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   11:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   12:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   12:1  error    `../constants.js` import should occur before import of `../utils/errors.js`   import/order
+   14:1  error    Expected line after comment                                                   lines-around-comment
+   17:1  error    This line has a length of 83. Maximum allowed is 80                           max-len
+   30:3  error    Expected line before comment                                                  lines-around-comment
+   30:3  error    Expected line after comment                                                   lines-around-comment
+   34:3  error    Expected line before comment                                                  lines-around-comment
+   34:3  error    Expected line after comment                                                   lines-around-comment
+   36:1  error    This line has a length of 89. Maximum allowed is 80                           max-len
+   39:3  error    Expected line before comment                                                  lines-around-comment
+   39:3  error    Expected line after comment                                                   lines-around-comment
+   43:3  error    Expected line before comment                                                  lines-around-comment
+   43:3  error    Expected line after comment                                                   lines-around-comment
+   44:1  error    This line has a length of 83. Maximum allowed is 80                           max-len
+   47:3  error    Expected line before comment                                                  lines-around-comment
+   47:3  error    Expected line after comment                                                   lines-around-comment
+   51:3  error    Expected line before comment                                                  lines-around-comment
+   51:3  error    Expected line after comment                                                   lines-around-comment
+   52:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+   55:3  error    Expected line before comment                                                  lines-around-comment
+   55:3  error    Expected line after comment                                                   lines-around-comment
+   56:1  error    This line has a length of 85. Maximum allowed is 80                           max-len
+   61:1  error    Expected line after comment                                                   lines-around-comment
+   62:1  error    This line has a length of 97. Maximum allowed is 80                           max-len
+   62:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+   64:1  error    This line has a length of 87. Maximum allowed is 80                           max-len
+   64:1  warning  Missing JSDoc @param "input" type                                             jsdoc/require-param-type
+   65:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  101:1  error    Expected line before comment                                                  lines-around-comment
+  101:1  error    Expected line after comment                                                   lines-around-comment
+  102:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  104:1  warning  Missing JSDoc @param "input" type                                             jsdoc/require-param-type
+  105:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  122:1  error    Expected line after comment                                                   lines-around-comment
+  124:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  137:1  error    This line has a length of 86. Maximum allowed is 80                           max-len
+
+/workspace/app/src/config/prompts.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   2:1  error    This line has a length of 88. Maximum allowed is 80                           max-len
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   5:1  error    Expected line after comment                                                   lines-around-comment
+   8:1  error    This line has a length of 278. Maximum allowed is 80                          max-len
+  12:1  error    This line has a length of 83. Maximum allowed is 80                           max-len
+  13:1  error    This line has a length of 81. Maximum allowed is 80                           max-len
+  14:1  error    This line has a length of 115. Maximum allowed is 80                          max-len
+  20:1  error    Expected line after comment                                                   lines-around-comment
+  26:3  error    Expected line before comment                                                  lines-around-comment
+  26:3  error    Expected line after comment                                                   lines-around-comment
+  28:3  error    Expected line before comment                                                  lines-around-comment
+  28:3  error    Expected line after comment                                                   lines-around-comment
+  30:3  error    Expected line before comment                                                  lines-around-comment
+  30:3  error    Expected line after comment                                                   lines-around-comment
+  32:3  error    Expected line before comment                                                  lines-around-comment
+  32:3  error    Expected line after comment                                                   lines-around-comment
+  34:3  error    Expected line before comment                                                  lines-around-comment
+  34:3  error    Expected line after comment                                                   lines-around-comment
+  38:1  error    Expected line after comment                                                   lines-around-comment
+
+/workspace/app/src/constants.ts
+  1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+  1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+  4:1  error  Expected line after comment                                          lines-around-comment
+  6:1  error  Expected line before comment                                         lines-around-comment
+  6:1  error  Expected line after comment                                          lines-around-comment
+  8:1  error  Expected line before comment                                         lines-around-comment
+  8:1  error  Expected line after comment                                          lines-around-comment
+
+/workspace/app/src/file/constants.ts
+  1:1  error  Definition for rule 'jsdoc/check-multiline-blocks' was not found     jsdoc/check-multiline-blocks
+  1:1  error  Definition for rule 'jsdoc/newline-after-description' was not found  jsdoc/newline-after-description
+  1:1  error  Expected line after comment                                          lines-around-comment
+
+/workspace/app/src/file/file.ts
+    1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+    1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+    1:1  error    Expected line after comment                                                   lines-around-comment
+    2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+    8:1  error    Expected blank line before this statement                                     padding-line-between-statements
+    8:1  error    There should be at least one empty line between import groups                 import/order
+    8:1  error    `crypto` import should occur before import of `fs`                            import/order
+    9:1  error    Expected blank line before this statement                                     padding-line-between-statements
+    9:1  error    There should be at least one empty line between import groups                 import/order
+   10:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   10:1  error    `path` import should occur before import of `fast-glob`                       import/order
+   11:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   11:1  error    There should be at least one empty line between import groups                 import/order
+   11:1  error    `os` import should occur before import of `fast-glob`                         import/order
+   12:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   13:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   13:1  error    There should be at least one empty line between import groups                 import/order
+   13:1  error    `@actions/core` import should occur before import of `fast-glob`              import/order
+   14:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   14:1  error    There should be at least one empty line between import groups                 import/order
+   15:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   17:1  error    Expected line after comment                                                   lines-around-comment
+   18:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+   20:1  warning  Missing JSDoc @param "filePath" type                                          jsdoc/require-param-type
+   21:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+   30:1  error    This line has a length of 85. Maximum allowed is 80                           max-len
+   38:1  error    Expected line after comment                                                   lines-around-comment
+   40:1  warning  Missing JSDoc @param "filePath" type                                          jsdoc/require-param-type
+   41:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+   50:1  error    Expected line after comment                                                   lines-around-comment
+   51:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+   53:1  warning  Missing JSDoc @param "workspace" type                                         jsdoc/require-param-type
+   54:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+   83:1  error    This line has a length of 89. Maximum allowed is 80                           max-len
+   95:1  error    This line has a length of 130. Maximum allowed is 80                          max-len
+  132:1  error    Expected line after comment                                                   lines-around-comment
+  133:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  135:1  warning  Missing JSDoc @param "workspace" type                                         jsdoc/require-param-type
+  136:1  warning  Missing JSDoc @param "originalState" type                                     jsdoc/require-param-type
+  137:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+  137:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  144:1  error    This line has a length of 88. Maximum allowed is 80                           max-len
+
+/workspace/app/src/file/images.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   4:1  error    This line has a length of 95. Maximum allowed is 80                           max-len
+   7:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   7:1  error    There should be at least one empty line between import groups                 import/order
+   8:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   9:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   9:1  error    `@actions/core` import should occur before import of `axios`                  import/order
+  15:1  error    Expected line after comment                                                   lines-around-comment
+  16:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  18:1  warning  Missing JSDoc @param "text" type                                              jsdoc/require-param-type
+  19:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  35:1  error    Expected line after comment                                                   lines-around-comment
+  36:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  38:1  warning  Missing JSDoc @param "urls" type                                              jsdoc/require-param-type
+  39:1  warning  Missing JSDoc @param "downloadDir" type                                       jsdoc/require-param-type
+  40:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  79:1  error    Expected line after comment                                                   lines-around-comment
+  81:1  warning  Missing JSDoc @param "url" type                                               jsdoc/require-param-type
+  82:1  warning  Missing JSDoc @param "dest" type                                              jsdoc/require-param-type
+  83:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+
+/workspace/app/src/github/action.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                      jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found                   jsdoc/newline-after-description
+    1:1   error    Expected line after comment                                                           lines-around-comment
+    2:1   warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"          jsdoc/check-tag-names
+    7:1   error    There should be at least one empty line between import groups                         import/order
+    8:1   error    Expected blank line before this statement                                             padding-line-between-statements
+    8:1   error    There should be at least one empty line between import groups                         import/order
+    9:1   error    Expected blank line before this statement                                             padding-line-between-statements
+    9:1   error    There should be at least one empty line between import groups                         import/order
+    9:1   error    `execa` import should occur before import of `../utils/errors.js`                     import/order
+   10:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   10:1   error    There should be at least one empty line between import groups                         import/order
+   20:1   error    This line has a length of 88. Maximum allowed is 80                                   max-len
+   20:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   20:1   error    `../api/openai.js` import should occur before import of `../utils/errors.js`          import/order
+   21:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   21:1   error    There should be at least one empty line between import groups                         import/order
+   21:1   error    `../file/file.js` import should occur before import of `../utils/errors.js`           import/order
+   22:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   22:1   error    `path` import should occur before import of `@actions/core`                           import/order
+   23:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   23:1   error    There should be at least one empty line between import groups                         import/order
+   23:1   error    `fs` import should occur before import of `@actions/core`                             import/order
+   24:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   24:1   error    `../file/images.js` import should occur before import of `../utils/errors.js`         import/order
+   25:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   25:1   error    There should be at least one empty line between import groups                         import/order
+   25:1   error    `../config/config.js` type import should occur before import of `../utils/errors.js`  import/order
+   26:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   26:1   error    There should be at least one empty line between import groups                         import/order
+   26:1   error    `./event.js` type import should occur before import of `./github.js`                  import/order
+   27:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   27:1   error    `../security/security.js` import should occur before import of `../utils/errors.js`   import/order
+   28:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   28:1   error    There should be at least one empty line between import groups                         import/order
+   28:1   error    `../client/codex.js` import should occur before import of `../utils/errors.js`        import/order
+   29:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   29:1   error    There should be at least one empty line between import groups                         import/order
+   29:1   error    `octokit` type import should occur before import of `../utils/errors.js`              import/order
+   30:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   30:1   error    There should be at least one empty line between import groups                         import/order
+   31:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   31:1   error    `adm-zip` import should occur before import of `../utils/errors.js`                   import/order
+   32:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   32:1   error    There should be at least one empty line between import groups                         import/order
+   32:1   error    `axios` import should occur before import of `../utils/errors.js`                     import/order
+   33:1   error    Expected blank line before this statement                                             padding-line-between-statements
+   33:1   error    `../constants.js` import should occur before import of `../utils/errors.js`           import/order
+   35:1   error    Expected line after comment                                                           lines-around-comment
+   35:1   error    Missing JSDoc @param "repo.owner" declaration                                         jsdoc/require-param
+   35:1   error    Missing JSDoc @param "repo.repo" declaration                                          jsdoc/require-param
+   36:1   error    This line has a length of 92. Maximum allowed is 80                                   max-len
+   37:1   warning  Missing @param "repo.owner"                                                           jsdoc/check-param-names
+   37:1   warning  Missing @param "repo.repo"                                                            jsdoc/check-param-names
+   37:1   warning  Missing JSDoc @param "octokit" type                                                   jsdoc/require-param-type
+   38:1   warning  Missing JSDoc @param "repo" type                                                      jsdoc/require-param-type
+   39:1   warning  Missing JSDoc @returns type                                                           jsdoc/require-returns-type
+   88:1   error    Expected line before comment                                                          lines-around-comment
+   88:1   error    Expected line after comment                                                           lines-around-comment
+   90:1   warning  Missing JSDoc @param "str" type                                                       jsdoc/require-param-type
+   91:1   warning  Missing JSDoc @returns type                                                           jsdoc/require-returns-type
+   97:1   error    Expected line after comment                                                           lines-around-comment
+   97:1   error    Missing JSDoc @param "repo.owner" declaration                                         jsdoc/require-param
+   97:1   error    Missing JSDoc @param "repo.repo" declaration                                          jsdoc/require-param
+   99:1   warning  Missing @param "repo.owner"                                                           jsdoc/check-param-names
+   99:1   warning  Missing @param "repo.repo"                                                            jsdoc/check-param-names
+   99:1   warning  Missing JSDoc @param "octokit" type                                                   jsdoc/require-param-type
+  100:1   warning  Missing JSDoc @param "repo" type                                                      jsdoc/require-param-type
+  101:1   warning  Missing JSDoc @param "event" type                                                     jsdoc/require-param-type
+  102:1   warning  Missing JSDoc @param "steps" type                                                     jsdoc/require-param-type
+  103:1   warning  Missing JSDoc @returns type                                                           jsdoc/require-returns-type
+  112:9   error    'total' is assigned a value but never used. Allowed unused vars must match /^_/u      unused-imports/no-unused-vars
+  112:9   warning  'total' is assigned a value but never used                                            @typescript-eslint/no-unused-vars
+  122:1   error    This line has a length of 142. Maximum allowed is 80                                  max-len
+  150:1   error    Expected line after comment                                                           lines-around-comment
+  150:1   error    Missing JSDoc @param "repo.owner" declaration                                         jsdoc/require-param
+  150:1   error    Missing JSDoc @param "repo.repo" declaration                                          jsdoc/require-param
+  152:1   warning  Missing @param "repo.owner"                                                           jsdoc/check-param-names
+  152:1   warning  Missing @param "repo.repo"                                                            jsdoc/check-param-names
+  152:1   warning  Missing JSDoc @param "octokit" type                                                   jsdoc/require-param-type
+  153:1   warning  Missing JSDoc @param "repo" type                                                      jsdoc/require-param-type
+  154:1   warning  Missing JSDoc @param "event" type                                                     jsdoc/require-param-type
+  155:1   warning  Missing JSDoc @param "commentId" type                                                 jsdoc/require-param-type
+  156:1   warning  Missing JSDoc @param "steps" type                                                     jsdoc/require-param-type
+  157:1   warning  Missing JSDoc @returns type                                                           jsdoc/require-returns-type
+  166:1   error    This line has a length of 84. Maximum allowed is 80                                   max-len
+  185:1   error    This line has a length of 141. Maximum allowed is 80                                  max-len
+  208:1   error    Expected line after comment                                                           lines-around-comment
+  209:1   error    This line has a length of 85. Maximum allowed is 80                                   max-len
+  210:1   warning  Missing JSDoc @param "config" type                                                    jsdoc/require-param-type
+  211:1   warning  Missing JSDoc @param "processedEvent" type                                            jsdoc/require-param-type
+  212:1   warning  Missing JSDoc @param "output" type                                                    jsdoc/require-param-type
+  213:1   warning  Missing JSDoc @param "changedFiles" type                                              jsdoc/require-param-type
+  214:1   warning  Missing JSDoc @param "progressCommentId" type                                         jsdoc/require-param-type
+  215:1   warning  Missing JSDoc @returns type                                                           jsdoc/require-returns-type
+  343:1   error    This line has a length of 114. Maximum allowed is 80                                  max-len
+  360:1   error    This line has a length of 96. Maximum allowed is 80                                   max-len
+  368:1   error    Expected line after comment                                                           lines-around-comment
+  370:1   warning  Missing JSDoc @param "config" type                                                    jsdoc/require-param-type
+  371:1   warning  Missing JSDoc @param "processedEvent" type                                            jsdoc/require-param-type
+  446:1   error    This line has a length of 87. Maximum allowed is 80                                   max-len
+  463:15  error    'data' is never reassigned. Use 'const' instead                                       prefer-const
+  495:1   error    This line has a length of 122. Maximum allowed is 80                                  max-len
+  497:1   error    This line has a length of 186. Maximum allowed is 80                                  max-len
+  514:1   error    This line has a length of 90. Maximum allowed is 80                                   max-len
+
+/workspace/app/src/github/createIssues.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  error    This line has a length of 83. Maximum allowed is 80                           max-len
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   5:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   5:1  error    There should be at least one empty line between import groups                 import/order
+   6:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   7:1  error    Expected blank line before this statement                                     padding-line-between-statements
+   9:1  error    Expected line after comment                                                   lines-around-comment
+   9:1  error    Missing JSDoc @param "octokit" declaration                                    jsdoc/require-param
+   9:1  error    Missing JSDoc @param "repo" declaration                                       jsdoc/require-param
+   9:1  error    Missing JSDoc @param "repo.owner" declaration                                 jsdoc/require-param
+   9:1  error    Missing JSDoc @param "repo.repo" declaration                                  jsdoc/require-param
+   9:1  error    Missing JSDoc @param "event" declaration                                      jsdoc/require-param
+   9:1  error    Missing JSDoc @param "output" declaration                                     jsdoc/require-param
+   9:1  error    Missing JSDoc @param "progressCommentId" declaration                          jsdoc/require-param
+  56:1  error    This line has a length of 86. Maximum allowed is 80                           max-len
+  71:1  error    This line has a length of 133. Maximum allowed is 80                          max-len
+  86:1  error    This line has a length of 99. Maximum allowed is 80                           max-len
+
+/workspace/app/src/github/event.ts
+    1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                     jsdoc/check-multiline-blocks
+    1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found                  jsdoc/newline-after-description
+    1:1   error    Expected line after comment                                                          lines-around-comment
+    2:1   warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"         jsdoc/check-tag-names
+    7:1   error    There should be at least one empty line between import groups                        import/order
+    8:1   error    Expected blank line before this statement                                            padding-line-between-statements
+    9:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   10:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   10:1   error    There should be at least one empty line between import groups                        import/order
+   10:1   error    `../utils/errors.js` import should occur before import of `../utils/prompt.js`       import/order
+   11:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   11:1   error    There should be at least one empty line between import groups                        import/order
+   11:1   error    `fs` import should occur before import of `@actions/core`                            import/order
+   12:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   12:1   error    There should be at least one empty line between import groups                        import/order
+   13:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   13:1   error    There should be at least one empty line between import groups                        import/order
+   13:1   error    `../constants.js` import should occur before import of `../utils/error.js`           import/order
+   14:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   14:1   error    There should be at least one empty line between import groups                        import/order
+   15:1   error    Expected blank line before this statement                                            padding-line-between-statements
+   15:1   error    `../config/config.js` type import should occur before import of `../utils/error.js`  import/order
+   17:1   error    Expected line after comment                                                          lines-around-comment
+   18:1   warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+   20:1   warning  Missing JSDoc @property "type" type                                                  jsdoc/require-property-type
+   21:1   warning  Missing JSDoc @property "agentEvent" type                                            jsdoc/require-property-type
+   22:1   warning  Missing JSDoc @property "userPrompt" type                                            jsdoc/require-property-type
+   23:1   warning  Missing JSDoc @property "includeFullHistory" type                                    jsdoc/require-property-type
+   24:1   warning  Missing JSDoc @property "createIssues" type                                          jsdoc/require-property-type
+   25:1   error    This line has a length of 95. Maximum allowed is 80                                  max-len
+   25:1   warning  Missing JSDoc @property "noPr" type                                                  jsdoc/require-property-type
+   26:1   error    This line has a length of 103. Maximum allowed is 80                                 max-len
+   26:1   warning  Missing JSDoc @property "includeFixBuild" type                                       jsdoc/require-property-type
+   27:1   error    This line has a length of 108. Maximum allowed is 80                                 max-len
+   27:1   warning  Missing JSDoc @property "includeFetch" type                                          jsdoc/require-property-type
+   35:3   error    Expected line before comment                                                         lines-around-comment
+   35:3   error    Expected line after comment                                                          lines-around-comment
+   39:3   error    Expected line before comment                                                         lines-around-comment
+   39:3   error    Expected line after comment                                                          lines-around-comment
+   43:3   error    Expected line before comment                                                         lines-around-comment
+   43:3   error    Expected line after comment                                                          lines-around-comment
+   44:1   error    This line has a length of 85. Maximum allowed is 80                                  max-len
+   49:1   error    Expected line after comment                                                          lines-around-comment
+   50:1   warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+   52:1   warning  Missing JSDoc @param "eventPath" type                                                jsdoc/require-param-type
+   53:1   warning  Missing JSDoc @returns type                                                          jsdoc/require-returns-type
+   72:1   error    Expected line after comment                                                          lines-around-comment
+   73:1   warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+   75:1   warning  Missing JSDoc @param "config" type                                                   jsdoc/require-param-type
+   76:1   warning  Missing JSDoc @returns type                                                          jsdoc/require-returns-type
+  119:1   error    This line has a length of 83. Maximum allowed is 80                                  max-len
+  172:15  error    Expected a `const` assertion instead of a literal type annotation                    @typescript-eslint/prefer-as-const
+
+/workspace/app/src/github/github.ts
+     1:1   error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                    jsdoc/check-multiline-blocks
+     1:1   error    Definition for rule 'jsdoc/newline-after-description' was not found                 jsdoc/newline-after-description
+     1:1   error    Expected line after comment                                                         lines-around-comment
+     2:1   warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"        jsdoc/check-tag-names
+     7:1   error    Expected blank line before this statement                                           padding-line-between-statements
+     8:1   error    Expected blank line before this statement                                           padding-line-between-statements
+     8:1   error    There should be at least one empty line between import groups                       import/order
+     9:1   error    Expected blank line before this statement                                           padding-line-between-statements
+     9:1   error    There should be at least one empty line between import groups                       import/order
+     9:1   error    `fs` import should occur before import of `@actions/core`                           import/order
+    10:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    11:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    11:1   error    There should be at least one empty line between import groups                       import/order
+    12:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    12:1   error    There should be at least one empty line between import groups                       import/order
+    12:1   error    `octokit` import should occur before import of `../utils/contents.js`               import/order
+    13:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    13:1   error    `../config/prompts.js` import should occur before import of `../utils/contents.js`  import/order
+    14:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    15:1   error    Expected blank line before this statement                                           padding-line-between-statements
+    15:1   error    `../constants.js` import should occur before import of `../utils/contents.js`       import/order
+    17:1   error    Expected line after comment                                                         lines-around-comment
+    20:1   warning  Missing JSDoc @param "commitMessage" type                                           jsdoc/require-param-type
+    21:1   error    This line has a length of 85. Maximum allowed is 80                                 max-len
+    21:1   warning  Missing JSDoc @returns type                                                         jsdoc/require-returns-type
+    32:1   error    Expected line after comment                                                         lines-around-comment
+    35:1   warning  Missing JSDoc @param "text" type                                                    jsdoc/require-param-type
+    36:1   error    This line has a length of 81. Maximum allowed is 80                                 max-len
+    36:1   warning  Missing JSDoc @returns type                                                         jsdoc/require-returns-type
+   154:1   error    Expected line after comment                                                         lines-around-comment
+   155:1   error    This line has a length of 82. Maximum allowed is 80                                 max-len
+   156:1   warning  Missing JSDoc @param "workspace" type                                               jsdoc/require-param-type
+   157:1   warning  Missing JSDoc @param "githubToken" type                                             jsdoc/require-param-type
+   158:1   warning  Missing JSDoc @param "repo" type                                                    jsdoc/require-param-type
+   159:1   warning  Missing JSDoc @param "context" type                                                 jsdoc/require-param-type
+   160:1   warning  Missing JSDoc @param "octokit" type                                                 jsdoc/require-param-type
+   161:1   warning  Missing JSDoc @param "event" type                                                   jsdoc/require-param-type
+   244:1   error    Expected line after comment                                                         lines-around-comment
+   246:1   warning  Missing JSDoc @param "payload" type                                                 jsdoc/require-param-type
+   247:1   warning  Missing JSDoc @returns type                                                         jsdoc/require-returns-type
+   249:39  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+   308:1   error    Expected line after comment                                                         lines-around-comment
+   308:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   308:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   308:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   351:1   error    This line has a length of 83. Maximum allowed is 80                                 max-len
+   363:1   error    Expected line after comment                                                         lines-around-comment
+   363:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   363:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   363:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   414:1   error    This line has a length of 83. Maximum allowed is 80                                 max-len
+   440:1   error    This line has a length of 91. Maximum allowed is 80                                 max-len
+   455:1   error    Expected line after comment                                                         lines-around-comment
+   455:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   455:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   455:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   485:1   error    This line has a length of 81. Maximum allowed is 80                                 max-len
+   498:1   error    This line has a length of 89. Maximum allowed is 80                                 max-len
+   510:1   error    Expected line after comment                                                         lines-around-comment
+   510:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   510:1   error    Missing JSDoc @returns declaration                                                  jsdoc/require-returns
+   513:1   error    This line has a length of 96. Maximum allowed is 80                                 max-len
+   514:1   error    This line has a length of 102. Maximum allowed is 80                                max-len
+   554:1   error    Expected line after comment                                                         lines-around-comment
+   556:1   warning  Missing JSDoc @param "workspace" type                                               jsdoc/require-param-type
+   557:1   warning  Missing JSDoc @param "octokit" type                                                 jsdoc/require-param-type
+   558:1   warning  Missing JSDoc @param "repo" type                                                    jsdoc/require-param-type
+   559:1   warning  Missing JSDoc @param "event" type                                                   jsdoc/require-param-type
+   560:1   warning  Missing JSDoc @param "commitMessage" type                                           jsdoc/require-param-type
+   561:1   warning  Missing JSDoc @param "output" type                                                  jsdoc/require-param-type
+   562:1   error    This line has a length of 87. Maximum allowed is 80                                 max-len
+   562:1   warning  Missing JSDoc @param "progressCommentId" type                                       jsdoc/require-param-type
+   584:1   error    This line has a length of 82. Maximum allowed is 80                                 max-len
+   586:1   error    This line has a length of 102. Maximum allowed is 80                                max-len
+   656:1   error    This line has a length of 107. Maximum allowed is 80                                max-len
+   690:1   error    This line has a length of 85. Maximum allowed is 80                                 max-len
+   707:1   error    This line has a length of 88. Maximum allowed is 80                                 max-len
+   715:1   error    This line has a length of 85. Maximum allowed is 80                                 max-len
+   744:1   error    Expected line after comment                                                         lines-around-comment
+   744:1   error    Missing JSDoc @param "workspace" declaration                                        jsdoc/require-param
+   744:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   744:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   744:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   744:1   error    Missing JSDoc @param "commitMessage" declaration                                    jsdoc/require-param
+   744:1   error    Missing JSDoc @param "output" declaration                                           jsdoc/require-param
+   744:1   error    Missing JSDoc @param "progressCommentId" declaration                                jsdoc/require-param
+   756:3   error    Expected line before comment                                                        lines-around-comment
+   756:3   error    Expected line after comment                                                         lines-around-comment
+   779:1   error    This line has a length of 84. Maximum allowed is 80                                 max-len
+   781:1   error    This line has a length of 83. Maximum allowed is 80                                 max-len
+   790:1   error    This line has a length of 91. Maximum allowed is 80                                 max-len
+   854:1   error    This line has a length of 84. Maximum allowed is 80                                 max-len
+   899:1   error    Expected line after comment                                                         lines-around-comment
+   899:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   899:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   899:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   899:1   error    Missing JSDoc @param "body" declaration                                             jsdoc/require-param
+   928:1   error    This line has a length of 88. Maximum allowed is 80                                 max-len
+   935:1   error    This line has a length of 104. Maximum allowed is 80                                max-len
+   962:1   error    Expected line after comment                                                         lines-around-comment
+   962:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+   962:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+   962:1   error    Missing JSDoc @param "event" declaration                                            jsdoc/require-param
+   962:1   error    Missing JSDoc @param "commentId" declaration                                        jsdoc/require-param
+   962:1   error    Missing JSDoc @param "body" declaration                                             jsdoc/require-param
+   963:1   error    This line has a length of 81. Maximum allowed is 80                                 max-len
+  1000:8   warning  Missing JSDoc comment                                                               jsdoc/require-jsdoc
+  1015:7   error    Type string trivially inferred from a string literal, remove type annotation        @typescript-eslint/no-inferrable-types
+  1045:1   error    This line has a length of 81. Maximum allowed is 80                                 max-len
+  1068:8   warning  Missing JSDoc comment                                                               jsdoc/require-jsdoc
+  1092:8   warning  Missing JSDoc comment                                                               jsdoc/require-jsdoc
+  1112:1   error    Expected line after comment                                                         lines-around-comment
+  1112:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+  1112:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+  1112:1   error    Missing JSDoc @param "issueNumber" declaration                                      jsdoc/require-param
+  1112:1   error    Missing JSDoc @returns declaration                                                  jsdoc/require-returns
+  1181:1   error    Expected line after comment                                                         lines-around-comment
+  1181:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+  1181:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+  1181:1   error    Missing JSDoc @param "pullNumber" declaration                                       jsdoc/require-param
+  1181:1   error    Missing JSDoc @param "targetCommentId" declaration                                  jsdoc/require-param
+  1181:1   error    Missing JSDoc @returns declaration                                                  jsdoc/require-returns
+  1233:1   error    This line has a length of 92. Maximum allowed is 80                                 max-len
+  1238:1   error    This line has a length of 97. Maximum allowed is 80                                 max-len
+  1245:1   error    Expected line after comment                                                         lines-around-comment
+  1245:1   error    Missing JSDoc @param "octokit" declaration                                          jsdoc/require-param
+  1245:1   error    Missing JSDoc @param "repo" declaration                                             jsdoc/require-param
+  1245:1   error    Missing JSDoc @param "pullNumber" declaration                                       jsdoc/require-param
+  1245:1   error    Missing JSDoc @returns declaration                                                  jsdoc/require-returns
+  1309:1   error    This line has a length of 81. Maximum allowed is 80                                 max-len
+  1318:1   warning  Missing JSDoc comment                                                               jsdoc/require-jsdoc
+
+/workspace/app/src/index.ts
+  1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+  1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+  1:1  error    Expected line after comment                                                   lines-around-comment
+  2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+
+/workspace/app/src/main.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found               jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found            jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                    lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"   jsdoc/check-tag-names
+   6:1  error    There should be at least one empty line between import groups                  import/order
+   7:1  error    Expected blank line before this statement                                      padding-line-between-statements
+   8:1  error    Expected blank line before this statement                                      padding-line-between-statements
+   9:1  error    Expected blank line before this statement                                      padding-line-between-statements
+   9:1  error    `./github/action.js` import should occur before import of `./github/event.js`  import/order
+  10:1  error    Expected blank line before this statement                                      padding-line-between-statements
+  12:1  error    Expected line after comment                                                    lines-around-comment
+  16:1  warning  Expected only 0 line after block description                                   jsdoc/tag-lines
+  18:1  warning  Missing JSDoc @returns type                                                    jsdoc/require-returns-type
+
+/workspace/app/src/security/security.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found                     jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found                  jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                          lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"         jsdoc/check-tag-names
+   5:1  error    There should be at least one empty line between import groups                        import/order
+   6:1  error    Expected blank line before this statement                                            padding-line-between-statements
+   7:1  error    Expected blank line before this statement                                            padding-line-between-statements
+   7:1  error    There should be at least one empty line between import groups                        import/order
+   7:1  error    `../config/config.js` type import should occur before import of `../utils/error.js`  import/order
+   8:1  error    Expected blank line before this statement                                            padding-line-between-statements
+   8:1  error    `octokit` type import should occur before import of `../utils/error.js`              import/order
+  10:1  error    Expected line after comment                                                          lines-around-comment
+  11:1  warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+  13:1  warning  Missing JSDoc @param "config" type                                                   jsdoc/require-param-type
+  14:1  warning  Missing JSDoc @returns type                                                          jsdoc/require-returns-type
+  35:1  error    Expected line after comment                                                          lines-around-comment
+  35:1  error    Missing JSDoc @param "repo.owner" declaration                                        jsdoc/require-param
+  35:1  error    Missing JSDoc @param "repo.repo" declaration                                         jsdoc/require-param
+  36:1  warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+  38:1  warning  Missing @param "repo.owner"                                                          jsdoc/check-param-names
+  38:1  warning  Missing @param "repo.repo"                                                           jsdoc/check-param-names
+  38:1  warning  Missing JSDoc @param "octokit" type                                                  jsdoc/require-param-type
+  39:1  warning  Missing JSDoc @param "repo" type                                                     jsdoc/require-param-type
+  40:1  warning  Missing JSDoc @param "username" type                                                 jsdoc/require-param-type
+  41:1  warning  Missing JSDoc @returns type                                                          jsdoc/require-returns-type
+  68:1  error    Expected line after comment                                                          lines-around-comment
+  69:1  warning  Expected only 0 line after block description                                         jsdoc/tag-lines
+  71:1  warning  Missing JSDoc @param "text" type                                                     jsdoc/require-param-type
+  72:1  warning  Missing JSDoc @param "config" type                                                   jsdoc/require-param-type
+  73:1  warning  Missing JSDoc @returns type                                                          jsdoc/require-returns-type
+
+/workspace/app/src/utils/contents.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   8:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+   8:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  13:1  error    Expected line after comment                                                   lines-around-comment
+  17:3  error    Expected line before comment                                                  lines-around-comment
+  17:3  error    Expected line after comment                                                   lines-around-comment
+  19:3  error    Expected line before comment                                                  lines-around-comment
+  19:3  error    Expected line after comment                                                   lines-around-comment
+  23:1  error    Expected line after comment                                                   lines-around-comment
+  24:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  26:1  warning  Missing JSDoc @param "comment" type                                           jsdoc/require-param-type
+  27:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+  44:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  49:1  error    Expected line after comment                                                   lines-around-comment
+  50:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  52:1  warning  Missing JSDoc @param "comment" type                                           jsdoc/require-param-type
+  53:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+
+/workspace/app/src/utils/error.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   1:1  error    Missing JSDoc @param "error" declaration                                      jsdoc/require-param
+   1:1  error    Missing JSDoc @returns declaration                                            jsdoc/require-returns
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   3:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+  12:8  warning  Missing JSDoc comment                                                         jsdoc/require-jsdoc
+
+/workspace/app/src/utils/errors.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   3:1  error    This line has a length of 84. Maximum allowed is 80                           max-len
+   5:1  error    Expected line after comment                                                   lines-around-comment
+  12:1  error    Expected line before comment                                                  lines-around-comment
+  12:1  error    Expected line after comment                                                   lines-around-comment
+  19:1  error    Expected line before comment                                                  lines-around-comment
+  19:1  error    Expected line after comment                                                   lines-around-comment
+  26:1  error    Expected line before comment                                                  lines-around-comment
+  26:1  error    Expected line after comment                                                   lines-around-comment
+  33:1  error    Expected line before comment                                                  lines-around-comment
+  33:1  error    Expected line after comment                                                   lines-around-comment
+
+/workspace/app/src/utils/flags.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   7:3  error    Expected line before comment                                                  lines-around-comment
+   7:3  error    Expected line after comment                                                   lines-around-comment
+  11:3  error    Expected line before comment                                                  lines-around-comment
+  11:3  error    Expected line after comment                                                   lines-around-comment
+  17:1  error    Expected line after comment                                                   lines-around-comment
+  18:1  warning  Expected only 0 line after block description                                  jsdoc/tag-lines
+  20:1  warning  Missing JSDoc @param "input" type                                             jsdoc/require-param-type
+  21:1  warning  Missing JSDoc @param "flagNames" type                                         jsdoc/require-param-type
+  22:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+
+/workspace/app/src/utils/prompt.ts
+   1:1  error    Definition for rule 'jsdoc/check-multiline-blocks' was not found              jsdoc/check-multiline-blocks
+   1:1  error    Definition for rule 'jsdoc/newline-after-description' was not found           jsdoc/newline-after-description
+   1:1  error    Expected line after comment                                                   lines-around-comment
+   2:1  warning  Invalid JSDoc tag (preference). Replace "fileoverview" JSDoc tag with "file"  jsdoc/check-tag-names
+   9:3  error    Expected line before comment                                                  lines-around-comment
+   9:3  error    Expected line after comment                                                   lines-around-comment
+  11:3  error    Expected line before comment                                                  lines-around-comment
+  11:3  error    Expected line after comment                                                   lines-around-comment
+  13:3  error    Expected line before comment                                                  lines-around-comment
+  13:3  error    Expected line after comment                                                   lines-around-comment
+  15:3  error    Expected line before comment                                                  lines-around-comment
+  15:3  error    Expected line after comment                                                   lines-around-comment
+  17:3  error    Expected line before comment                                                  lines-around-comment
+  17:3  error    Expected line after comment                                                   lines-around-comment
+  19:3  error    Expected line before comment                                                  lines-around-comment
+  19:3  error    Expected line after comment                                                   lines-around-comment
+  23:1  error    Expected line after comment                                                   lines-around-comment
+  24:1  error    This line has a length of 86. Maximum allowed is 80                           max-len
+  25:1  warning  Missing JSDoc @param "input" type                                             jsdoc/require-param-type
+  26:1  error    This line has a length of 85. Maximum allowed is 80                           max-len
+  26:1  warning  Missing JSDoc @param "isDirect" type                                          jsdoc/require-param-type
+  27:1  warning  Missing JSDoc @returns type                                                   jsdoc/require-returns-type
+
+✖ 797 problems (572 errors, 225 warnings)
+  386 errors and 46 warnings potentially fixable with the `--fix` option.
+
