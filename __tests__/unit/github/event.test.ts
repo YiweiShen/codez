@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+
 import { loadEventPayload, processEvent } from '../../../src/github/event';
 
 describe('loadEventPayload', () => {

@@ -1,13 +1,55 @@
 /**
  * @file Module for creating GitHub issues from a feature plan JSON output.
  */
+
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
+
 import type { GitHubEvent } from './github.js';
 import { postComment } from './github.js';
 
 /**
  * Creates GitHub issues based on a JSON feature plan output.
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
  */
 export async function createIssuesFromFeaturePlan(
   octokit: Octokit,

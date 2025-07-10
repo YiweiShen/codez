@@ -1,8 +1,12 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
 import * as crypto from 'crypto';
+
+import * as fs from 'fs';
+
+import * as os from 'os';
+import * as path from 'path';
+
 import * as core from '@actions/core';
+
 import { captureFileState, detectChanges } from '../../../src/file/file';
 
 describe('captureFileState', () => {

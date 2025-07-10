@@ -4,18 +4,22 @@
  * Parses action inputs and environment variables, providing a validated
  * ActionConfig object for use throughout the action.
  */
+
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
+
 import { defaultModel } from '../api/openai.js';
-import { ConfigError } from '../utils/errors.js';
 import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
+
+import { ConfigError } from '../utils/errors.js';
 
 /**
  * Defines configuration inputs for the GitHub Action.
  *
  * Includes GitHub authentication, workspace settings, and Codex/OpenAI parameters.
  */
+
 export interface ActionConfig {
   githubToken: string;
   eventPath: string;
@@ -27,42 +31,70 @@ export interface ActionConfig {
 
   openaiApiKey: string;
   openaiBaseUrl: string;
+
   /**
    * OpenAI model identifier.
    */
+
   openaiModel: string;
+
   /**
    * One-shot direct prompt for automated workflows.
    * If provided, Codez will bypass GitHub comment triggers and run this prompt directly.
    */
+
   directPrompt: string;
+
   /**
    * Custom trigger phrase to invoke Codez.
    */
+
   triggerPhrase: string;
+
   /**
    * List of GitHub usernames that trigger Codez when an issue is assigned to them.
    */
+
   assigneeTrigger: string[];
+
   /**
    * Custom environment variables to inject into the Codex CLI process.
    */
+
   codexEnv: Record<string, string>;
+
   /**
    * Optional list of local image file paths to include in the Codex CLI invocation.
    */
+
   images: string[];
+
   /**
    * Whether to fetch known URLs referenced in the prompt and include their contents.
    */
+
   fetch: boolean;
 }
 
 /**
  * Parse custom environment variables input from YAML mapping or comma-separated key=value pairs.
- *
  * @param input - Raw input string (multiline YAML or comma-separated key=value pairs).
  * @returns A map of environment variable names to values.
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
  */
 export function parseKeyValueMap(input: string): Record<string, string> {
   const result: Record<string, string> = {};
@@ -98,12 +130,28 @@ export function parseKeyValueMap(input: string): Record<string, string> {
   }
   return result;
 }
+
 /**
  * Parse list input into an array of trimmed, non-empty strings.
- *
  * @param input - String containing list items.
  * @returns Array of trimmed non-empty strings.
  */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
 export function parseStringList(input: string): string[] {
   if (!input) {
     return [];
@@ -123,6 +171,26 @@ export function parseStringList(input: string): string[] {
  * Gets and validates the inputs for the GitHub Action.
  * @returns ActionConfig object
  * @throws Error if required inputs are missing
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
  */
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });

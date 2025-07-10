@@ -4,19 +4,26 @@
  * Provides functions and types to load GitHub event payloads and normalize
  * them into a consistent format for the action workflow.
  */
-import * as core from '@actions/core';
-import { toErrorMessage } from '../utils/error.js';
-import { extractPromptFlags } from '../utils/prompt.js';
-import { ParseError } from '../utils/errors.js';
+
 import { promises as fs } from 'fs';
-import { getEventType, extractText } from './github.js';
-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
-import type { AgentEvent } from './github.js';
+
+import * as core from '@actions/core';
+
 import type { ActionConfig } from '../config/config.js';
+
+import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
+
+import { toErrorMessage } from '../utils/error.js';
+
+import { ParseError } from '../utils/errors.js';
+import { extractPromptFlags } from '../utils/prompt.js';
+
+import { getEventType, extractText } from './github.js';
+
+import type { AgentEvent } from './github.js';
 
 /**
  * Represents a normalized event to trigger the Codex workflow.
- *
  * @property type - The type of agent event (e.g., 'codex').
  * @property agentEvent - The original GitHub event information.
  * @property userPrompt - Extracted prompt text for processing.
@@ -26,32 +33,53 @@ import type { ActionConfig } from '../config/config.js';
  * @property includeFixBuild - Whether to fetch and include the latest failed CI build logs as context.
  * @property includeFetch - Whether to fetch known URLs referenced in the prompt and include their contents.
  */
+
 export interface ProcessedEvent {
   type: 'codex';
   agentEvent: AgentEvent;
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
+
   /**
    * Whether to skip pull request creation and only post AI output as a comment.
    */
+
   noPr: boolean;
+
   /**
    * Whether to fetch and include the latest failed CI build logs as context.
    */
+
   includeFixBuild: boolean;
+
   /**
    * Whether to fetch known URLs referenced in the prompt and include their contents.
    */
+
   includeFetch: boolean;
 }
 
 /**
  * Load and parse the event payload from the specified file path.
- *
  * @param eventPath - Path to the event payload file.
  * @returns Parsed event payload object as a generic record.
  * @throws If the file cannot be read or parsed.
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
  */
 export async function loadEventPayload(
   eventPath: string,
@@ -71,9 +99,23 @@ export async function loadEventPayload(
 
 /**
  * Process the GitHub event to determine the type and extract the user prompt.
- *
  * @param config - Action configuration object.
  * @returns The processed event data or null if unsupported.
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
  */
 export async function processEvent(
   config: ActionConfig,

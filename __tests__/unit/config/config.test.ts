@@ -1,12 +1,15 @@
+import * as core from '@actions/core';
+
+import * as github from '@actions/github';
+
+import { Octokit } from 'octokit';
+
+import { defaultModel } from '../../../src/api/openai';
 import {
   parseKeyValueMap,
   parseStringList,
   getConfig,
 } from '../../../src/config/config';
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import { defaultModel } from '../../../src/api/openai';
-import { Octokit } from 'octokit';
 
 describe('parseKeyValueMap', () => {
   it('returns empty object for empty input', () => {

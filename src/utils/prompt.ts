@@ -36,6 +36,27 @@ export interface PromptFlagOptions {
  * @returns {PromptFlagOptions} Parsed prompt options and cleaned prompt text.
  */
 
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ */
 export function extractPromptFlags(
   input: string,
   isDirect: boolean,

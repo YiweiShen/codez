@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
+
 import { run } from '../../../src/main';
+
 // Mock @actions/core first so imports in run() pick it up
 jest.mock('@actions/core', () => ({
   setFailed: jest.fn(),
@@ -15,6 +17,7 @@ jest.mock('../../../src/security/security.js', () => ({
 jest.mock('../../../src/github/action.js', () => ({ runAction: jest.fn() }));
 
 import * as core from '@actions/core';
+
 import { getConfig } from '../../../src/config/config.js';
 import { processEvent } from '../../../src/github/event.js';
 import { checkPermission } from '../../../src/security/security.js';

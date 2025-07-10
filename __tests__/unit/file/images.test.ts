@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import axios from 'axios';
-import * as core from '@actions/core';
+
 import { Readable } from 'stream';
+
+import * as core from '@actions/core';
+import axios from 'axios';
+
 import { extractImageUrls, downloadImages } from '../../../src/file/images';
 
 jest.mock('axios');
@@ -16,6 +19,24 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const mockedCoreInfo = core.info as jest.Mock;
 const mockedCoreWarning = core.warning as jest.Mock;
 
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ */
 function createStream(data: string): Readable {
   const stream = new Readable();
   stream.push(data);

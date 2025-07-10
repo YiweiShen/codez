@@ -4,9 +4,24 @@
  * Orchestrates cloning, prompt generation, Codex invocation,
  * change detection, and result handling including pull requests and comments.
  */
+
+import { promises as fs } from 'fs';
+import path from 'path';
+
 import * as core from '@actions/core';
-import { GitHubError } from '../utils/errors.js';
+import AdmZip from 'adm-zip';
+
+import axios from 'axios';
 import { execa } from 'execa';
+import type { Octokit } from 'octokit';
+
+import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
+
+import type { ActionConfig } from '../config/config.js';
+import { captureFileState, detectChanges } from '../file/file.js';
+
+import { extractImageUrls, downloadImages } from '../file/images.js';
+import { GitHubError } from '../utils/errors.js';
 import {
   cloneRepository,
   addEyeReaction,
@@ -17,26 +32,48 @@ import {
   addThumbUpReaction,
   upsertComment,
 } from './github.js';
-import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
-import { captureFileState, detectChanges } from '../file/file.js';
-import path from 'path';
-import { promises as fs } from 'fs';
-import { extractImageUrls, downloadImages } from '../file/images.js';
-import type { ActionConfig } from '../config/config.js';
+
 import type { ProcessedEvent } from './event.js';
+
 import { maskSensitiveInfo } from '../security/security.js';
+
 import { runCodex } from '../client/codex.js';
-import type { Octokit } from 'octokit';
+
 import type { GitHubEvent } from './github.js';
-import AdmZip from 'adm-zip';
-import axios from 'axios';
+
 import { PROGRESS_BAR_BLOCKS, PROGRESS_TITLE } from '../constants.js';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
  * @param octokit Octokit client
  * @param repo Repository context ({owner, repo})
+ * @param repo.owner
+ * @param repo.repo
  * @returns String of log content or an informational message
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
  */
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
@@ -85,11 +122,28 @@ async function fetchLatestFailedWorkflowLogs(
   }
 }
 export { createIssuesFromFeaturePlan } from './createIssues.js';
+
 /**
  * Escape special characters in a literal string so it can be used in a RegExp.
  * @param str - Input string containing potential RegExp metacharacters.
  * @returns A string where regex-meaningful characters are escaped.
  */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '$\\$&');
 }
@@ -98,9 +152,41 @@ function escapeRegExp(str: string): string {
  * Create a GitHub comment to display initial progress steps with checkboxes.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
+ * @param repo.owner
  * @param event - The GitHubEvent where the comment will be posted.
+ * @param repo.repo
  * @param steps - Array of markdown step descriptions to render.
  * @returns Promise resolving to the created comment ID.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
  */
 async function createProgressComment(
   octokit: Octokit,
@@ -151,10 +237,45 @@ async function createProgressComment(
  * Update the content of an existing GitHub progress comment.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
+ * @param repo.owner
  * @param event - The GitHubEvent that the comment belongs to.
+ * @param repo.repo
  * @param commentId - ID of the comment to update.
  * @param steps - Array of markdown-formatted step lines to render.
  * @returns Promise resolving when the comment update is complete.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
  */
 async function updateProgressComment(
   octokit: Octokit,
@@ -214,6 +335,34 @@ async function updateProgressComment(
  * @param progressCommentId - Optional ID of the progress comment to update.
  * @returns Promise resolving when all result handling is complete.
  */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
 async function handleResult(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -370,6 +519,25 @@ async function handleResult(
  * @param config Action configuration.
  * @param processedEvent Processed event data.
  */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
 export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -460,7 +628,7 @@ export async function runAction(
             responseType: 'text',
             timeout: 60000,
           });
-          let data =
+          const data =
             typeof response.data === 'string'
               ? response.data
               : JSON.stringify(response.data);

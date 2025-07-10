@@ -3,20 +3,49 @@
  * Provides a function to invoke the Codex CLI tool with configured parameters
  * and return its output.
  */
-import { execa } from 'execa';
+
 import * as core from '@actions/core';
+
+import { execa } from 'execa';
+
 import type { ActionConfig } from '../config/config.js';
 import { CliError, TimeoutError } from '../utils/errors.js';
 
 /**
  * Invoke the Codex CLI with the specified parameters.
- *
  * @param workspace - Directory in which to run the Codex CLI.
  * @param config - Configuration containing API keys and environment settings.
  * @param prompt - User-provided prompt string for Codex.
  * @param timeout - Maximum time in milliseconds to wait for the CLI to complete.
  * @param [images] - Optional array of image file paths to include in the invocation.
  * @returns A promise resolving to the formatted output from Codex.
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
  */
 export async function runCodex(
   workspace: string,

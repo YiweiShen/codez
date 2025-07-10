@@ -1,8 +1,9 @@
+import type { ActionConfig } from '../../../src/config/config';
+
 import {
   checkPermission,
   maskSensitiveInfo,
 } from '../../../src/security/security';
-import type { ActionConfig } from '../../../src/config/config';
 
 describe('checkPermission', () => {
   it('returns false if actor is undefined', async () => {

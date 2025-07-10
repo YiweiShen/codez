@@ -3,9 +3,11 @@
  * Provides functionality to interface with the OpenAI API and generate
  * Conventional Commits formatted messages based on user input and changed files.
  */
+
 import * as core from '@actions/core';
 import OpenAI from 'openai';
 import type { ClientOptions } from 'openai';
+
 import type { ActionConfig } from '../config/config.js';
 import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
 import { ParseError } from '../utils/errors.js';
@@ -13,6 +15,7 @@ import { ParseError } from '../utils/errors.js';
 /**
  * Default model identifier for OpenAI provider.
  */
+
 export const defaultModel = 'o4-mini';
 
 /**
@@ -20,6 +23,22 @@ export const defaultModel = 'o4-mini';
  * @param config - ActionConfig containing OpenAI API key and optional base URL.
  * @returns A configured OpenAI client for making API calls.
  */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
 export function getOpenAIClient(config: ActionConfig): OpenAI {
   const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
   if (config.openaiBaseUrl) {
@@ -32,13 +51,13 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
  * Generate a Git commit message using the OpenAI API.
  *
  * The generated commit message follows the Conventional Commits specification.
- *
  * @param changedFiles - List of modified file paths.
  * @param userPrompt - The original user request or description.
  * @param context - Pull request or issue context.
+ * @param context.prNumber
  * @param config - Action configuration settings for API client.
+ * @param context.issueNumber
  * @returns A promise that resolves to the generated commit message.
- *
  * @example
  * const message = await generateCommitMessage(
  *   ['src/index.ts'],
@@ -46,6 +65,30 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
  *   { prNumber: 42 },
  *   config
  * );
+ */
+
+/**
+ *
+ * @param changedFiles
+ * @param userPrompt
+ * @param context
+ * @param context.prNumber
+ * @param context.issueNumber
+ * @param config
+ */
+
+/**
+ *
+ * @param changedFiles
+ * @param userPrompt
+ * @param context
+ * @param context.prNumber
+ * @param context.issueNumber
+ * @param config
+ */
+
+/**
+ *
  */
 export async function generateCommitMessage(
   changedFiles: string[],

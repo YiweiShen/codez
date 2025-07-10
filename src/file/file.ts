@@ -4,21 +4,41 @@
  * Provides functions to calculate file hashes, capture workspace file state,
  * and detect changes between states respecting ignore rules.
  */
-import { promises as fs } from 'fs';
+
 import * as crypto from 'crypto';
-import fg from 'fast-glob';
-import * as path from 'path';
+
+import { promises as fs } from 'fs';
+
 import * as os from 'os';
-import ignore from 'ignore';
+import * as path from 'path';
+
 import * as core from '@actions/core';
+import fg from 'fast-glob';
+import ignore from 'ignore';
+
 import { toErrorMessage } from '../utils/error.js';
+
 import { DEFAULT_IGNORE_PATTERNS } from './constants.js';
 
 /**
  * Calculate the SHA-256 hash of the specified file.
- *
  * @param filePath - Absolute path to the file.
  * @returns The SHA-256 hash of the file content.
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
  */
 async function calculateFileHash(filePath: string): Promise<string> {
   try {
@@ -40,6 +60,22 @@ async function calculateFileHash(filePath: string): Promise<string> {
  * @param filePath - Absolute or relative path to check.
  * @returns Promise resolving to true if the path exists, false otherwise.
  */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
 function pathExists(filePath: string): Promise<boolean> {
   return fs
     .access(filePath)
@@ -49,9 +85,23 @@ function pathExists(filePath: string): Promise<boolean> {
 
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
- *
  * @param workspace - The root directory of the workspace.
  * @returns Map of relative file paths to their SHA-256 hashes.
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
  */
 export async function captureFileState(
   workspace: string,
@@ -131,10 +181,27 @@ export async function captureFileState(
 
 /**
  * Detect file changes by comparing two file state maps.
- *
  * @param workspace - The root directory of the workspace.
  * @param originalState - Initial state of files mapped to hashes.
  * @returns Array of relative file paths that have been added, modified, or deleted.
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
  */
 export async function detectChanges(
   workspace: string,

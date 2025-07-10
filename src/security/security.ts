@@ -2,16 +2,33 @@
  * @file Security helpers module.
  * Provides functions for permission checks and masking sensitive information.
  */
+
 import * as core from '@actions/core';
-import { toErrorMessage } from '../utils/error.js';
-import type { ActionConfig } from '../config/config.js';
+
 import type { Octokit } from 'octokit';
+
+import type { ActionConfig } from '../config/config.js';
+import { toErrorMessage } from '../utils/error.js';
 
 /**
  * Check if the user has appropriate permissions to run the action.
- *
  * @param config - Action configuration object containing GitHub context.
  * @returns True if the user has permission; false otherwise.
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
  */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
@@ -34,11 +51,34 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
 
 /**
  * Check if a GitHub user has appropriate permissions for the repository.
- *
  * @param octokit - GitHub API client instance.
  * @param repo - Repository information.
+ * @param repo.owner
  * @param username - GitHub username to check permissions for.
+ * @param repo.repo
  * @returns True if the user has write or admin permissions; false otherwise.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
  */
 async function checkUserPermissionGithub(
   octokit: Octokit,
@@ -67,10 +107,27 @@ async function checkUserPermissionGithub(
 
 /**
  * Mask sensitive information (GitHub token and OpenAI API key) within a string.
- *
  * @param text - Input text that may contain sensitive data.
  * @param config - Action configuration containing sensitive keys.
  * @returns The text with sensitive information replaced by '***'.
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;

@@ -1,11 +1,14 @@
+import type { Octokit } from 'octokit';
+
 import {
   escapeRegExp,
   createProgressComment,
   updateProgressComment,
   createIssuesFromFeaturePlan,
 } from '../../../src/github/action';
+
 import * as githubHelpers from '../../../src/github/github';
-import type { Octokit } from 'octokit';
+
 import type { GitHubEvent } from '../../../src/github/github';
 
 describe('escapeRegExp', () => {

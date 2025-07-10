@@ -3,16 +3,24 @@
  * Defines types and functions for interacting with GitHub events, issues,
  * comments, reactions, and repository operations.
  */
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import { execa } from 'execa';
+
 import { promises as fs } from 'fs';
-import { genContentsString, genFullContentsString } from '../utils/contents.js';
-import { toErrorMessage } from '../utils/error.js';
+
+import * as core from '@actions/core';
+
+import * as github from '@actions/github';
+
+import { execa } from 'execa';
+
 import { Octokit } from 'octokit';
+
 import { promptBuilderConfig } from '../config/prompts.js';
-import { GitHubError } from '../utils/errors.js';
+
 import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
+import { genContentsString, genFullContentsString } from '../utils/contents.js';
+
+import { toErrorMessage } from '../utils/error.js';
+import { GitHubError } from '../utils/errors.js';
 
 /**
  * Infer a branch type keyword from a commit message header.
@@ -20,6 +28,22 @@ import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
  * @param commitMessage - The commit message to analyze.
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
 function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
@@ -35,6 +59,22 @@ function getBranchType(commitMessage: string): string {
  * @param text - The input text to slugify.
  * @returns A slug string containing only lowercase letters, digits, and hyphens.
  */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -160,6 +200,37 @@ type RepoContext = { owner: string; repo: string };
  * @param octokit - Authenticated Octokit client for API calls.
  * @param event - The AgentEvent indicating pull request or issue context.
  */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
 export async function cloneRepository(
   workspace: string,
   githubToken: string,
@@ -246,6 +317,22 @@ export async function cloneRepository(
  * @param payload - The parsed GitHub event JSON.
  * @returns An AgentEvent discriminator object, or null if unsupported.
  */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
 export function getEventType(payload: any): AgentEvent | null {
   if (
     payload.action === 'opened' &&
@@ -307,6 +394,30 @@ export function getEventType(payload: any): AgentEvent | null {
 
 /**
  * Adds an 'eyes' reaction to the event source (issue or comment).
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
  */
 export async function addEyeReaction(
   octokit: Octokit,
@@ -362,6 +473,30 @@ export async function addEyeReaction(
 
 /**
  * Removes an 'eyes' reaction from the event source (issue or comment).
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
  */
 export async function removeEyeReaction(
   octokit: Octokit,
@@ -454,6 +589,30 @@ export async function removeEyeReaction(
 
 /**
  * Adds a 'thumbs up' reaction to the event source (issue or comment).
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
  */
 export async function addThumbUpReaction(
   octokit: Octokit,
@@ -514,6 +673,22 @@ export async function addThumbUpReaction(
  *   - Else if the title starts with `DEFAULT_TRIGGER_PHRASE`, returns the title and appends the body.
  *   - Otherwise, returns the body.
  * Comment events remain unchanged.
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
  */
 export function extractText(event: GitHubEvent): string | null {
   if (
@@ -561,6 +736,40 @@ export function extractText(event: GitHubEvent): string | null {
  * @param output AI output or details for comment body
  * @param progressCommentId Optional comment ID to update instead of creating a new one
  */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
 export async function createPullRequest(
   workspace: string,
   octokit: Octokit,
@@ -743,6 +952,46 @@ export async function createPullRequest(
 
 /**
  * Commits and pushes changes to the existing PR branch.
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
  */
 export async function commitAndPush(
   workspace: string,
@@ -753,7 +1002,9 @@ export async function commitAndPush(
     | GitHubEventPullRequestReviewCommentCreated,
   commitMessage: string,
   output: string,
+
   /** Optional comment ID to update instead of creating a new one */
+
   progressCommentId?: number,
 ): Promise<void> {
   // Get PR number from the event - different location based on event type
@@ -898,6 +1149,34 @@ export async function commitAndPush(
 
 /**
  * Posts a comment to the issue or PR.
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
  */
 export async function postComment(
   octokit: Octokit,
@@ -962,6 +1241,38 @@ export async function postComment(
 /**
  * Create or update a comment: if commentId is provided, update existing comment,
  * otherwise create a new comment.
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
  */
 export async function upsertComment(
   octokit: Octokit,
@@ -997,6 +1308,36 @@ export async function upsertComment(
   }
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ */
 export async function generatePrompt(
   octokit: Octokit,
   repo: RepoContext,
@@ -1012,7 +1353,7 @@ export async function generatePrompt(
   );
 
   let prFiles: string[] = [];
-  let contextInfo: string = '';
+  let contextInfo = '';
 
   if (
     event.type === 'pullRequestCommentCreated' ||
@@ -1065,6 +1406,30 @@ export async function generatePrompt(
   return prompt;
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ */
 export async function getChangedFiles(
   octokit: Octokit,
   repo: RepoContext,
@@ -1089,6 +1454,30 @@ export async function getChangedFiles(
   return prFilesResponse.data.map((file) => file.filename);
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ */
 export async function getContentsData(
   octokit: Octokit,
   repo: RepoContext,
@@ -1111,6 +1500,30 @@ export async function getContentsData(
 
 /**
  * Retrieves the body and all comment bodies for a specific issue.
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
  */
 async function getIssueData(
   octokit: Octokit,
@@ -1181,6 +1594,34 @@ async function getIssueData(
 /**
  * Retrieves the body and all review comment bodies for a specific pull request.
  * Note: PR review comments are fetched via the pulls API endpoint.
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
  */
 async function getPullRequestReviewCommentsData(
   octokit: Octokit,
@@ -1245,6 +1686,30 @@ async function getPullRequestReviewCommentsData(
 /**
  * Retrieves the body and all comment bodies for a specific pull request.
  * Note: PR comments are fetched via the issues API endpoint.
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
  */
 async function getPullRequestData(
   octokit: Octokit,
@@ -1315,6 +1780,24 @@ async function getPullRequestData(
 
 // Truncate the output if it exceeds 60000 characters
 // GitHub API has a limit of 65536 characters for the body of a PR
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ */
 function truncateOutput(output: string): string {
   if (output.length > 60000) {
     core.warning(`Output exceeds 60000 characters, truncating...`);

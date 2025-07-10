@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+
 import { generatePrompt } from '../../../src/github/github.js';
 
 // We will spy on these in‐module helpers

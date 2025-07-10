@@ -1,6 +1,8 @@
-import { runCodex } from '../../../src/client/codex';
-import { execa } from 'execa';
 import * as core from '@actions/core';
+import { execa } from 'execa';
+
+import { runCodex } from '../../../src/client/codex';
+
 import type { ActionConfig } from '../../../src/config/config';
 
 jest.mock('execa', () => ({

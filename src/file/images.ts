@@ -3,10 +3,13 @@
  *
  * Provides functions to extract image URLs from text and download images to a local directory.
  */
+
 import { createWriteStream, promises as fsPromises } from 'fs';
 import * as path from 'path';
-import axios from 'axios';
+
 import * as core from '@actions/core';
+
+import axios from 'axios';
 
 // Precompiled regular expressions for Markdown and HTML image tags
 const markdownImageRegex = /!\[[\s\S]*?\]\((https?:\/\/[^)]+)\)/g;
@@ -14,9 +17,23 @@ const htmlImageRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
 
 /**
  * Extract image URLs from Markdown and HTML <img> tags in the given text.
- *
  * @param text - Text to search for image URLs.
  * @returns Array of unique image URLs.
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
  */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
@@ -34,10 +51,27 @@ export function extractImageUrls(text: string): string[] {
 
 /**
  * Download images from the given URLs into a local directory.
- *
  * @param urls - Array of image URLs to download.
  * @param downloadDir - Directory path where images will be saved.
  * @returns Array of relative file paths for downloaded images.
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
  */
 export async function downloadImages(
   urls: string[],
@@ -82,6 +116,25 @@ export async function downloadImages(
  * @param dest - Local filesystem path where the file will be written.
  * @returns Promise that resolves once the file has been fully written.
  */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then((response) => {
     return new Promise<void>((resolve, reject) => {

@@ -16,10 +16,9 @@ export interface ParsedFlags {
 
 /**
  * Parses the input string for boolean flags and returns the remaining content.
- *
- * @param input - The input string containing flags and content.
- * @param flagNames - Array of flag names (without leading dashes) to parse.
- * @returns An object with flags map and remaining content string.
+ * @param {string} input - The input string containing flags and content.
+ * @param {string[]} flagNames - Array of flag names (without leading dashes) to parse.
+ * @returns {ParsedFlags} An object with flags map and remaining content string.
  */
 export function parseFlags(input: string, flagNames: string[]): ParsedFlags {
   const tokens = input.split(/\s+/).filter(Boolean);
