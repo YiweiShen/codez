@@ -1,31 +1,41 @@
 /**
- * @fileoverview Prompt utilities module.
+ * @file Prompt utilities module.
  *
  * Extracts flags and remaining prompt text from user input.
  */
+
 import { parseFlags } from './flags.js';
 
+/**
+ * @interface PromptFlagOptions
+ * @property {boolean} includeFullHistory Include full conversation history
+ * @property {boolean} createIssues Create issues based on the output
+ * @property {boolean} noPr Do not open a pull request
+ * @property {boolean} includeFixBuild Include latest failed CI build logs
+ * @property {boolean} includeFetch Fetch and include known URLs referenced
+ * in the prompt
+ * @property {string} prompt Remaining prompt text after flags
+ */
+
 export interface PromptFlagOptions {
-  /** Include full conversation history */
   includeFullHistory: boolean;
-  /** Create issues based on the output */
   createIssues: boolean;
-  /** Do not open a pull request */
   noPr: boolean;
-  /** Include latest failed CI build logs */
   includeFixBuild: boolean;
-  /** Fetch and include known URLs referenced in the prompt */
   includeFetch: boolean;
-  /** Remaining prompt text after flags */
   prompt: string;
 }
 
 /**
- * Extract prompt flags and remaining prompt text for direct or trigger-based prompts.
- * @param input - The raw input string containing flags and prompt text.
- * @param isDirect - Whether this is a direct prompt (true) or trigger-based (false).
- * @returns Parsed prompt options and cleaned prompt text.
+ * Extract prompt flags and remaining prompt text for direct or trigger-based
+ * prompts.
+ * @param {string} input The raw input string containing flags and prompt
+ * text.
+ * @param {boolean} isDirect Whether this is a direct prompt (true) or
+ * trigger-based (false).
+ * @returns {PromptFlagOptions} Parsed prompt options and cleaned prompt text.
  */
+
 export function extractPromptFlags(
   input: string,
   isDirect: boolean,
@@ -34,6 +44,7 @@ export function extractPromptFlags(
     ? ['fix-build', 'fetch']
     : ['full-history', 'create-issues', 'no-pr', 'fix-build', 'fetch'];
   const { flags, rest } = parseFlags(input, flagNames);
+
   return {
     includeFullHistory: !!flags['full-history'],
     createIssues: !!flags['create-issues'],
