@@ -10,26 +10,32 @@
  * @param content - Object containing body text and user login.
  * @returns Quoted body string for bot comments or empty string otherwise.
  */
-export function genContentsString(content: {
+/**
+ * Represents a GitHub comment with body text and author login.
+ */
+interface CommentContent {
+  /** Raw body text of the comment. */
   body: string;
+  /** Author login of the comment (e.g., "github-actions[bot]"). */
   login: string;
-}): string {
-  let body = content.body.trim();
-  const login = content.login.trim();
-  if (!body) {
+}
+
+/**
+ * Quote the comment body if authored by the GitHub Actions bot.
+ *
+ * @param comment - Comment to process.
+ * @returns Quoted body string with each line prefixed by "> ", or empty string.
+ */
+export function genContentsString(comment: CommentContent): string {
+  const body = comment.body.trim();
+  if (!body || comment.login.trim() !== 'github-actions[bot]') {
     return '';
   }
-
-  if (login === 'github-actions[bot]') {
-    // Add ">" to the beginning of the body, considering line breaks
-    body = body
-      .split('\n')
-      .map((line) => `> ${line}`)
-      .join('\n');
-    return body + '\n\n';
-  }
-
-  return '';
+  const quoted = body
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return quoted + '\n\n';
 }
 
 /**
@@ -40,17 +46,20 @@ export function genContentsString(content: {
  * @param content - Object containing body text and user login.
  * @returns Fully quoted body string or empty string if the body is empty.
  */
-export function genFullContentsString(content: {
-  body: string;
-  login: string;
-}): string {
-  const body = content.body.trim();
+/**
+ * Fully quote the comment body regardless of author.
+ *
+ * @param comment - Comment to process.
+ * @returns Quoted body string with each line prefixed by "> ", or empty string.
+ */
+export function genFullContentsString(comment: CommentContent): string {
+  const body = comment.body.trim();
   if (!body) {
     return '';
   }
-  const formatted = body
+  const quoted = body
     .split('\n')
     .map((line) => `> ${line}`)
     .join('\n');
-  return formatted + '\n\n';
+  return quoted + '\n\n';
 }
