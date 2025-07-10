@@ -37,7 +37,7 @@ export interface ActionConfig {
    */
   directPrompt: string;
   /**
- * Custom trigger phrase to invoke Codez.
+   * Custom trigger phrase to invoke Codez.
    */
   triggerPhrase: string;
   /**
@@ -150,7 +150,8 @@ export function getConfig(): ActionConfig {
   const openaiModelInput = core.getInput('openai-model') || '';
   const openaiModel = openaiModelInput || defaultModel;
   const directPrompt = core.getInput('direct-prompt') || '';
-  const triggerPhrase = core.getInput('trigger-phrase') || DEFAULT_TRIGGER_PHRASE;
+  const triggerPhrase =
+    core.getInput('trigger-phrase') || DEFAULT_TRIGGER_PHRASE;
   const assigneeTriggerInput = core.getInput('assignee-trigger') || '';
   // Parse comma- or newline-separated GitHub usernames
   const assigneeTrigger = parseStringList(assigneeTriggerInput);
