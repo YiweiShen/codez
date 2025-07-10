@@ -958,6 +958,44 @@ export async function postComment(
   }
 }
 
+/**
+ * Create or update a comment: if commentId is provided, update existing comment,
+ * otherwise create a new comment.
+ */
+export async function upsertComment(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: GitHubEvent,
+  commentId: number | undefined,
+  body: string,
+): Promise<void> {
+  try {
+    if (!commentId) {
+      await postComment(octokit, repo, event, body);
+    } else if ('issue' in event) {
+      await octokit.rest.issues.updateComment({
+        ...repo,
+        comment_id: commentId,
+        body,
+      });
+    } else if ('pull_request' in event) {
+      await octokit.rest.pulls.updateReviewComment({
+        ...repo,
+        comment_id: commentId,
+        body,
+      });
+    } else {
+      await postComment(octokit, repo, event, body);
+    }
+  } catch (error) {
+    core.warning(
+      `Failed to upsert comment: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
+
 export async function generatePrompt(
   octokit: Octokit,
   repo: RepoContext,
