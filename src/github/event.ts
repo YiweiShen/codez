@@ -10,6 +10,7 @@ import { extractPromptFlags } from '../utils/prompt.js';
 import { ParseError } from '../utils/errors.js';
 import { promises as fs } from 'fs';
 import { getEventType, extractText } from './github.js';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
 import type { AgentEvent } from './github.js';
 import type { ActionConfig } from '../config/config.js';
 
@@ -164,7 +165,7 @@ export async function processEvent(
   }
 
   if (!userPrompt) {
-    core.info('No prompt found after "/codex" command.');
+    core.info(`No prompt found after "${DEFAULT_TRIGGER_PHRASE}" command.`);
     return null;
   }
 

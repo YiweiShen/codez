@@ -30,6 +30,7 @@ import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './github.js';
 import AdmZip from 'adm-zip';
 import axios from 'axios';
+import { PROGRESS_BAR_BLOCKS, PROGRESS_TITLE } from '../constants.js';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
@@ -92,11 +93,6 @@ export { createIssuesFromFeaturePlan } from './createIssues.js';
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '$\\$&');
 }
-const PROGRESS_BAR_BLOCKS = 20;
-/**
- * Title used for Codez progress comments.
- */
-const PROGRESS_TITLE = '**🚀 Codez Progress**';
 
 /**
  * Create a GitHub comment to display initial progress steps with checkboxes.
