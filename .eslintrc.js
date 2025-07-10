@@ -24,8 +24,7 @@ module.exports = {
     },
   },
   rules: {
-    'jsdoc/check-multiline-blocks': 'error',
-    'jsdoc/newline-after-description': 'error',
+    'jsdoc/multiline-blocks': 'error',
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
     'max-len': ['error', { code: 80, ignoreComments: false }],
