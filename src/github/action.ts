@@ -467,7 +467,22 @@ export async function runAction(
           fetchedParts.push(`=== ${url} ===\n${data}`);
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
-          fetchedParts.push(`Failed to fetch ${url}: ${msg}`);
+          // Fallback to direct fetch if Jina Reader API fails (e.g., unsupported URLs)
+          let fetched = false;
+          try {
+            const directResponse = await axios.get<string>(url, { responseType: 'text', timeout: 60000 });
+            const directData =
+              typeof directResponse.data === 'string'
+                ? directResponse.data
+                : JSON.stringify(directResponse.data);
+            fetchedParts.push(`=== ${url} ===\n${directData}`);
+            fetched = true;
+          } catch {
+            // ignore direct fetch errors
+          }
+          if (!fetched) {
+            fetchedParts.push(`Failed to fetch ${url}: ${msg}`);
+          }
         }
       }
       effectiveUserPrompt = `Contents from URLs:\n\n${fetchedParts.join(
