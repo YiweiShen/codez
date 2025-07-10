@@ -704,7 +704,7 @@ export async function createPullRequest(
       await octokit.graphql(
         `
         mutation($issueId: ID!, $pullRequestId: ID!) {
-          linkPullRequest(input: { issueId: $issueId, pullRequestId: $pullRequestId }) {
+          addPullRequestToIssue(input: { issueId: $issueId, pullRequestId: $pullRequestId }) {
             clientMutationId
           }
         }
