@@ -85,4 +85,12 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.{js,jsx,ts,tsx}'],
+      rules: {
+        'max-len': ['error', { code: 120, ignoreComments: false }],
+      },
+    },
+  ],
 };
