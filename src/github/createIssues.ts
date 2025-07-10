@@ -1,5 +1,5 @@
 /**
- * @fileoverview Module for creating GitHub issues from a feature plan JSON output.
+ * @file Module for creating GitHub issues from a feature plan JSON output.
  */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';

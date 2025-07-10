@@ -1,5 +1,5 @@
 /**
- * @fileoverview Core logic for executing the GitHub Action.
+ * @file Core logic for executing the GitHub Action.
  *
  * Orchestrates cloning, prompt generation, Codex invocation,
  * change detection, and result handling including pull requests and comments.

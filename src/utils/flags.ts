@@ -1,5 +1,5 @@
 /**
- * @fileoverview Utility for parsing boolean flags from input strings.
+ * @file Utility for parsing boolean flags from input strings.
  *
  * Provides functions to parse flags and return remaining content.
  */

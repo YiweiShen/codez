@@ -1,5 +1,5 @@
 /**
- * @fileoverview Core orchestration and workflow logic for the GitHub Action.
+ * @file Core orchestration and workflow logic for the GitHub Action.
  * This module initializes configuration, processes events, checks permissions,
  * and triggers the main action logic.
  */

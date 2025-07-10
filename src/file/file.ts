@@ -1,5 +1,5 @@
 /**
- * @fileoverview File state utilities module.
+ * @file File state utilities module.
  *
  * Provides functions to calculate file hashes, capture workspace file state,
  * and detect changes between states respecting ignore rules.

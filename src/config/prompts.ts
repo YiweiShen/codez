@@ -1,5 +1,5 @@
 /**
- * @fileoverview Configuration for prompts used in the Codex CLI and OpenAI integration.
+ * @file Configuration for prompts used in the Codex CLI and OpenAI integration.
  */
 
 /**

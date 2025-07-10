@@ -1,5 +1,5 @@
 /**
- * @fileoverview Security helpers module.
+ * @file Security helpers module.
  * Provides functions for permission checks and masking sensitive information.
  */
 import * as core from '@actions/core';

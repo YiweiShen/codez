@@ -1,5 +1,5 @@
 /**
- * @fileoverview Configuration module for the GitHub Action.
+ * @file Configuration module for the GitHub Action.
  *
  * Parses action inputs and environment variables, providing a validated
  * ActionConfig object for use throughout the action.
