@@ -29,20 +29,6 @@ import { GitHubError } from '../utils/errors.js';
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
 
-/**
- *
- * @param commitMessage
- */
-
-/**
- *
- * @param commitMessage
- */
-
-/**
- *
- * @param commitMessage
- */
 
 function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
@@ -53,27 +39,7 @@ function getBranchType(commitMessage: string): string {
   return 'chore';
 }
 
-/**
- * Convert a text string into a URL-friendly slug.
- * Lowercases, replaces non-alphanumeric runs with '-', and trims '-' edges.
- * @param text - The input text to slugify.
- * @returns A slug string containing only lowercase letters, digits, and hyphens.
- */
 
-/**
- *
- * @param text
- */
-
-/**
- *
- * @param text
- */
-
-/**
- *
- * @param text
- */
 
 function slugify(text: string): string {
   return text
@@ -82,7 +48,7 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-// --- Type Definitions ---
+// Type definitions for GitHub events and payloads.
 
 export type AgentEvent =
   | { type: 'issuesOpened'; github: GitHubEventIssuesOpened }
@@ -189,7 +155,7 @@ export type GithubContentsData = {
 
 type RepoContext = { owner: string; repo: string };
 
-// --- Functions ---
+// Helper functions for GitHub operations.
 
 /**
  * Clone the target repository and checkout the appropriate branch based on event.

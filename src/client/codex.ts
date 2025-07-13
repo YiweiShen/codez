@@ -125,7 +125,6 @@ export async function runCodex(
     const blockLines = lines.slice(startIndex + 1, endIndex);
     const textResult = blockLines.join('\n').trim();
 
-    // core.info(`Extracted second-last block:\n${textResult}`);
 
     return textResult;
   } catch (error) {
