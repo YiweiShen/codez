@@ -21,32 +21,6 @@ import { CliError, TimeoutError } from '../utils/errors.js';
  * @returns A promise resolving to the formatted output from Codex.
  */
 
-/**
- *
- * @param workspace
- * @param config
- * @param prompt
- * @param timeout
- * @param images
- */
-
-/**
- *
- * @param workspace
- * @param config
- * @param prompt
- * @param timeout
- * @param images
- */
-
-/**
- *
- * @param workspace
- * @param config
- * @param prompt
- * @param timeout
- * @param images
- */
 export async function runCodex(
   workspace: string,
   config: ActionConfig,
@@ -131,7 +105,6 @@ export async function runCodex(
 
     // stdout parse
     const codeResult = `\`\`\`\n${result.stdout}\n\`\`\``;
-    // core.info(`Codex output:\n${codeResult}`);
 
     const lines = codeResult.split('\n');
 

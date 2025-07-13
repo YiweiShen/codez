@@ -82,20 +82,6 @@ export interface ActionConfig {
  * @returns A map of environment variable names to values.
  */
 
-/**
- *
- * @param input
- */
-
-/**
- *
- * @param input
- */
-
-/**
- *
- * @param input
- */
 export function parseKeyValueMap(input: string): Record<string, string> {
   const result: Record<string, string> = {};
   if (!input) return result;
@@ -137,20 +123,6 @@ export function parseKeyValueMap(input: string): Record<string, string> {
  * @returns Array of trimmed non-empty strings.
  */
 
-/**
- *
- * @param input
- */
-
-/**
- *
- * @param input
- */
-
-/**
- *
- * @param input
- */
 
 export function parseStringList(input: string): string[] {
   if (!input) {
@@ -173,25 +145,6 @@ export function parseStringList(input: string): string[] {
  * @throws Error if required inputs are missing
  */
 
-/**
- *
- */
-
-/**
- *
- */
-
-/**
- *
- */
-
-/**
- *
- */
-
-/**
- *
- */
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const eventPath = core.getInput('event-path');

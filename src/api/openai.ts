@@ -24,20 +24,6 @@ export const defaultModel = 'o4-mini';
  * @returns A configured OpenAI client for making API calls.
  */
 
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
 
 export function getOpenAIClient(config: ActionConfig): OpenAI {
   const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
@@ -67,29 +53,6 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
  * );
  */
 
-/**
- *
- * @param changedFiles
- * @param userPrompt
- * @param context
- * @param context.prNumber
- * @param context.issueNumber
- * @param config
- */
-
-/**
- *
- * @param changedFiles
- * @param userPrompt
- * @param context
- * @param context.prNumber
- * @param context.issueNumber
- * @param config
- */
-
-/**
- *
- */
 export async function generateCommitMessage(
   changedFiles: string[],
   userPrompt: string,

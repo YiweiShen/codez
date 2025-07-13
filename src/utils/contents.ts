@@ -29,20 +29,6 @@ interface CommentContent {
  * @returns Quoted body string with each line prefixed by "> ", or empty string.
  */
 
-/**
- *
- * @param comment
- */
-
-/**
- *
- * @param comment
- */
-
-/**
- *
- * @param comment
- */
 export function genContentsString(comment: CommentContent): string {
   const body = comment.body.trim();
   if (!body || comment.login.trim() !== 'github-actions[bot]') {
@@ -61,26 +47,6 @@ export function genContentsString(comment: CommentContent): string {
  * Prefixes each line of the body with "> " and retains all content.
  * @param content - Object containing body text and user login.
  * @returns Fully quoted body string or empty string if the body is empty.
- */
-/**
- * Fully quote the comment body regardless of author.
- * @param comment - Comment to process.
- * @returns Quoted body string with each line prefixed by "> ", or empty string.
- */
-
-/**
- *
- * @param comment
- */
-
-/**
- *
- * @param comment
- */
-
-/**
- *
- * @param comment
  */
 export function genFullContentsString(comment: CommentContent): string {
   const body = comment.body.trim();
