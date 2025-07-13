@@ -21,22 +21,6 @@ import { checkPermission } from './security/security.js';
  * @returns A promise that resolves when the action completes.
  */
 
-/**
- *
- */
-
-/**
- *
- */
-
-/**
- *
- */
-
-/**
- *
- */
-
 export async function run(): Promise<void> {
   try {
     // Get Configuration

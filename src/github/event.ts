@@ -67,20 +67,6 @@ export interface ProcessedEvent {
  * @throws If the file cannot be read or parsed.
  */
 
-/**
- *
- * @param eventPath
- */
-
-/**
- *
- * @param eventPath
- */
-
-/**
- *
- * @param eventPath
- */
 export async function loadEventPayload(
   eventPath: string,
 ): Promise<Record<string, unknown>> {
@@ -103,20 +89,6 @@ export async function loadEventPayload(
  * @returns The processed event data or null if unsupported.
  */
 
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
 export async function processEvent(
   config: ActionConfig,
 ): Promise<ProcessedEvent | null> {
