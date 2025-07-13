@@ -41,7 +41,11 @@ import { runCodex } from '../client/codex.js';
 
 import type { GitHubEvent } from './github.js';
 
-import { PROGRESS_BAR_BLOCKS, PROGRESS_TITLE } from '../constants.js';
+import {
+  PROGRESS_BAR_BLOCKS,
+  PROGRESS_TITLE,
+  LOADING_PHRASES,
+} from '../constants.js';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
@@ -199,7 +203,16 @@ async function createProgressComment(
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = PROGRESS_TITLE;
-  const bodyLines: string[] = [title, '', `Progress: [${emptyBar}] 0%`, ''];
+  const loadingPhrase =
+    LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
+  const bodyLines: string[] = [
+    title,
+    '',
+    `Progress: [${emptyBar}] 0%`,
+    '',
+    loadingPhrase,
+    '',
+  ];
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     const prefix = `- [ ] ${step}`;
@@ -292,10 +305,14 @@ async function updateProgressComment(
   const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
   const percent = Math.round((completed / total) * 100);
   const title = PROGRESS_TITLE;
+  const loadingPhrase =
+    LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
   const bodyLines: string[] = [
     title,
     '',
     `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
+    '',
+    loadingPhrase,
     '',
   ];
   for (let i = 0; i < steps.length; i++) {
