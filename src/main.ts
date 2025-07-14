@@ -36,9 +36,8 @@ export async function run(): Promise<void> {
       const client = getOpenAIClient(config);
       await client.models.retrieve(config.openaiModel);
     } catch (error) {
-      const errMsg = error instanceof Error ? error.message : String(error);
       const failureMessage =
-        `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}": ${errMsg}`;
+        `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}"`;
       core.setFailed(failureMessage);
       try {
         const processedEvent = await processEvent(config);
