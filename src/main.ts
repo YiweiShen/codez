@@ -78,16 +78,34 @@ export async function run(): Promise<void> {
     // Event is valid and prompt exists, run the main action logic with timeout control
     const timeoutMs = config.timeoutSeconds * 1000;
     let timer: ReturnType<typeof setTimeout>;
+    const timeoutErrorMessage = `Action timed out after ${config.timeoutSeconds} seconds`;
     try {
       await Promise.race([
         runAction(config, processedEvent),
         new Promise<never>((_, reject) => {
-          timer = setTimeout(
-            () => reject(new Error(`Action timed out after ${config.timeoutSeconds} seconds`)),
-            timeoutMs,
-          );
+          timer = setTimeout(() => reject(new Error(timeoutErrorMessage)), timeoutMs);
         }),
       ]);
+    } catch (error) {
+      if (error instanceof Error && error.message === timeoutErrorMessage) {
+        core.setFailed(timeoutErrorMessage);
+        try {
+          await postComment(
+            config.octokit,
+            config.repo,
+            processedEvent.agentEvent.github,
+            timeoutErrorMessage,
+          );
+        } catch (commentError) {
+          core.error(
+            `Failed to post timeout comment: ${
+              commentError instanceof Error ? commentError.message : String(commentError)
+            }`,
+          );
+        }
+        return;
+      }
+      throw error;
     } finally {
       clearTimeout(timer!);
     }
