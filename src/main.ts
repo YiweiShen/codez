@@ -36,8 +36,7 @@ export async function run(): Promise<void> {
       const client = getOpenAIClient(config);
       await client.models.retrieve(config.openaiModel);
     } catch (error) {
-      const failureMessage =
-        `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}"`;
+      const failureMessage = `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}"`;
       core.setFailed(failureMessage);
       try {
         const processedEvent = await processEvent(config);
@@ -52,7 +51,9 @@ export async function run(): Promise<void> {
       } catch (commentError) {
         core.error(
           `Failed to post API key error comment: ${
-            commentError instanceof Error ? commentError.message : String(commentError)
+            commentError instanceof Error
+              ? commentError.message
+              : String(commentError)
           }`,
         );
       }
@@ -82,7 +83,10 @@ export async function run(): Promise<void> {
       await Promise.race([
         runAction(config, processedEvent),
         new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new Error(timeoutErrorMessage)), timeoutMs);
+          timer = setTimeout(
+            () => reject(new Error(timeoutErrorMessage)),
+            timeoutMs,
+          );
         }),
       ]);
     } catch (error) {
@@ -98,7 +102,9 @@ export async function run(): Promise<void> {
         } catch (commentError) {
           core.error(
             `Failed to post timeout comment: ${
-              commentError instanceof Error ? commentError.message : String(commentError)
+              commentError instanceof Error
+                ? commentError.message
+                : String(commentError)
             }`,
           );
         }

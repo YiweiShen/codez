@@ -24,7 +24,6 @@ export const defaultModel = 'o4-mini';
  * @returns A configured OpenAI client for making API calls.
  */
 
-
 export function getOpenAIClient(config: ActionConfig): OpenAI {
   const openaiOptions: ClientOptions = { apiKey: config.openaiApiKey };
   if (config.openaiBaseUrl) {

@@ -29,7 +29,6 @@ import { GitHubError } from '../utils/errors.js';
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
 
-
 function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
@@ -38,8 +37,6 @@ function getBranchType(commitMessage: string): string {
   if (/^(style|format|lint)/.test(cm)) return 'styles';
   return 'chore';
 }
-
-
 
 function slugify(text: string): string {
   return text

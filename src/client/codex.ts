@@ -125,7 +125,6 @@ export async function runCodex(
     const blockLines = lines.slice(startIndex + 1, endIndex);
     const textResult = blockLines.join('\n').trim();
 
-
     return textResult;
   } catch (error) {
     // Log the full error for debugging
