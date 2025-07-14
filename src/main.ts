@@ -11,6 +11,7 @@ import { getOpenAIClient } from './api/openai.js';
 import { runAction } from './github/action.js';
 
 import { processEvent } from './github/event.js';
+import { postComment } from './github/github.js';
 
 import { checkPermission } from './security/security.js';
 
@@ -35,11 +36,27 @@ export async function run(): Promise<void> {
       const client = getOpenAIClient(config);
       await client.models.retrieve(config.openaiModel);
     } catch (error) {
-      core.setFailed(
-        `OPENAI_API_KEY invalid or no access to model "${
-          config.openaiModel
-        }": ${error instanceof Error ? error.message : String(error)}`,
-      );
+      const errMsg = error instanceof Error ? error.message : String(error);
+      const failureMessage =
+        `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}": ${errMsg}`;
+      core.setFailed(failureMessage);
+      try {
+        const processedEvent = await processEvent(config);
+        if (processedEvent) {
+          await postComment(
+            config.octokit,
+            config.repo,
+            processedEvent.agentEvent.github,
+            failureMessage,
+          );
+        }
+      } catch (commentError) {
+        core.error(
+          `Failed to post API key error comment: ${
+            commentError instanceof Error ? commentError.message : String(commentError)
+          }`,
+        );
+      }
       return;
     }
 
