@@ -54,6 +54,9 @@ describe('runCodex', () => {
       expect.any(Array),
       expect.objectContaining({ timeout, cwd: workspace }),
     );
+    // CLI arguments should include timeout flag for model runtime budget
+    const cliArgs = (execa as jest.Mock).mock.calls[0][1] as string[];
+    expect(cliArgs).toEqual(expect.arrayContaining(['--timeout', timeout.toString()]));
     expect(core.info).toHaveBeenCalled();
   });
 

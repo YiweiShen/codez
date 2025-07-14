@@ -38,8 +38,10 @@ export async function runCodex(
         cliArgs.push('-i', imgPath);
       }
     }
-    // Model and auto flags
+    // Model and runtime budget flags
     cliArgs.push('--model', config.openaiModel);
+    // Pass timeout to Codex CLI to enforce model runtime budget
+    cliArgs.push('--timeout', timeout.toString());
     cliArgs.push(
       'exec', // headless
       '--dangerously-bypass-approvals-and-sandbox',
