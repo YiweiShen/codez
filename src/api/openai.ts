@@ -11,6 +11,7 @@ import type { ClientOptions } from 'openai';
 import type { ActionConfig } from '../config/config.js';
 import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
 import { ParseError } from '../utils/errors.js';
+import { maskSensitiveInfo } from '../security/security.js';
 
 /**
  * Default model identifier for OpenAI provider.
@@ -106,10 +107,10 @@ ${changedFiles.join('\n')}
     core.info(`Generated commit message: ${commitMessage}`);
     return commitMessage;
   } catch (error) {
+    const rawErrorMessage = error instanceof Error ? error.message : String(error);
+    const maskedErrorMessage = maskSensitiveInfo(rawErrorMessage, config);
     core.warning(
-      `Error generating commit message with OpenAI: ${
-        error instanceof Error ? error.message : String(error)
-      }. Using fallback.`,
+      `Error generating commit message with OpenAI: ${maskedErrorMessage}. Using fallback.`,
     );
     if (context.prNumber) {
       return `chore: apply changes for PR #${context.prNumber}`;
