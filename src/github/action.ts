@@ -148,7 +148,7 @@ export { createIssuesFromFeaturePlan } from './createIssues.js';
  * @param str
  */
 
-function escapeRegExp(str: string): string {
+export function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '$\\$&');
 }
 
@@ -192,7 +192,7 @@ function escapeRegExp(str: string): string {
  * @param event
  * @param steps
  */
-async function createProgressComment(
+export async function createProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
   event: GitHubEvent,
@@ -290,7 +290,7 @@ async function createProgressComment(
  * @param commentId
  * @param steps
  */
-async function updateProgressComment(
+export async function updateProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
   event: GitHubEvent,

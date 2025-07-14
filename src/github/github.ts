@@ -29,7 +29,7 @@ import { GitHubError } from '../utils/errors.js';
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
 
-function getBranchType(commitMessage: string): string {
+export function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
   if (/^(fix|correct|resolve|patch|repair)/.test(cm)) return 'fix';
@@ -38,7 +38,7 @@ function getBranchType(commitMessage: string): string {
   return 'chore';
 }
 
-function slugify(text: string): string {
+export function slugify(text: string): string {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -164,35 +164,6 @@ type RepoContext = { owner: string; repo: string };
  * @param event - The AgentEvent indicating pull request or issue context.
  */
 
-/**
- *
- * @param workspace
- * @param githubToken
- * @param repo
- * @param context
- * @param octokit
- * @param event
- */
-
-/**
- *
- * @param workspace
- * @param githubToken
- * @param repo
- * @param context
- * @param octokit
- * @param event
- */
-
-/**
- *
- * @param workspace
- * @param githubToken
- * @param repo
- * @param context
- * @param octokit
- * @param event
- */
 
 export async function cloneRepository(
   workspace: string,
@@ -281,20 +252,6 @@ export async function cloneRepository(
  * @returns An AgentEvent discriminator object, or null if unsupported.
  */
 
-/**
- *
- * @param payload
- */
-
-/**
- *
- * @param payload
- */
-
-/**
- *
- * @param payload
- */
 
 export function getEventType(payload: any): AgentEvent | null {
   if (
@@ -362,26 +319,6 @@ export function getEventType(payload: any): AgentEvent | null {
  * @param event
  */
 
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
 export async function addEyeReaction(
   octokit: Octokit,
   repo: RepoContext,
@@ -441,26 +378,6 @@ export async function addEyeReaction(
  * @param event
  */
 
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
 export async function removeEyeReaction(
   octokit: Octokit,
   repo: RepoContext,
@@ -557,26 +474,6 @@ export async function removeEyeReaction(
  * @param event
  */
 
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param event
- */
 export async function addThumbUpReaction(
   octokit: Octokit,
   repo: RepoContext,
