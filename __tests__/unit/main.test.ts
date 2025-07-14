@@ -15,6 +15,8 @@ jest.mock('../../../src/security/security.js', () => ({
   checkPermission: jest.fn(),
 }));
 jest.mock('../../../src/github/action.js', () => ({ runAction: jest.fn() }));
+// Mock OpenAI client to prevent real API calls during tests
+jest.mock('../../../src/api/openai.js', () => ({ getOpenAIClient: jest.fn() }));
 
 import * as core from '@actions/core';
 
@@ -22,10 +24,15 @@ import { getConfig } from '../../../src/config/config.js';
 import { processEvent } from '../../../src/github/event.js';
 import { checkPermission } from '../../../src/security/security.js';
 import { runAction } from '../../../src/github/action.js';
+import { getOpenAIClient } from '../../../src/api/openai.js';
 
 describe('run (src/main.ts)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Ensure OpenAI client mock returns a valid retrieve() method
+    (getOpenAIClient as jest.Mock).mockReturnValue({
+      models: { retrieve: jest.fn().mockResolvedValue({}) },
+    });
   });
 
   it('calls core.setFailed if getConfig throws', async () => {

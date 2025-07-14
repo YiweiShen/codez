@@ -7,6 +7,7 @@
 import * as core from '@actions/core';
 
 import { getConfig } from './config/config.js';
+import { getOpenAIClient } from './api/openai.js';
 import { runAction } from './github/action.js';
 
 import { processEvent } from './github/event.js';
@@ -25,6 +26,22 @@ export async function run(): Promise<void> {
   try {
     // Get Configuration
     const config = getConfig();
+
+    // Verify OpenAI API key and access to the configured model
+    core.info(
+      `Verifying OpenAI API key and access to model ${config.openaiModel}`,
+    );
+    try {
+      const client = getOpenAIClient(config);
+      await client.models.retrieve(config.openaiModel);
+    } catch (error) {
+      core.setFailed(
+        `OPENAI_API_KEY invalid or no access to model "${
+          config.openaiModel
+        }": ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return;
+    }
 
     // Process Event
     const processedEvent = await processEvent(config);
