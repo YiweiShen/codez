@@ -209,7 +209,7 @@ You can also use Node.js profiling tools on large runs to pinpoint bottlenecks:
 | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `github-token`  | **Required** GitHub token for authentication                                                                               |
 | `event-path`    | Path to the event file (default: `${{ github.event_path }}`)                                                               |
-| `timeout`       | Timeout for AI processing in seconds (default: 600, must be a positive integer)                                            |
+| `timeout`       | Timeout for AI processing (model runtime budget) in seconds (default: 600, must be a positive integer); passed to the Codex CLI via `--timeout` flag. |
 | `direct-prompt` | One-shot prompt for automated workflows. If provided, Codez will bypass comment triggers and execute this prompt directly. |
 
 ### Codex Configuration

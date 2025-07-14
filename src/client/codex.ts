@@ -16,7 +16,7 @@ import { CliError, TimeoutError } from '../utils/errors.js';
  * @param workspace - Directory in which to run the Codex CLI.
  * @param config - Configuration containing API keys and environment settings.
  * @param prompt - User-provided prompt string for Codex.
- * @param timeout - Maximum time in milliseconds to wait for the CLI to complete.
+ * @param timeout - Maximum time in milliseconds to wait for the CLI to complete; also passed to the CLI as the model runtime budget.
  * @param [images] - Optional array of image file paths to include in the invocation.
  * @returns A promise resolving to the formatted output from Codex.
  */
@@ -38,6 +38,8 @@ export async function runCodex(
         cliArgs.push('-i', imgPath);
       }
     }
+    // Pass timeout to CLI as model runtime budget
+    cliArgs.push('--timeout', String(timeout));
     // Model and auto flags
     cliArgs.push('--model', config.openaiModel);
     cliArgs.push(
