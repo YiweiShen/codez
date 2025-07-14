@@ -19,7 +19,7 @@ import { checkPermission } from './security/security.js';
  * Orchestrate the action's workflow.
  *
  * Retrieves configuration, processes the event, checks permissions,
- * and executes the main action logic.
+ * and executes the main action logic within the configured timeout budget.
  * @returns A promise that resolves when the action completes.
  */
 
@@ -75,8 +75,22 @@ export async function run(): Promise<void> {
       return;
     }
 
-    // Event is valid and prompt exists, run the main action logic
-    await runAction(config, processedEvent);
+    // Event is valid and prompt exists, run the main action logic with timeout control
+    const timeoutMs = config.timeoutSeconds * 1000;
+    let timer: ReturnType<typeof setTimeout>;
+    try {
+      await Promise.race([
+        runAction(config, processedEvent),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error(`Action timed out after ${config.timeoutSeconds} seconds`)),
+            timeoutMs,
+          );
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer!);
+    }
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(`Action failed: ${error.message}\n${error.stack ?? ''}`);
