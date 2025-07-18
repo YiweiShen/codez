@@ -17,11 +17,22 @@ import type { Octokit } from 'octokit';
 
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 
+import { runCodex } from '../client/codex.js';
 import type { ActionConfig } from '../config/config.js';
+
+import {
+  PROGRESS_BAR_BLOCKS,
+  PROGRESS_TITLE,
+  LOADING_PHRASES,
+} from '../constants.js';
 import { captureFileState, detectChanges } from '../file/file.js';
 
 import { extractImageUrls, downloadImages } from '../file/images.js';
+import { maskSensitiveInfo } from '../security/security.js';
+
 import { GitHubError } from '../utils/errors.js';
+
+import type { ProcessedEvent } from './event.js';
 import {
   cloneRepository,
   addEyeReaction,
@@ -32,20 +43,7 @@ import {
   addThumbUpReaction,
   upsertComment,
 } from './github.js';
-
-import type { ProcessedEvent } from './event.js';
-
-import { maskSensitiveInfo } from '../security/security.js';
-
-import { runCodex } from '../client/codex.js';
-
 import type { GitHubEvent } from './github.js';
-
-import {
-  PROGRESS_BAR_BLOCKS,
-  PROGRESS_TITLE,
-  LOADING_PHRASES,
-} from '../constants.js';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
@@ -79,6 +77,31 @@ import {
  * @param repo.owner
  * @param repo.repo
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -114,7 +137,7 @@ async function fetchLatestFailedWorkflowLogs(
     if (!entries || entries.length === 0) {
       return 'No log files found in the logs archive.';
     }
-    const logs: string[] = entries.map((entry) => {
+    const logs: string[] = entries.map((entry: any) => {
       const name = entry.entryName;
       const content = entry.getData().toString('utf8');
       return `=== ${name} ===\n${content}`;
@@ -131,6 +154,11 @@ export { createIssuesFromFeaturePlan } from './createIssues.js';
  * Escape special characters in a literal string so it can be used in a RegExp.
  * @param str - Input string containing potential RegExp metacharacters.
  * @returns A string where regex-meaningful characters are escaped.
+ */
+
+/**
+ *
+ * @param str
  */
 
 /**
@@ -192,6 +220,7 @@ export function escapeRegExp(str: string): string {
  * @param event
  * @param steps
  */
+
 export async function createProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -199,7 +228,6 @@ export async function createProgressComment(
   steps: string[],
 ): Promise<number> {
   // Build initial progress display with emoji title, bar, and unchecked steps
-  const total = steps.length;
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = PROGRESS_TITLE;
@@ -290,6 +318,18 @@ export async function createProgressComment(
  * @param commentId
  * @param steps
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
 export async function updateProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -380,6 +420,36 @@ export async function updateProgressComment(
  * @param progressCommentId
  */
 
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ */
 async function handleResult(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -555,6 +625,27 @@ async function handleResult(
  * @param processedEvent
  */
 
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ */
 export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
