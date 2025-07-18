@@ -17,11 +17,22 @@ import type { Octokit } from 'octokit';
 
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
 
+import { runCodex } from '../client/codex.js';
 import type { ActionConfig } from '../config/config.js';
+
+import {
+  PROGRESS_BAR_BLOCKS,
+  PROGRESS_TITLE,
+  LOADING_PHRASES,
+} from '../constants.js';
 import { captureFileState, detectChanges } from '../file/file.js';
 
 import { extractImageUrls, downloadImages } from '../file/images.js';
+import { maskSensitiveInfo } from '../security/security.js';
+
 import { GitHubError } from '../utils/errors.js';
+
+import type { ProcessedEvent } from './event.js';
 import {
   cloneRepository,
   addEyeReaction,
@@ -32,20 +43,7 @@ import {
   addThumbUpReaction,
   upsertComment,
 } from './github.js';
-
-import type { ProcessedEvent } from './event.js';
-
-import { maskSensitiveInfo } from '../security/security.js';
-
-import { runCodex } from '../client/codex.js';
-
 import type { GitHubEvent } from './github.js';
-
-import {
-  PROGRESS_BAR_BLOCKS,
-  PROGRESS_TITLE,
-  LOADING_PHRASES,
-} from '../constants.js';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
@@ -78,6 +76,58 @@ import {
  * @param repo
  * @param repo.owner
  * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
  */
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
@@ -148,6 +198,40 @@ export { createIssuesFromFeaturePlan } from './createIssues.js';
  * @param str
  */
 
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
 export function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '$\\$&');
 }
@@ -191,6 +275,70 @@ export function escapeRegExp(str: string): string {
  * @param repo.repo
  * @param event
  * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
  */
 export async function createProgressComment(
   octokit: Octokit,
@@ -290,6 +438,76 @@ export async function createProgressComment(
  * @param commentId
  * @param steps
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ */
 export async function updateProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -380,6 +598,68 @@ export async function updateProgressComment(
  * @param progressCommentId
  */
 
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
 async function handleResult(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -555,6 +835,47 @@ async function handleResult(
  * @param processedEvent
  */
 
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
 export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,

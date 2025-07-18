@@ -51,6 +51,76 @@ import { postComment } from './github.js';
  * @param output
  * @param progressCommentId
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ */
 export async function createIssuesFromFeaturePlan(
   octokit: Octokit,
   repo: { owner: string; repo: string },

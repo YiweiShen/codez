@@ -30,6 +30,40 @@ import { toErrorMessage } from '../utils/error.js';
  *
  * @param config
  */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
   const actor = context.actor;
@@ -79,7 +113,67 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
 
 /**
  *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param username
+ */
+
 async function checkUserPermissionGithub(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -128,6 +222,46 @@ async function checkUserPermissionGithub(
  *
  * @param text
  * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
+ * @param text
+ * @param config
+ */
+
+/**
+ *
  */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;

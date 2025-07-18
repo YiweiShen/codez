@@ -29,6 +29,40 @@ import { GitHubError } from '../utils/errors.js';
  * @returns A string tag such as 'feat', 'fix', 'docs', 'styles', or default 'chore'.
  */
 
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
 export function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
   if (/^(add|create|implement|introduce)/.test(cm)) return 'feat';
@@ -38,6 +72,40 @@ export function getBranchType(commitMessage: string): string {
   return 'chore';
 }
 
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -164,7 +232,75 @@ type RepoContext = { owner: string; repo: string };
  * @param event - The AgentEvent indicating pull request or issue context.
  */
 
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
 
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
 export async function cloneRepository(
   workspace: string,
   githubToken: string,
@@ -252,7 +388,40 @@ export async function cloneRepository(
  * @returns An AgentEvent discriminator object, or null if unsupported.
  */
 
+/**
+ *
+ * @param payload
+ */
 
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
 export function getEventType(payload: any): AgentEvent | null {
   if (
     payload.action === 'opened' &&
@@ -319,6 +488,54 @@ export function getEventType(payload: any): AgentEvent | null {
  * @param event
  */
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
 export async function addEyeReaction(
   octokit: Octokit,
   repo: RepoContext,
@@ -378,6 +595,54 @@ export async function addEyeReaction(
  * @param event
  */
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
 export async function removeEyeReaction(
   octokit: Octokit,
   repo: RepoContext,
@@ -474,6 +739,54 @@ export async function removeEyeReaction(
  * @param event
  */
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
 export async function addThumbUpReaction(
   octokit: Octokit,
   repo: RepoContext,
@@ -549,6 +862,40 @@ export async function addThumbUpReaction(
 /**
  *
  * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
  */
 export function extractText(event: GitHubEvent): string | null {
   if (
@@ -630,6 +977,82 @@ export function extractText(event: GitHubEvent): string | null {
  * @param progressCommentId
  */
 
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
 export async function createPullRequest(
   workspace: string,
   octokit: Octokit,
@@ -853,6 +1276,76 @@ export async function createPullRequest(
  * @param output
  * @param progressCommentId
  */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ */
 export async function commitAndPush(
   workspace: string,
   octokit: Octokit,
@@ -1038,6 +1531,58 @@ export async function commitAndPush(
  * @param event
  * @param body
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ */
 export async function postComment(
   octokit: Octokit,
   repo: RepoContext,
@@ -1134,6 +1679,64 @@ export async function postComment(
  * @param commentId
  * @param body
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ */
 export async function upsertComment(
   octokit: Octokit,
   repo: RepoContext,
@@ -1197,7 +1800,67 @@ export async function upsertComment(
 
 /**
  *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
 export async function generatePrompt(
   octokit: Octokit,
   repo: RepoContext,
@@ -1289,7 +1952,53 @@ export async function generatePrompt(
 
 /**
  *
+ * @param octokit
+ * @param repo
+ * @param event
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
 export async function getChangedFiles(
   octokit: Octokit,
   repo: RepoContext,
@@ -1337,7 +2046,53 @@ export async function getChangedFiles(
 
 /**
  *
+ * @param octokit
+ * @param repo
+ * @param event
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
 export async function getContentsData(
   octokit: Octokit,
   repo: RepoContext,
@@ -1384,6 +2139,52 @@ export async function getContentsData(
  * @param octokit
  * @param repo
  * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
  */
 async function getIssueData(
   octokit: Octokit,
@@ -1483,6 +2284,58 @@ async function getIssueData(
  * @param pullNumber
  * @param targetCommentId
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ * @param targetCommentId
+ */
+
+/**
+ *
+ */
 async function getPullRequestReviewCommentsData(
   octokit: Octokit,
   repo: RepoContext,
@@ -1571,6 +2424,52 @@ async function getPullRequestReviewCommentsData(
  * @param repo
  * @param pullNumber
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param pullNumber
+ */
+
+/**
+ *
+ */
 async function getPullRequestData(
   octokit: Octokit,
   repo: RepoContext,
@@ -1657,7 +2556,39 @@ async function getPullRequestData(
 
 /**
  *
+ * @param output
  */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
 function truncateOutput(output: string): string {
   if (output.length > 60000) {
     core.warning(`Output exceeds 60000 characters, truncating...`);

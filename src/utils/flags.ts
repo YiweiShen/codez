@@ -3,14 +3,19 @@
  *
  * Provides functions to parse flags and return remaining content.
  */
+
 export interface ParsedFlags {
+
   /**
    * Map of flag names to boolean indicating presence.
    */
+
   flags: Record<string, boolean>;
+
   /**
    * Remaining input string after removing flags.
    */
+
   rest: string;
 }
 
@@ -19,6 +24,46 @@ export interface ParsedFlags {
  * @param {string} input - The input string containing flags and content.
  * @param {string[]} flagNames - Array of flag names (without leading dashes) to parse.
  * @returns {ParsedFlags} An object with flags map and remaining content string.
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
  */
 export function parseFlags(input: string, flagNames: string[]): ParsedFlags {
   const tokens = input.split(/\s+/).filter(Boolean);

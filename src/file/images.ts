@@ -35,6 +35,40 @@ const htmlImageRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
  *
  * @param text
  */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
   let match: RegExpExecArray | null;
@@ -72,6 +106,46 @@ export function extractImageUrls(text: string): string[] {
  *
  * @param urls
  * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
+ * @param urls
+ * @param downloadDir
+ */
+
+/**
+ *
  */
 export async function downloadImages(
   urls: string[],
@@ -135,6 +209,47 @@ export async function downloadImages(
  * @param dest
  */
 
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
+
+/**
+ *
+ * @param url
+ * @param dest
+ */
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then((response) => {
     return new Promise<void>((resolve, reject) => {

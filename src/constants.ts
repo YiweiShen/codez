@@ -14,6 +14,7 @@ export const PROGRESS_BAR_BLOCKS = 20;
 export const PROGRESS_TITLE = '**🚀 Codez Progress**';
 
 /** Loading phrases to display below the progress bar. */
+
 export const LOADING_PHRASES = [
   'Decrypting punchlines with 256-bit humor...',
   'Loading… the progress bar is in another castle.',
