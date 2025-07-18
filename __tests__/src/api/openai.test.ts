@@ -16,7 +16,7 @@ jest.unstable_mockModule('openai', () => ({
 }));
 
 // Import after mocking to ensure MockOpenAI is used
-const { getOpenAIClient, defaultModel, generateCommitMessage } = await import(
+const { getOpenAIClient, generateCommitMessage } = await import(
   '../../src/api/openai.js'
 );
 
