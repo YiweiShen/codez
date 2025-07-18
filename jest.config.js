@@ -15,7 +15,7 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(execa|@actions)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(execa|@actions|octokit)/)'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },

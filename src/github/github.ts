@@ -146,7 +146,7 @@ export type GitHubPullRequest = {
 };
 
 export type GithubContentsData = {
-  content: { number: number; title: string; body: string; login: string };
+  content: { number?: number; title: string; body: string; login: string };
   comments: { body: string; login: string }[];
 };
 
@@ -427,32 +427,6 @@ export async function removeEyeReaction(
           });
           core.info(
             `Removed eye reaction from comment on issue/PR #${event.issue.number}`,
-          );
-          break;
-        }
-      }
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'pull_request' in event
-    ) {
-      const reactions =
-        await octokit.rest.reactions.listForPullRequestReviewComment({
-          ...repo,
-          comment_id: event.comment.id,
-        });
-      for (const reaction of reactions.data) {
-        if (
-          reaction.content === 'eyes' &&
-          reaction.user?.login === 'github-actions[bot]'
-        ) {
-          await octokit.rest.reactions.deleteForPullRequestReviewComment({
-            ...repo,
-            comment_id: event.comment.id,
-            reaction_id: reaction.id,
-          });
-          core.info(
-            `Removed eye reaction from review comment on PR #${event.pull_request.number}`,
           );
           break;
         }

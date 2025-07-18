@@ -114,7 +114,7 @@ async function fetchLatestFailedWorkflowLogs(
     if (!entries || entries.length === 0) {
       return 'No log files found in the logs archive.';
     }
-    const logs: string[] = entries.map((entry) => {
+    const logs: string[] = entries.map((entry: any) => {
       const name = entry.entryName;
       const content = entry.getData().toString('utf8');
       return `=== ${name} ===\n${content}`;
@@ -199,7 +199,6 @@ export async function createProgressComment(
   steps: string[],
 ): Promise<number> {
   // Build initial progress display with emoji title, bar, and unchecked steps
-  const total = steps.length;
   const barBlocks = PROGRESS_BAR_BLOCKS;
   const emptyBar = '░'.repeat(barBlocks);
   const title = PROGRESS_TITLE;
