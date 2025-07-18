@@ -8,7 +8,7 @@ export default {
   coverageDirectory: 'coverage',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.tsx?$': [
+    '^.+\.[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
