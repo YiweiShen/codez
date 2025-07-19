@@ -164,7 +164,6 @@ type RepoContext = { owner: string; repo: string };
  * @param event - The AgentEvent indicating pull request or issue context.
  */
 
-
 export async function cloneRepository(
   workspace: string,
   githubToken: string,
@@ -251,7 +250,6 @@ export async function cloneRepository(
  * @param payload - The parsed GitHub event JSON.
  * @returns An AgentEvent discriminator object, or null if unsupported.
  */
-
 
 export function getEventType(payload: any): AgentEvent | null {
   if (
