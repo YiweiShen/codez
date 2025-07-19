@@ -20,21 +20,6 @@ const htmlImageRegex = /<img[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g;
  * @param text - Text to search for image URLs.
  * @returns Array of unique image URLs.
  */
-
-/**
- *
- * @param text
- */
-
-/**
- *
- * @param text
- */
-
-/**
- *
- * @param text
- */
 export function extractImageUrls(text: string): string[] {
   const urls: string[] = [];
   let match: RegExpExecArray | null;
@@ -54,24 +39,6 @@ export function extractImageUrls(text: string): string[] {
  * @param urls - Array of image URLs to download.
  * @param downloadDir - Directory path where images will be saved.
  * @returns Array of relative file paths for downloaded images.
- */
-
-/**
- *
- * @param urls
- * @param downloadDir
- */
-
-/**
- *
- * @param urls
- * @param downloadDir
- */
-
-/**
- *
- * @param urls
- * @param downloadDir
  */
 export async function downloadImages(
   urls: string[],
@@ -116,25 +83,6 @@ export async function downloadImages(
  * @param dest - Local filesystem path where the file will be written.
  * @returns Promise that resolves once the file has been fully written.
  */
-
-/**
- *
- * @param url
- * @param dest
- */
-
-/**
- *
- * @param url
- * @param dest
- */
-
-/**
- *
- * @param url
- * @param dest
- */
-
 function downloadFile(url: string, dest: string): Promise<void> {
   return axios.get(url, { responseType: 'stream' }).then((response) => {
     return new Promise<void>((resolve, reject) => {
