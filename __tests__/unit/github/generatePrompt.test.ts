@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
 
-import { generatePrompt } from '../../../src/github/github.ts';
+import { generatePrompt } from '../../../src/github/github';
 
 // We will spy on these in‐module helpers
-import * as githubModule from '../../../src/github/github.ts';
+import * as githubModule from '../../../src/github/github';
 
 describe('generatePrompt', () => {
   const fakeOctokit = {} as any;

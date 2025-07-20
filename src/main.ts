@@ -6,14 +6,14 @@
 
 import * as core from '@actions/core';
 
-import { getConfig } from './config/config.ts';
-import { getOpenAIClient } from './api/openai.ts';
-import { runAction } from './github/action.ts';
+import { getConfig } from './config/config';
+import { getOpenAIClient } from './api/openai';
+import { runAction } from './github/action';
 
-import { processEvent } from './github/event.ts';
-import { postComment } from './github/github.ts';
+import { processEvent } from './github/event';
+import { postComment } from './github/github';
 
-import { checkPermission } from './security/security.ts';
+import { checkPermission } from './security/security';
 
 /**
  * Orchestrate the action's workflow.

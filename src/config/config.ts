@@ -9,10 +9,10 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 
-import { defaultModel } from '../api/openai.ts';
-import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
+import { defaultModel } from '../api/openai';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants';
 
-import { ConfigError } from '../utils/errors.ts';
+import { ConfigError } from '../utils/errors';
 import { z } from 'zod';
 
 /**

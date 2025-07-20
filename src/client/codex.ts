@@ -8,8 +8,8 @@ import * as core from '@actions/core';
 
 import { execa } from 'execa';
 
-import type { ActionConfig } from '../config/config.ts';
-import { CliError, TimeoutError } from '../utils/errors.ts';
+import type { ActionConfig } from '../config/config';
+import { CliError, TimeoutError } from '../utils/errors';
 
 /**
  * Invoke the Codex CLI with the specified parameters.

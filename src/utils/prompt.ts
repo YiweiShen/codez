@@ -9,6 +9,6 @@
  * Centralized flag parsing logic moved to src/utils/flags.ts.
  */
 
-import { extractPromptFlags, PromptFlagOptions } from './flags.ts';
+import { extractPromptFlags, PromptFlagOptions } from './flags';
 
 export { extractPromptFlags, PromptFlagOptions };

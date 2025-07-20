@@ -8,9 +8,9 @@ import * as core from '@actions/core';
 import OpenAI from 'openai';
 import type { ClientOptions } from 'openai';
 
-import type { ActionConfig } from '../config/config.ts';
-import { conventionalCommitsSystemPrompt } from '../config/prompts.ts';
-import { ParseError } from '../utils/errors.ts';
+import type { ActionConfig } from '../config/config';
+import { conventionalCommitsSystemPrompt } from '../config/prompts';
+import { ParseError } from '../utils/errors';
 
 /**
  * Default model identifier for OpenAI provider.

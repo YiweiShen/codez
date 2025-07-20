@@ -16,9 +16,9 @@ import * as core from '@actions/core';
 import fg from 'fast-glob';
 import ignore from 'ignore';
 
-import { toErrorMessage } from '../utils/error.ts';
+import { toErrorMessage } from '../utils/error';
 
-import { DEFAULT_IGNORE_PATTERNS } from './constants.ts';
+import { DEFAULT_IGNORE_PATTERNS } from './constants';
 
 /**
  * Calculate the SHA-256 hash of the specified file.

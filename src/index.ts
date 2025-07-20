@@ -3,7 +3,7 @@
  * This module imports and invokes the main orchestration logic.
  */
 
-import { run } from './main.ts';
+import { run } from './main';
 
 // Invoke the main execution workflow
 run();

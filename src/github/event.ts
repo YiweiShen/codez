@@ -9,18 +9,18 @@ import { promises as fs } from 'fs';
 
 import * as core from '@actions/core';
 
-import type { ActionConfig } from '../config/config.ts';
+import type { ActionConfig } from '../config/config';
 
-import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants';
 
-import { toErrorMessage } from '../utils/error.ts';
+import { toErrorMessage } from '../utils/error';
 
-import { ParseError } from '../utils/errors.ts';
-import { extractPromptFlags } from '../utils/prompt.ts';
+import { ParseError } from '../utils/errors';
+import { extractPromptFlags } from '../utils/prompt';
 
-import { getEventType, extractText } from './github.ts';
+import { getEventType, extractText } from './github';
 
-import type { AgentEvent } from './github.ts';
+import type { AgentEvent } from './github';
 
 /**
  * Represents a normalized event to trigger the Codex workflow.

@@ -7,8 +7,8 @@ import * as core from '@actions/core';
 
 import type { Octokit } from 'octokit';
 
-import type { ActionConfig } from '../config/config.ts';
-import { toErrorMessage } from '../utils/error.ts';
+import type { ActionConfig } from '../config/config';
+import { toErrorMessage } from '../utils/error';
 
 /**
  * Check if the user has appropriate permissions to run the action.

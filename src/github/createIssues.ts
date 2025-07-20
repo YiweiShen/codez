@@ -5,8 +5,8 @@
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 
-import type { GitHubEvent } from './github.ts';
-import { postComment } from './github.ts';
+import type { GitHubEvent } from './github';
+import { postComment } from './github';
 
 /**
  * Creates GitHub issues based on a JSON feature plan output.

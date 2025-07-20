@@ -15,13 +15,13 @@ import axios from 'axios';
 import { execa } from 'execa';
 import type { Octokit } from 'octokit';
 
-import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.ts';
+import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai';
 
-import type { ActionConfig } from '../config/config.ts';
-import { captureFileState, detectChanges } from '../file/file.ts';
+import type { ActionConfig } from '../config/config';
+import { captureFileState, detectChanges } from '../file/file';
 
-import { extractImageUrls, downloadImages } from '../file/images.ts';
-import { GitHubError } from '../utils/errors.ts';
+import { extractImageUrls, downloadImages } from '../file/images';
+import { GitHubError } from '../utils/errors';
 import {
   cloneRepository,
   addEyeReaction,
@@ -33,19 +33,19 @@ import {
   upsertComment,
 } from './github.ts';
 
-import type { ProcessedEvent } from './event.ts';
+import type { ProcessedEvent } from './event';
 
-import { maskSensitiveInfo } from '../security/security.ts';
+import { maskSensitiveInfo } from '../security/security';
 
-import { runCodex } from '../client/codex.ts';
+import { runCodex } from '../client/codex';
 
-import type { GitHubEvent } from './github.ts';
+import type { GitHubEvent } from './github';
 
 import {
   PROGRESS_BAR_BLOCKS,
   PROGRESS_TITLE,
   LOADING_PHRASES,
-} from '../constants.ts';
+} from '../constants';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
