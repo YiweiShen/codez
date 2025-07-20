@@ -1,3 +1,6 @@
+/**
+ * Utilities for retrieving changed files and content data for GitHub events.
+ */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { RepoContext, AgentEvent, GithubContentsData } from './types';
@@ -5,6 +8,10 @@ import { GitHubError } from '../utils/errors';
 
 /**
  * Get the list of changed files for a pull request comment event.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - AgentEvent describing the GitHub comment event.
+ * @returns Promise resolving to an array of changed file paths.
  */
 export async function getChangedFiles(
   octokit: Octokit,
@@ -29,7 +36,11 @@ export async function getChangedFiles(
 }
 
 /**
- * Retrieve content and comments for an issue or pull request.
+ * Retrieve issue or pull request content and associated comments.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - AgentEvent triggering the data retrieval.
+ * @returns Promise resolving to content and comments data.
  */
 export async function getContentsData(
   octokit: Octokit,

@@ -1,3 +1,6 @@
+/**
+ * Git operations for cloning repositories, creating pull requests, and pushing commits.
+ */
 import { promises as fs } from 'fs';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
@@ -12,7 +15,14 @@ import { postComment } from './comments';
 import { toErrorMessage } from '../utils/error';
 
 /**
- * Clone the target repository and checkout the appropriate branch based on event.
+ * Clone the target repository and checkout the appropriate branch based on the given event.
+ * @param workspace - Directory path where the repository will be cloned.
+ * @param githubToken - GitHub token used for authenticated clone.
+ * @param repo - Repository owner and name context.
+ * @param context - GitHub context payload with repository information.
+ * @param octokit - Authenticated Octokit client.
+ * @param event - Normalized AgentEvent triggering the clone operation.
+ * @returns Promise that resolves when the repository is cloned and checked out.
  */
 export async function cloneRepository(
   workspace: string,
@@ -83,7 +93,15 @@ export async function cloneRepository(
 }
 
 /**
- * Creates a Pull Request with changes and updates or creates a comment.
+ * Creates a pull request with committed changes and updates or creates a comment for progress.
+ * @param workspace - Directory path of the local repository.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - GitHubEvent that triggered the pull request creation.
+ * @param commitMessage - Commit message to use for the changes.
+ * @param output - Text content for the pull request body.
+ * @param progressCommentId - Optional ID of a progress comment to update.
+ * @returns Promise that resolves when the pull request is created and comment updated.
  */
 export async function createPullRequest(
   workspace: string,
@@ -252,7 +270,15 @@ export async function createPullRequest(
 }
 
 /**
- * Commits and pushes changes to the existing PR branch.
+ * Commits and pushes changes to the existing pull request branch and updates comments.
+ * @param workspace - Directory path of the local repository.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - GitHubEvent that triggered the commit and push operation.
+ * @param commitMessage - Commit message to use.
+ * @param output - Text content for updating comments with the latest output.
+ * @param progressCommentId - Optional ID of a progress comment to update.
+ * @returns Promise that resolves when commit and push operations complete.
  */
 export async function commitAndPush(
   workspace: string,

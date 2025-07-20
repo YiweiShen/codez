@@ -1,3 +1,6 @@
+/**
+ * Utilities for posting and updating comments on GitHub issues and pull requests.
+ */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { RepoContext, GitHubEvent } from './types';
@@ -5,7 +8,12 @@ import { GitHubError } from '../utils/errors';
 import { truncateOutput } from './utils';
 
 /**
- * Posts a comment to the issue or PR.
+ * Posts a comment to an issue or pull request.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - The GitHubEvent triggering the comment.
+ * @param body - Content of the comment.
+ * @returns Promise that resolves when the comment is posted.
  */
 export async function postComment(
   octokit: Octokit,
@@ -60,8 +68,13 @@ export async function postComment(
 }
 
 /**
- * Update or create a comment: if commentId is provided, update existing comment,
- * otherwise create a new comment.
+ * Creates or updates a comment based on the presence of commentId.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - The GitHubEvent triggering the upsert.
+ * @param commentId - ID of the comment to update, or undefined to create a new one.
+ * @param body - Content of the comment.
+ * @returns Promise that resolves when the comment is upserted.
  */
 export async function upsertComment(
   octokit: Octokit,
