@@ -135,11 +135,25 @@ export async function removeEyeReaction(
           reaction.content === 'eyes' &&
           reaction.user?.login === 'github-actions[bot]'
         ) {
-          await octokit.rest.reactions.deleteForPullRequestReviewComment({
-            ...repo,
-            comment_id: event.comment.id,
-            reaction_id: reaction.id,
-          });
+          if (
+            typeof octokit.rest.reactions.deleteForPullRequestReviewComment ===
+            'function'
+          ) {
+            await octokit.rest.reactions.deleteForPullRequestReviewComment({
+              ...repo,
+              comment_id: event.comment.id,
+              reaction_id: reaction.id,
+            });
+          } else {
+            await octokit.request(
+              'DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}',
+              {
+                ...repo,
+                comment_id: event.comment.id,
+                reaction_id: reaction.id,
+              },
+            );
+          }
           core.info(
             `Removed eye reaction from review comment on PR #${event.pull_request.number}`,
           );
