@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type { GitHubEvent } from './github';
+import type { GitHubEvent } from './types';
 import { GitHubError } from '../utils/errors';
 import {
   PROGRESS_BAR_BLOCKS,

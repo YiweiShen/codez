@@ -7,7 +7,8 @@ import type { ActionConfig } from '../config/config';
 import type { ProcessedEvent } from './event';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai';
 import { GitHubError } from '../utils/errors';
-import { createPullRequest, commitAndPush, upsertComment } from './github';
+import { createPullRequest, commitAndPush } from './git';
+import { upsertComment } from './comments';
 import { detectChanges } from '../file/file';
 
 /**
