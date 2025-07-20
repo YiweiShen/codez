@@ -13,6 +13,7 @@ import { defaultModel } from '../api/openai.js';
 import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
 
 import { ConfigError } from '../utils/errors.js';
+import { z } from 'zod';
 
 /**
  * Defines configuration inputs for the GitHub Action.
@@ -75,6 +76,32 @@ export interface ActionConfig {
 
   fetch: boolean;
 }
+
+// Zod schema for validating action configuration
+const actionConfigSchema = z.object({
+  githubToken: z.string().min(1, 'GitHub token is required'),
+  eventPath: z.string().min(1, 'GitHub event path is required'),
+  workspace: z.string().min(1, 'Workspace path is required'),
+  timeoutSeconds: z.number().int().positive('Timeout must be a positive integer'),
+  octokit: z.any(),
+  context: z.any(),
+  repo: z.object({
+    owner: z.string().min(1, 'Repository owner is required'),
+    repo: z.string().min(1, 'Repository name is required'),
+  }),
+  openaiApiKey: z.string().min(1, 'OpenAI API key is required'),
+  openaiBaseUrl: z.union([
+    z.string().url({ message: 'Invalid URL for openai-base-url' }),
+    z.literal(''),
+  ]),
+  openaiModel: z.string().min(1, 'OpenAI model is required'),
+  directPrompt: z.string(),
+  triggerPhrase: z.string().min(1, 'Trigger phrase is required'),
+  assigneeTrigger: z.array(z.string()),
+  codexEnv: z.record(z.string(), z.string()),
+  images: z.array(z.string()),
+  fetch: z.boolean(),
+});
 
 /**
  * Parse custom environment variables input from YAML mapping or comma-separated key=value pairs.
@@ -194,7 +221,7 @@ export function getConfig(): ActionConfig {
     throw new ConfigError('GitHub workspace path is missing.');
   }
 
-  return {
+  const rawConfig = {
     githubToken,
     eventPath,
     workspace,
@@ -212,5 +239,15 @@ export function getConfig(): ActionConfig {
     codexEnv,
     images,
     fetch,
-  };
+  } as const;
+
+  const parsed = actionConfigSchema.safeParse(rawConfig);
+  if (!parsed.success) {
+    const issues = parsed.error.errors
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join('; ');
+    throw new ConfigError(`Invalid configuration: ${issues}`);
+  }
+
+  return parsed.data;
 }
