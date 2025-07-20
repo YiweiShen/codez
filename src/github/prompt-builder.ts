@@ -8,7 +8,7 @@ import type { ActionConfig } from '../config/config';
 import type { ProcessedEvent } from './event';
 import { GitHubError } from '../utils/errors';
 import { extractImageUrls, downloadImages } from '../file/images';
-import { generatePrompt } from './github';
+import { generatePrompt } from './prompt';
 import { escapeRegExp } from './progress';
 
 /**

@@ -11,7 +11,7 @@ import { getOpenAIClient } from './api/openai';
 import { runAction } from './github/action';
 
 import { processEvent } from './github/event';
-import { postComment } from './github/github';
+import { postComment } from './github/comments';
 
 import { checkPermission } from './security/security';
 

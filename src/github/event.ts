@@ -18,8 +18,8 @@ import { toErrorMessage } from '../utils/error';
 import { ParseError } from '../utils/errors';
 import { extractPromptFlags } from '../utils/prompt';
 
-import type { AgentEvent } from './github';
-import { getEventType, extractText } from './github';
+import type { AgentEvent } from './types';
+import { getEventType, extractText } from './event-utils';
 import { z } from 'zod';
 
 /**
