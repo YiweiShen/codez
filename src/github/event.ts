@@ -19,6 +19,15 @@ import { ParseError } from '../utils/errors.js';
 import { extractPromptFlags } from '../utils/prompt.js';
 
 import { getEventType, extractText } from './github.js';
+import { z } from 'zod';
+
+/**
+ * Schema for a generic object record from JSON.parse.
+ */
+const RawRecordSchema = z.unknown().refine(
+  (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
+  { message: 'Expected JSON object' },
+);
 
 import type { AgentEvent } from './github.js';
 
@@ -67,13 +76,21 @@ export interface ProcessedEvent {
  * @throws If the file cannot be read or parsed.
  */
 
+/**
+ * Load and parse the event payload from the specified file path, validating its shape.
+ * @param eventPath - Path to the event payload file.
+ * @returns Parsed event payload object as a generic record.
+ * @throws If the file cannot be read, parsed, or validated.
+ */
 export async function loadEventPayload(
   eventPath: string,
 ): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(eventPath, 'utf8');
-    // JSON.parse returns any; cast to a generic object to avoid untyped any
-    return JSON.parse(content) as Record<string, unknown>;
+    const raw = JSON.parse(content);
+    // Validate that the parsed content is an object
+    const parsed = RawRecordSchema.parse(raw);
+    return parsed;
   } catch (error) {
     throw new ParseError(
       `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(
