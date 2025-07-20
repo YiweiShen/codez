@@ -1,8 +1,10 @@
 /**
  * Reaction utilities for adding or removing reactions on GitHub issues and comments.
  */
+
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
+
 import type { RepoContext, GitHubEvent } from './types';
 
 /**
@@ -11,6 +13,52 @@ import type { RepoContext, GitHubEvent } from './types';
  * @param repo - Repository owner and name context.
  * @param event - GitHubEvent describing the issue or comment.
  * @returns Promise that resolves when the reaction is added.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
  */
 export async function addEyeReaction(
   octokit: Octokit,
@@ -67,6 +115,52 @@ export async function addEyeReaction(
  * @param repo - Repository owner and name context.
  * @param event - GitHubEvent describing the issue or comment.
  * @returns Promise that resolves when the reaction is removed.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
  */
 export async function removeEyeReaction(
   octokit: Octokit,
@@ -137,6 +231,52 @@ export async function removeEyeReaction(
  * @param repo - Repository owner and name context.
  * @param event - GitHubEvent describing the issue or comment.
  * @returns Promise that resolves when the reaction is added.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
  */
 export async function addThumbUpReaction(
   octokit: Octokit,

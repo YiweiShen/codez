@@ -9,6 +9,7 @@ import * as core from '@actions/core';
 import { execa } from 'execa';
 
 import type { ExecaError } from 'execa';
+
 import type { ActionConfig } from '../config/config';
 import { CliError, TimeoutError } from '../utils/errors';
 
@@ -22,6 +23,68 @@ import { CliError, TimeoutError } from '../utils/errors';
  * @returns A promise resolving to the formatted output from Codex.
  */
 
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
+
+/**
+ *
+ * @param workspace
+ * @param config
+ * @param prompt
+ * @param timeout
+ * @param images
+ */
 export async function runCodex(
   workspace: string,
   config: ActionConfig,

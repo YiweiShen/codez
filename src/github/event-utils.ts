@@ -1,13 +1,49 @@
 /**
  * Utility functions for normalizing and extracting data from GitHub webhook events.
  */
+
 import { DEFAULT_TRIGGER_PHRASE } from '../constants';
+
 import type { AgentEvent, GitHubEvent } from './types';
 
 /**
  * Determine the normalized AgentEvent type from a raw GitHub webhook payload.
  * @param payload - Raw webhook event payload.
  * @returns AgentEvent object if recognized, otherwise null.
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
+ * @param payload
+ */
+
+/**
+ *
  */
 export function getEventType(payload: unknown): AgentEvent | null {
   if (typeof payload !== 'object' || payload === null) {
@@ -73,6 +109,40 @@ export function getEventType(payload: unknown): AgentEvent | null {
  * Extracts the relevant text (title, body, or comment) from the GitHubEvent.
  * @param event - GitHubEvent containing issue or pull request data.
  * @returns Extracted text content or null if unavailable.
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
+ * @param event
+ */
+
+/**
+ *
  */
 export function extractText(event: GitHubEvent): string | null {
   if (

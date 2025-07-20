@@ -1,18 +1,21 @@
 /**
  * Manage action results: commit changes, create pull requests, or post comments.
  */
+
 import { promises as fs } from 'fs';
 import path from 'path';
+
 import * as core from '@actions/core';
 import { execa } from 'execa';
 
-import type { ActionConfig } from '../config/config';
-import type { ProcessedEvent } from './event';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai';
-import { GitHubError } from '../utils/errors';
-import { createPullRequest, commitAndPush } from './git';
+
+import type { ActionConfig } from '../config/config';
+
 import { upsertComment } from './comments';
-import { detectChanges } from '../file/file';
+
+import type { ProcessedEvent } from './event';
+import { createPullRequest, commitAndPush } from './git';
 
 /**
  * Process and publish the action's results: push commits, open PR, or post comments.
@@ -22,6 +25,64 @@ import { detectChanges } from '../file/file';
  * @param changedFiles - List of relative file paths that were modified.
  * @param progressCommentId - Optional ID of the progress comment to update.
  * @returns Promise that resolves when result processing is complete.
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ * @param output
+ * @param changedFiles
+ * @param progressCommentId
+ */
+
+/**
+ *
  */
 export async function handleResult(
   config: ActionConfig,

@@ -5,18 +5,88 @@
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 
-import type { GitHubEvent } from './types';
 import { postComment } from './comments';
+
+import type { GitHubEvent } from './types';
 
 /**
  * Creates GitHub issues based on a JSON feature plan output.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and repository name.
+ * @param repo.owner
  * @param event - GitHubEvent triggering issue creation.
+ * @param repo.repo
  * @param output - JSON string containing the feature plan.
  * @param progressCommentId - Optional ID of a progress comment to update.
  * @returns Promise that resolves when issues are created.
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param output
+ * @param progressCommentId
+ */
+
 export async function createIssuesFromFeaturePlan(
   octokit: Octokit,
   repo: { owner: string; repo: string },

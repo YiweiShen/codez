@@ -8,6 +8,40 @@
  * @param error - The caught error or value.
  * @returns The error message string.
  */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ */
 export function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -19,6 +53,40 @@ export function toErrorMessage(error: unknown): string {
  * Safely extracts the stack trace from an unknown error object.
  * @param error - The caught error or value.
  * @returns The error stack trace or undefined if unavailable.
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
+ * @param error
+ */
+
+/**
+ *
  */
 export function toErrorStack(error: unknown): string | undefined {
   if (error instanceof Error) {

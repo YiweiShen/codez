@@ -3,14 +3,19 @@
  *
  * Provides functions to parse flags and return remaining content.
  */
+
 export interface ParsedFlags {
+
   /**
    * Map of flag names to boolean indicating presence.
    */
+
   flags: Record<string, boolean>;
+
   /**
    * Remaining input string after removing flags.
    */
+
   rest: string;
 }
 
@@ -19,6 +24,46 @@ export interface ParsedFlags {
  * @param {string} input - The input string containing flags and content.
  * @param {string[]} flagNames - Array of flag names (without leading dashes) to parse.
  * @returns {ParsedFlags} An object with flags map and remaining content string.
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
+ * @param input
+ * @param flagNames
+ */
+
+/**
+ *
  */
 export function parseFlags(input: string, flagNames: string[]): ParsedFlags {
   const tokens = input.split(/\s+/).filter(Boolean);
@@ -43,18 +88,31 @@ export function parseFlags(input: string, flagNames: string[]): ParsedFlags {
 /**
  * Options for prompt flag parsing.
  */
+
 export interface PromptFlagOptions {
+
   /** Include full conversation history */
+
   includeFullHistory: boolean;
+
   /** Create issues based on the output */
+
   createIssues: boolean;
+
   /** Do not open a pull request */
+
   noPr: boolean;
+
   /** Include latest failed CI build logs */
+
   includeFixBuild: boolean;
+
   /** Fetch and include contents from known URLs */
+
   includeFetch: boolean;
+
   /** Remaining prompt text after flags */
+
   prompt: string;
 }
 
@@ -63,6 +121,46 @@ export interface PromptFlagOptions {
  * @param input The raw input string containing flags and prompt text.
  * @param isDirect Whether this is a direct prompt (true) or trigger-based (false).
  * @returns Parsed prompt options and cleaned prompt text.
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
+ * @param input
+ * @param isDirect
+ */
+
+/**
+ *
  */
 export function extractPromptFlags(
   input: string,

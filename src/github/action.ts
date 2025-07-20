@@ -1,6 +1,7 @@
 /**
  * Public API entrypoints for GitHub action utilities.
  */
+
 export {
   escapeRegExp,
   createProgressComment,

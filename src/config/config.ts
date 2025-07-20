@@ -8,16 +8,16 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
+import { z } from 'zod';
 
 import { defaultModel } from '../api/openai';
+
 import {
   DEFAULT_TRIGGER_PHRASE,
   DEFAULT_TIMEOUT_SECONDS,
   DEFAULT_WORKSPACE_PATH,
 } from '../constants';
-
 import { ConfigError } from '../utils/errors';
-import { z } from 'zod';
 
 /**
  * Defines configuration inputs for the GitHub Action.
@@ -28,15 +28,19 @@ import { z } from 'zod';
 export interface ActionConfig {
   githubToken: string;
   eventPath: string;
+
   /**
    * GitHub workspace path.
    * @default DEFAULT_WORKSPACE_PATH
    */
+
   workspace: string;
+
   /**
    * Timeout in seconds for GitHub Action operations.
    * @default DEFAULT_TIMEOUT_SECONDS
    */
+
   timeoutSeconds: number;
   octokit: Octokit;
   context: typeof github.context;
@@ -124,6 +128,40 @@ const actionConfigSchema = z.object({
  * @returns A map of environment variable names to values.
  */
 
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
 export function parseKeyValueMap(input: string): Record<string, string> {
   const result: Record<string, string> = {};
   if (!input) return result;
@@ -165,6 +203,40 @@ export function parseKeyValueMap(input: string): Record<string, string> {
  * @returns Array of trimmed non-empty strings.
  */
 
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
+
+/**
+ *
+ * @param input
+ */
 export function parseStringList(input: string): string[] {
   if (!input) {
     return [];
@@ -184,6 +256,46 @@ export function parseStringList(input: string): string[] {
  * Gets and validates the inputs for the GitHub Action.
  * @returns ActionConfig object
  * @throws Error if required inputs are missing
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
  */
 
 export function getConfig(): ActionConfig {

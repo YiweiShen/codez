@@ -1,18 +1,21 @@
 /**
  * Git operations for cloning repositories, creating pull requests, and pushing commits.
  */
+
 import { promises as fs } from 'fs';
+
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { execa } from 'execa';
 import type { Octokit } from 'octokit';
 
-import type { RepoContext, AgentEvent, GitHubEvent } from './types';
-import { GitHubError } from '../utils/errors';
-import { getBranchType, slugify, truncateOutput } from './utils';
-import { removeEyeReaction, addThumbUpReaction } from './reactions';
-import { postComment } from './comments';
 import { toErrorMessage } from '../utils/error';
+import { GitHubError } from '../utils/errors';
+
+import { postComment } from './comments';
+import { removeEyeReaction, addThumbUpReaction } from './reactions';
+import type { RepoContext, AgentEvent } from './types';
+import { getBranchType, slugify, truncateOutput } from './utils';
 
 /**
  * Clone the target repository and checkout the appropriate branch based on the given event.
@@ -23,6 +26,70 @@ import { toErrorMessage } from '../utils/error';
  * @param octokit - Authenticated Octokit client.
  * @param event - Normalized AgentEvent triggering the clone operation.
  * @returns Promise that resolves when the repository is cloned and checked out.
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
+ * @param workspace
+ * @param githubToken
+ * @param repo
+ * @param context
+ * @param octokit
+ * @param event
+ */
+
+/**
+ *
  */
 export async function cloneRepository(
   workspace: string,
@@ -102,6 +169,76 @@ export async function cloneRepository(
  * @param output - Text content for the pull request body.
  * @param progressCommentId - Optional ID of a progress comment to update.
  * @returns Promise that resolves when the pull request is created and comment updated.
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
  */
 export async function createPullRequest(
   workspace: string,
@@ -279,6 +416,76 @@ export async function createPullRequest(
  * @param output - Text content for updating comments with the latest output.
  * @param progressCommentId - Optional ID of a progress comment to update.
  * @returns Promise that resolves when commit and push operations complete.
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
+ * @param workspace
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commitMessage
+ * @param output
+ * @param progressCommentId
+ */
+
+/**
+ *
  */
 export async function commitAndPush(
   workspace: string,

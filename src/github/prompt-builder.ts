@@ -1,26 +1,85 @@
 /**
  * Builds the AI prompt by optionally fetching URLs, logs, and images based on flags.
  */
-import * as core from '@actions/core';
-import axios from 'axios';
-import AdmZip from 'adm-zip';
+
 import path from 'path';
 
+import * as core from '@actions/core';
+
+import AdmZip from 'adm-zip';
+import axios from 'axios';
+
 import type { Octokit } from 'octokit';
+
 import type { ActionConfig } from '../config/config';
-import type { ProcessedEvent } from './event';
-import { GitHubError } from '../utils/errors';
 import { extractImageUrls, downloadImages } from '../file/images';
-import { generatePrompt } from './prompt';
+
+import { GitHubError } from '../utils/errors';
+
+import type { ProcessedEvent } from './event';
+
 import { escapeRegExp } from './progress';
+
+import { generatePrompt } from './prompt';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
+ * @param repo.owner
+ * @param repo.repo
  * @returns Promise resolving to combined log contents as a string.
  * @throws GitHubError if the logs cannot be fetched or parsed.
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ */
+
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -93,6 +152,46 @@ async function fetchLatestFailedWorkflowLogs(
  * @param config - The ActionConfig containing context and clients.
  * @param processedEvent - The normalized event data triggering the action.
  * @returns The final prompt string and a list of downloaded image file paths.
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
  */
 export async function preparePrompt(
   config: ActionConfig,

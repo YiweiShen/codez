@@ -25,6 +25,7 @@ Provide only the single-line commit header as the complete output.`;
  */
 
 export interface PromptBuilderConfig {
+
   /** Label used for the title section */
 
   titleLabel: string;

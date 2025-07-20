@@ -40,6 +40,40 @@ import { DEFAULT_IGNORE_PATTERNS } from './constants';
  *
  * @param filePath
  */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ */
 async function calculateFileHash(filePath: string): Promise<string> {
   try {
     const fileBuffer = await fs.readFile(filePath);
@@ -76,6 +110,40 @@ async function calculateFileHash(filePath: string): Promise<string> {
  * @param filePath
  */
 
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
+
+/**
+ *
+ * @param filePath
+ */
 function pathExists(filePath: string): Promise<boolean> {
   return fs
     .access(filePath)
@@ -102,6 +170,40 @@ function pathExists(filePath: string): Promise<boolean> {
 /**
  *
  * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
+ * @param workspace
+ */
+
+/**
+ *
  */
 export async function captureFileState(
   workspace: string,
@@ -202,6 +304,46 @@ export async function captureFileState(
  *
  * @param workspace
  * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
+ * @param workspace
+ * @param originalState
+ */
+
+/**
+ *
  */
 export async function detectChanges(
   workspace: string,

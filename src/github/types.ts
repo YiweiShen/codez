@@ -5,6 +5,7 @@
 /**
  * Normalized GitHub webhook event for the Codex agent.
  */
+
 export type AgentEvent =
   | { type: 'issuesOpened'; github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated'; github: GitHubEventIssueCommentCreated }
@@ -26,6 +27,7 @@ export type AgentEvent =
 /**
  * Raw GitHub event payload types.
  */
+
 export type GitHubEvent =
   | GitHubEventIssuesOpened
   | GitHubEventIssueCommentCreated
@@ -89,6 +91,7 @@ export type GitHubPullRequest = {
 /**
  * Content and comments data for issues and pull requests.
  */
+
 export type GithubContentsData = {
   content: { number?: number; title: string; body: string; login: string };
   comments: { body: string; login: string }[];
@@ -97,4 +100,5 @@ export type GithubContentsData = {
 /**
  * Repository owner/name context for API calls.
  */
+
 export type RepoContext = { owner: string; repo: string };

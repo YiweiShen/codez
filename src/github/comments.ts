@@ -1,10 +1,12 @@
 /**
  * Utilities for posting and updating comments on GitHub issues and pull requests.
  */
+
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
+
 import type { RepoContext, GitHubEvent } from './types';
-import { GitHubError } from '../utils/errors';
+
 import { truncateOutput } from './utils';
 
 /**
@@ -14,6 +16,58 @@ import { truncateOutput } from './utils';
  * @param event - The GitHubEvent triggering the comment.
  * @param body - Content of the comment.
  * @returns Promise that resolves when the comment is posted.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param body
+ */
+
+/**
+ *
  */
 export async function postComment(
   octokit: Octokit,
@@ -75,6 +129,64 @@ export async function postComment(
  * @param commentId - ID of the comment to update, or undefined to create a new one.
  * @param body - Content of the comment.
  * @returns Promise that resolves when the comment is upserted.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param commentId
+ * @param body
+ */
+
+/**
+ *
  */
 export async function upsertComment(
   octokit: Octokit,

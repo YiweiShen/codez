@@ -1,20 +1,57 @@
 /**
  * Utilities for creating and updating GitHub progress comments in workflows.
  */
+
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type { GitHubEvent } from './types';
-import { GitHubError } from '../utils/errors';
+
 import {
   PROGRESS_BAR_BLOCKS,
   PROGRESS_TITLE,
   LOADING_PHRASES,
 } from '../constants';
+import { GitHubError } from '../utils/errors';
+
+import type { GitHubEvent } from './types';
 
 /**
  * Escape special characters in a literal string so it can be used in a RegExp.
  * @param str - Input string containing potential RegExp metacharacters.
  * @returns A string where regex-meaningful characters are escaped.
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
+ * @param str
+ */
+
+/**
+ *
  */
 export function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\\]\\\\]/g, '$\\&');
@@ -24,10 +61,73 @@ export function escapeRegExp(str: string): string {
  * Create a GitHub comment to display initial progress steps with checkboxes.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
+ * @param repo.owner
  * @param event - The GitHubEvent where the comment will be posted.
+ * @param repo.repo
  * @param steps - Array of markdown step descriptions to render.
  * @returns Promise resolving to the created comment ID.
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param steps
+ */
+
 export async function createProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -84,11 +184,80 @@ export async function createProgressComment(
  * Update the content of an existing GitHub progress comment.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
+ * @param repo.owner
  * @param event - The GitHubEvent that the comment belongs to.
+ * @param repo.repo
  * @param commentId - ID of the comment to update.
  * @param steps - Array of markdown-formatted step lines to render.
  * @returns Promise that resolves when the comment is updated.
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param repo.owner
+ * @param repo.repo
+ * @param event
+ * @param commentId
+ * @param steps
+ */
+
 export async function updateProgressComment(
   octokit: Octokit,
   repo: { owner: string; repo: string },

@@ -1,11 +1,16 @@
 /**
  * Construct AI prompts based on GitHub event content and user input.
  */
+
 import type { Octokit } from 'octokit';
-import type { RepoContext, AgentEvent } from './types';
+
 import { promptBuilderConfig } from '../config/prompts';
+
 import { genContentsString, genFullContentsString } from '../utils/contents';
+
 import { getContentsData, getChangedFiles } from './contents';
+
+import type { RepoContext, AgentEvent } from './types';
 
 /**
  * Generate the AI prompt based on event context and user input.
@@ -15,6 +20,64 @@ import { getContentsData, getChangedFiles } from './contents';
  * @param userPrompt - User-specified prompt text.
  * @param includeFullHistory - Whether to include the full conversation history.
  * @returns Promise resolving to the constructed prompt string.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ * @param userPrompt
+ * @param includeFullHistory
+ */
+
+/**
+ *
  */
 export async function generatePrompt(
   octokit: Octokit,

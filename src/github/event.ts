@@ -8,19 +8,17 @@
 import { promises as fs } from 'fs';
 
 import * as core from '@actions/core';
+import { z } from 'zod';
 
 import type { ActionConfig } from '../config/config';
-
 import { DEFAULT_TRIGGER_PHRASE } from '../constants';
-
 import { toErrorMessage } from '../utils/error';
-
 import { ParseError } from '../utils/errors';
+
 import { extractPromptFlags } from '../utils/prompt';
 
-import type { AgentEvent } from './types';
 import { getEventType, extractText } from './event-utils';
-import { z } from 'zod';
+import type { AgentEvent } from './types';
 
 const RawRecordSchema = z
   .unknown()
@@ -58,6 +56,40 @@ export interface ProcessedEvent {
  * @returns Parsed event payload object as a generic record.
  * @throws If the file cannot be read, parsed, or validated.
  */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ * @param eventPath
+ */
+
+/**
+ *
+ */
 export async function loadEventPayload(
   eventPath: string,
 ): Promise<Record<string, unknown>> {
@@ -82,6 +114,40 @@ export async function loadEventPayload(
  * @returns The processed event data or null if unsupported.
  */
 
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
+
+/**
+ *
+ * @param config
+ */
 export async function processEvent(
   config: ActionConfig,
 ): Promise<ProcessedEvent | null> {

@@ -1,12 +1,47 @@
 /**
  * Utility functions for branch naming, slug generation, and output truncation.
  */
+
 import * as core from '@actions/core';
 
 /**
  * Infer a branch type keyword from a commit message header.
  * @param commitMessage - Commit message to analyze.
  * @returns Conventional branch type (e.g., 'feat', 'fix', 'docs', or 'chore').
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
+ * @param commitMessage
+ */
+
+/**
+ *
  */
 export function getBranchType(commitMessage: string): string {
   const cm = commitMessage.toLowerCase();
@@ -22,6 +57,40 @@ export function getBranchType(commitMessage: string): string {
  * @param text - Input text to slugify.
  * @returns URL-friendly slug string.
  */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ * @param text
+ */
+
+/**
+ *
+ */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -33,6 +102,40 @@ export function slugify(text: string): string {
  * Truncate output if it exceeds GitHub's body size limits.
  * @param output - Text to truncate.
  * @returns Truncated or original output string based on length.
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
+ * @param output
+ */
+
+/**
+ *
  */
 export function truncateOutput(output: string): string {
   if (output.length > 60000) {

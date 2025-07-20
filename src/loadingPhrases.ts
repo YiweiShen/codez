@@ -2,6 +2,7 @@
  * Loading phrases to display below the progress bar.
  * These phrases are chosen at random during action execution progress updates.
  */
+
 const LOADING_PHRASES: readonly string[] = [
   'Decrypting punchlines with 256-bit humor...',
   'Loading… the progress bar is in another castle.',

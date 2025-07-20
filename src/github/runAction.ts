@@ -1,24 +1,29 @@
 /**
  * Main executor for the GitHub Action workflow.
  */
+
 import * as core from '@actions/core';
-import { execa } from 'execa';
-import path from 'path';
+
+import { runCodex } from '../client/codex';
 
 import type { ActionConfig } from '../config/config';
+import { captureFileState, detectChanges } from '../file/file';
+
+import { maskSensitiveInfo } from '../security/security';
+
+import { upsertComment } from './comments';
+
 import type { ProcessedEvent } from './event';
 import { cloneRepository } from './git';
+import { createProgressComment, updateProgressComment } from './progress';
+
+import { preparePrompt } from './prompt-builder';
 import {
   addEyeReaction,
   removeEyeReaction,
   addThumbUpReaction,
 } from './reactions';
-import { upsertComment } from './comments';
-import { captureFileState, detectChanges } from '../file/file';
-import { maskSensitiveInfo } from '../security/security';
-import { runCodex } from '../client/codex';
-import { createProgressComment, updateProgressComment } from './progress';
-import { preparePrompt } from './prompt-builder';
+
 import { handleResult } from './result-handler';
 
 /**
@@ -26,6 +31,46 @@ import { handleResult } from './result-handler';
  * @param config - Action configuration.
  * @param processedEvent - Processed event data.
  * @returns Promise that resolves when the action run completes.
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
+ * @param config
+ * @param processedEvent
+ */
+
+/**
+ *
  */
 export async function runAction(
   config: ActionConfig,

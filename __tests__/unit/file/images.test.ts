@@ -36,7 +36,39 @@ const mockedCoreWarning = core.warning as jest.Mock;
 
 /**
  *
+ * @param data
  */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
+/**
+ *
+ * @param data
+ */
+
 function createStream(data: string): Readable {
   const stream = new Readable();
   stream.push(data);

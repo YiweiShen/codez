@@ -6,12 +6,14 @@
 
 import * as core from '@actions/core';
 
-import { getConfig } from './config/config';
 import { getOpenAIClient } from './api/openai';
+
+import { getConfig } from './config/config';
+
 import { runAction } from './github/action';
 
-import { processEvent } from './github/event';
 import { postComment } from './github/comments';
+import { processEvent } from './github/event';
 
 import { checkPermission } from './security/security';
 
@@ -21,6 +23,46 @@ import { checkPermission } from './security/security';
  * Retrieves configuration, processes the event, checks permissions,
  * and executes the main action logic within the configured timeout budget.
  * @returns A promise that resolves when the action completes.
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
+ */
+
+/**
+ *
  */
 
 export async function run(): Promise<void> {

@@ -1,10 +1,13 @@
 /**
  * Utilities for retrieving changed files and content data for GitHub events.
  */
+
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type { RepoContext, AgentEvent, GithubContentsData } from './types';
+
 import { GitHubError } from '../utils/errors';
+
+import type { RepoContext, AgentEvent, GithubContentsData } from './types';
 
 /**
  * Get the list of changed files for a pull request comment event.
@@ -12,6 +15,52 @@ import { GitHubError } from '../utils/errors';
  * @param repo - Repository owner and name context.
  * @param event - AgentEvent describing the GitHub comment event.
  * @returns Promise resolving to an array of changed file paths.
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
  */
 export async function getChangedFiles(
   octokit: Octokit,
@@ -42,6 +91,52 @@ export async function getChangedFiles(
  * @param event - AgentEvent triggering the data retrieval.
  * @returns Promise resolving to content and comments data.
  */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param event
+ */
+
+/**
+ *
+ */
 export async function getContentsData(
   octokit: Octokit,
   repo: RepoContext,
@@ -62,6 +157,54 @@ export async function getContentsData(
   throw new GitHubError('Invalid event type for data retrieval');
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param issueNumber
+ */
 async function getIssueData(
   octokit: Octokit,
   repo: RepoContext,
@@ -114,6 +257,54 @@ async function getIssueData(
   return { content, comments };
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ */
 async function getPullRequestData(
   octokit: Octokit,
   repo: RepoContext,
@@ -162,6 +353,61 @@ async function getPullRequestData(
   return { content, comments };
 }
 
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
+
+/**
+ *
+ * @param octokit
+ * @param repo
+ * @param prNumber
+ * @param commentId
+ */
 async function getPullRequestReviewCommentsData(
   octokit: Octokit,
   repo: RepoContext,
