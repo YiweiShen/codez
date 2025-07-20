@@ -20,11 +20,11 @@ jest.mock('../../../src/api/openai.js', () => ({ getOpenAIClient: jest.fn() }));
 
 import * as core from '@actions/core';
 
-import { getConfig } from '../../../src/config/config.js';
-import { processEvent } from '../../../src/github/event.js';
-import { checkPermission } from '../../../src/security/security.js';
-import { runAction } from '../../../src/github/action.js';
-import { getOpenAIClient } from '../../../src/api/openai.js';
+import { getConfig } from '../../../src/config/config';
+import { processEvent } from '../../../src/github/event';
+import { checkPermission } from '../../../src/security/security';
+import { runAction } from '../../../src/github/action';
+import { getOpenAIClient } from '../../../src/api/openai';
 
 describe('run (src/main.ts)', () => {
   beforeEach(() => {
