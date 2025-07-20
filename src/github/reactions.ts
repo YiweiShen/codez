@@ -121,6 +121,31 @@ export async function removeEyeReaction(
           break;
         }
       }
+    } else if (
+      event.action === 'created' &&
+      'comment' in event &&
+      'pull_request' in event
+    ) {
+      const reactions = await octokit.rest.reactions.listForPullRequestReviewComment({
+        ...repo,
+        comment_id: event.comment.id,
+      });
+      for (const reaction of reactions.data) {
+        if (
+          reaction.content === 'eyes' &&
+          reaction.user?.login === 'github-actions[bot]'
+        ) {
+          await octokit.rest.reactions.deleteForPullRequestReviewComment({
+            ...repo,
+            comment_id: event.comment.id,
+            reaction_id: reaction.id,
+          });
+          core.info(
+            `Removed eye reaction from review comment on PR #${event.pull_request.number}`,
+          );
+          break;
+        }
+      }
     }
   } catch (error) {
     core.warning(
@@ -144,6 +169,7 @@ export async function addThumbUpReaction(
   event: GitHubEvent,
 ): Promise<void> {
   try {
+    await removeEyeReaction(octokit, repo, event);
     if (
       (event.action === 'opened' || event.action === 'assigned') &&
       'issue' in event
