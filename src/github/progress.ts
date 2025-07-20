@@ -1,3 +1,6 @@
+/**
+ * Utilities for creating and updating GitHub progress comments in workflows.
+ */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './types';
@@ -84,6 +87,7 @@ export async function createProgressComment(
  * @param event - The GitHubEvent that the comment belongs to.
  * @param commentId - ID of the comment to update.
  * @param steps - Array of markdown-formatted step lines to render.
+ * @returns Promise that resolves when the comment is updated.
  */
 export async function updateProgressComment(
   octokit: Octokit,

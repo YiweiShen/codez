@@ -1,3 +1,6 @@
+/**
+ * Construct AI prompts based on GitHub event content and user input.
+ */
 import type { Octokit } from 'octokit';
 import type { RepoContext, AgentEvent } from './types';
 import { promptBuilderConfig } from '../config/prompts';
@@ -6,6 +9,12 @@ import { getContentsData, getChangedFiles } from './contents';
 
 /**
  * Generate the AI prompt based on event context and user input.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - AgentEvent containing the GitHub event data.
+ * @param userPrompt - User-specified prompt text.
+ * @param includeFullHistory - Whether to include the full conversation history.
+ * @returns Promise resolving to the constructed prompt string.
  */
 export async function generatePrompt(
   octokit: Octokit,

@@ -1,3 +1,6 @@
+/**
+ * Main executor for the GitHub Action workflow.
+ */
 import * as core from '@actions/core';
 import { execa } from 'execa';
 import path from 'path';
@@ -22,6 +25,7 @@ import { handleResult } from './result-handler';
  * Executes the main logic of the GitHub Action.
  * @param config - Action configuration.
  * @param processedEvent - Processed event data.
+ * @returns Promise that resolves when the action run completes.
  */
 export async function runAction(
   config: ActionConfig,

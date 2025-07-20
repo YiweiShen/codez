@@ -1,3 +1,6 @@
+/**
+ * Builds the AI prompt by optionally fetching URLs, logs, and images based on flags.
+ */
 import * as core from '@actions/core';
 import axios from 'axios';
 import AdmZip from 'adm-zip';
@@ -13,6 +16,10 @@ import { escapeRegExp } from './progress';
 
 /**
  * Fetches the latest failed workflow run logs for the repository and returns their content.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @returns Promise resolving to combined log contents as a string.
+ * @throws GitHubError if the logs cannot be fetched or parsed.
  */
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,

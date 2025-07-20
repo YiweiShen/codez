@@ -10,46 +10,12 @@ import { postComment } from './comments';
 
 /**
  * Creates GitHub issues based on a JSON feature plan output.
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param event
- * @param output
- * @param progressCommentId
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param event
- * @param output
- * @param progressCommentId
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param event
- * @param output
- * @param progressCommentId
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param event
- * @param output
- * @param progressCommentId
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and repository name.
+ * @param event - GitHubEvent triggering issue creation.
+ * @param output - JSON string containing the feature plan.
+ * @param progressCommentId - Optional ID of a progress comment to update.
+ * @returns Promise that resolves when issues are created.
  */
 export async function createIssuesFromFeaturePlan(
   octokit: Octokit,

@@ -1,9 +1,16 @@
+/**
+ * Reaction utilities for adding or removing reactions on GitHub issues and comments.
+ */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { RepoContext, GitHubEvent } from './types';
 
 /**
- * Adds an 'eyes' reaction to the event source (issue or comment).
+ * Adds an 'eyes' reaction to the specified issue or comment event.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - GitHubEvent describing the issue or comment.
+ * @returns Promise that resolves when the reaction is added.
  */
 export async function addEyeReaction(
   octokit: Octokit,
@@ -55,7 +62,11 @@ export async function addEyeReaction(
 }
 
 /**
- * Removes an 'eyes' reaction from the event source (issue or comment).
+ * Removes the 'eyes' reaction added by the bot from the specified event.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - GitHubEvent describing the issue or comment.
+ * @returns Promise that resolves when the reaction is removed.
  */
 export async function removeEyeReaction(
   octokit: Octokit,
@@ -121,7 +132,11 @@ export async function removeEyeReaction(
 }
 
 /**
- * Adds a 'thumbs up' reaction to the event source (issue or comment).
+ * Adds a 'thumbs up' reaction to the specified issue or comment event.
+ * @param octokit - Authenticated Octokit client.
+ * @param repo - Repository owner and name context.
+ * @param event - GitHubEvent describing the issue or comment.
+ * @returns Promise that resolves when the reaction is added.
  */
 export async function addThumbUpReaction(
   octokit: Octokit,
