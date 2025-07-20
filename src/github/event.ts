@@ -178,6 +178,8 @@ export async function processEvent(
     };
   }
   const rawPayload = await loadEventPayload(config.eventPath);
+  // printout the raw payload for debugging
+  core.info(`Raw event payload: ${JSON.stringify(rawPayload, null, 2)}`);
   const parsedEvent = GitHubEventSchema.safeParse(rawPayload);
   if (!parsedEvent.success) {
     core.info('Unsupported event payload structure.');
