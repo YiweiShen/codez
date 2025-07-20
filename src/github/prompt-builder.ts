@@ -60,7 +60,7 @@ async function fetchLatestFailedWorkflowLogs(
     const MAX_ENTRY_SIZE = 10 * 1024 * 1024; // 10MB
     if (entries.length > MAX_ENTRIES) {
       throw new GitHubError(
-        `Logs archive contains too many files: ${entries.length}`
+        `Logs archive contains too many files: ${entries.length}`,
       );
     }
     const logs: string[] = [];
@@ -68,12 +68,14 @@ async function fetchLatestFailedWorkflowLogs(
       const entryName = entry.entryName;
       const normalized = path.normalize(entryName);
       if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
-        throw new GitHubError(`Unsafe entry name in logs archive: ${entryName}`);
+        throw new GitHubError(
+          `Unsafe entry name in logs archive: ${entryName}`,
+        );
       }
       const data = entry.getData();
       if (data.length > MAX_ENTRY_SIZE) {
         throw new GitHubError(
-          `Log file ${entryName} is too large: ${data.length} bytes`
+          `Log file ${entryName} is too large: ${data.length} bytes`,
         );
       }
       logs.push(`=== ${entryName} ===\n${data.toString('utf8')}`);

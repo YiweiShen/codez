@@ -94,8 +94,11 @@ module.exports = {
   overrides: [
     {
       files: ['**/__tests__/**/*.{js,jsx,ts,tsx}'],
-        rules: {
-        'max-len': ['error', { code: MAX_LINE_LENGTH_TEST, ignoreComments: false }],
+      rules: {
+        'max-len': [
+          'error',
+          { code: MAX_LINE_LENGTH_TEST, ignoreComments: false },
+        ],
         '@typescript-eslint/no-explicit-any': 'off',
       },
     },
