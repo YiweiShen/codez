@@ -25,12 +25,77 @@ import { z } from 'zod';
 /**
  * Schema for a generic object record from JSON.parse.
  */
-const RawRecordSchema = z
-  .unknown()
-  .refine(
-    (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
-    { message: 'Expected JSON object' },
-  );
+const RawRecordSchema = z.record(z.unknown());
+
+// Zod schemas for GitHub webhook event payloads matching GitHubEvent types
+const GitHubIssueSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  body: z.string(),
+  pull_request: z.null(),
+});
+const GithubCommentSchema = z.object({
+  id: z.number(),
+  body: z.string(),
+});
+const GitHubPullRequestSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  body: z.string(),
+  pull_request: z.object({ url: z.string() }),
+});
+const GitHubEventIssuesOpenedSchema = z.object({
+  action: z.literal('opened'),
+  issue: GitHubIssueSchema,
+});
+const GitHubEventIssueCommentCreatedSchema = z.object({
+  action: z.literal('created'),
+  issue: GitHubIssueSchema,
+  comment: GithubCommentSchema,
+});
+const GitHubEventPullRequestCommentCreatedSchema = z.object({
+  action: z.literal('created'),
+  issue: GitHubPullRequestSchema,
+  comment: GithubCommentSchema,
+});
+const GitHubEventPullRequestReviewCommentCreatedSchema = z.object({
+  action: z.literal('created'),
+  pull_request: z.object({
+    number: z.number(),
+    title: z.string().optional(),
+    body: z.string().optional(),
+  }),
+  comment: z.object({
+    id: z.number(),
+    body: z.string(),
+    path: z.string(),
+    in_reply_to_id: z.number().optional(),
+    position: z.number().optional(),
+    line: z.number().optional(),
+  }),
+});
+const GitHubEventIssuesAssignedSchema = z.object({
+  action: z.literal('assigned'),
+  issue: GitHubIssueSchema,
+  assignee: z.object({ login: z.string() }),
+});
+const GitHubEventPullRequestOpenedSchema = z.object({
+  action: z.literal('opened'),
+  pull_request: GitHubPullRequestSchema,
+});
+const GitHubEventPullRequestSynchronizeSchema = z.object({
+  action: z.literal('synchronize'),
+  pull_request: GitHubPullRequestSchema,
+});
+const GitHubEventSchema = z.union([
+  GitHubEventIssuesOpenedSchema,
+  GitHubEventIssueCommentCreatedSchema,
+  GitHubEventPullRequestCommentCreatedSchema,
+  GitHubEventPullRequestReviewCommentCreatedSchema,
+  GitHubEventIssuesAssignedSchema,
+  GitHubEventPullRequestOpenedSchema,
+  GitHubEventPullRequestSynchronizeSchema,
+]);
 
 /**
  * Represents a normalized event to trigger the Codex workflow.
@@ -112,7 +177,13 @@ export async function processEvent(
       includeFetch,
     };
   }
-  const eventPayload = await loadEventPayload(config.eventPath);
+  const rawPayload = await loadEventPayload(config.eventPath);
+  const parsedEvent = GitHubEventSchema.safeParse(rawPayload);
+  if (!parsedEvent.success) {
+    core.info('Unsupported event type or payload structure.');
+    return null;
+  }
+  const eventPayload = parsedEvent.data;
   const agentEvent = getEventType(eventPayload);
 
   if (!agentEvent) {

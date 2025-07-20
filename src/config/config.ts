@@ -224,7 +224,7 @@ export function getConfig(): ActionConfig {
     throw new ConfigError('GitHub workspace path is missing.');
   }
 
-  const rawConfig = {
+  const rawConfig: ActionConfig = {
     githubToken,
     eventPath,
     workspace,
@@ -242,7 +242,7 @@ export function getConfig(): ActionConfig {
     codexEnv,
     images,
     fetch,
-  } as const;
+  };
 
   const parsed = actionConfigSchema.safeParse(rawConfig);
   if (!parsed.success) {
