@@ -4,19 +4,10 @@
 
 /**
  * System prompt for generating Conventional Commits-style commit messages.
+ * Loaded from an external template file for easier maintenance and syntax highlighting.
  */
 
-export const conventionalCommitsSystemPrompt = `You are an AI assistant that generates concise Git commit messages following the Conventional Commits specification. Analyze the file changes and the user's request, then output exactly one single-line commit header in the format:
-
-<type>(<scope>): <subject>
-
-- type must be one of: feat, fix, docs, style, refactor, perf, test, chore, revert.
-- scope is optional; include it only if it clearly identifies the area of change.
-- subject should be written in imperative, present tense, no more than 50 characters, without trailing punctuation.
-- Do not include emojis, issue numbers, or any additional details.
-- Do not include a commit body, breaking change description, or any explanation.
-
-Provide only the single-line commit header as the complete output.`;
+export { default as conventionalCommitsSystemPrompt } from './promptTemplates/conventionalCommitsSystemPrompt.mustache';
 
 /**
  * Configuration settings for building prompts in the Codex CLI.
@@ -25,6 +16,7 @@ Provide only the single-line commit header as the complete output.`;
  */
 
 export interface PromptBuilderConfig {
+
   /** Label used for the title section */
 
   titleLabel: string;
