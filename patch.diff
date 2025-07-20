@@ -1,0 +1,297 @@
+diff --git a/__tests__/unit/github/generatePrompt.test.ts b/__tests__/unit/github/generatePrompt.test.ts
+index 61e48d1..d4aeea5 100644
+--- a/__tests__/unit/github/generatePrompt.test.ts
++++ b/__tests__/unit/github/generatePrompt.test.ts
+@@ -1,9 +1,9 @@
+ import { jest } from '@jest/globals';
+ 
+-import { generatePrompt } from '../../../src/github/github.js';
++import { generatePrompt } from '../../../src/github/github.ts';
+ 
+ // We will spy on these in‐module helpers
+-import * as githubModule from '../../../src/github/github.js';
++import * as githubModule from '../../../src/github/github.ts';
+ 
+ describe('generatePrompt', () => {
+   const fakeOctokit = {} as any;
+diff --git a/__tests__/unit/main.test.ts b/__tests__/unit/main.test.ts
+index df3cafb..087a5e1 100644
+--- a/__tests__/unit/main.test.ts
++++ b/__tests__/unit/main.test.ts
+@@ -20,11 +20,11 @@ jest.mock('../../../src/api/openai.js', () => ({ getOpenAIClient: jest.fn() }));
+ 
+ import * as core from '@actions/core';
+ 
+-import { getConfig } from '../../../src/config/config.js';
+-import { processEvent } from '../../../src/github/event.js';
+-import { checkPermission } from '../../../src/security/security.js';
+-import { runAction } from '../../../src/github/action.js';
+-import { getOpenAIClient } from '../../../src/api/openai.js';
++import { getConfig } from '../../../src/config/config.ts';
++import { processEvent } from '../../../src/github/event.ts';
++import { checkPermission } from '../../../src/security/security.ts';
++import { runAction } from '../../../src/github/action.ts';
++import { getOpenAIClient } from '../../../src/api/openai.ts';
+ 
+ describe('run (src/main.ts)', () => {
+   beforeEach(() => {
+diff --git a/src/api/openai.ts b/src/api/openai.ts
+index 1312bac..577cf13 100644
+--- a/src/api/openai.ts
++++ b/src/api/openai.ts
+@@ -8,9 +8,9 @@ import * as core from '@actions/core';
+ import OpenAI from 'openai';
+ import type { ClientOptions } from 'openai';
+ 
+-import type { ActionConfig } from '../config/config.js';
+-import { conventionalCommitsSystemPrompt } from '../config/prompts.js';
+-import { ParseError } from '../utils/errors.js';
++import type { ActionConfig } from '../config/config.ts';
++import { conventionalCommitsSystemPrompt } from '../config/prompts.ts';
++import { ParseError } from '../utils/errors.ts';
+ 
+ /**
+  * Default model identifier for OpenAI provider.
+diff --git a/src/client/codex.ts b/src/client/codex.ts
+index 9645e32..9215ebf 100644
+--- a/src/client/codex.ts
++++ b/src/client/codex.ts
+@@ -8,8 +8,8 @@ import * as core from '@actions/core';
+ 
+ import { execa } from 'execa';
+ 
+-import type { ActionConfig } from '../config/config.js';
+-import { CliError, TimeoutError } from '../utils/errors.js';
++import type { ActionConfig } from '../config/config.ts';
++import { CliError, TimeoutError } from '../utils/errors.ts';
+ 
+ /**
+  * Invoke the Codex CLI with the specified parameters.
+diff --git a/src/config/config.ts b/src/config/config.ts
+index 5f63f67..b8c6a60 100644
+--- a/src/config/config.ts
++++ b/src/config/config.ts
+@@ -9,10 +9,10 @@ import * as core from '@actions/core';
+ import * as github from '@actions/github';
+ import { Octokit } from 'octokit';
+ 
+-import { defaultModel } from '../api/openai.js';
+-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
++import { defaultModel } from '../api/openai.ts';
++import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
+ 
+-import { ConfigError } from '../utils/errors.js';
++import { ConfigError } from '../utils/errors.ts';
+ 
+ /**
+  * Defines configuration inputs for the GitHub Action.
+diff --git a/src/file/file.ts b/src/file/file.ts
+index 88fe16f..57e6569 100644
+--- a/src/file/file.ts
++++ b/src/file/file.ts
+@@ -16,9 +16,9 @@ import * as core from '@actions/core';
+ import fg from 'fast-glob';
+ import ignore from 'ignore';
+ 
+-import { toErrorMessage } from '../utils/error.js';
++import { toErrorMessage } from '../utils/error.ts';
+ 
+-import { DEFAULT_IGNORE_PATTERNS } from './constants.js';
++import { DEFAULT_IGNORE_PATTERNS } from './constants.ts';
+ 
+ /**
+  * Calculate the SHA-256 hash of the specified file.
+diff --git a/src/github/action.ts b/src/github/action.ts
+index 02d7df7..fcbf720 100644
+--- a/src/github/action.ts
++++ b/src/github/action.ts
+@@ -15,13 +15,13 @@ import axios from 'axios';
+ import { execa } from 'execa';
+ import type { Octokit } from 'octokit';
+ 
+-import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.js';
++import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai.ts';
+ 
+-import type { ActionConfig } from '../config/config.js';
+-import { captureFileState, detectChanges } from '../file/file.js';
++import type { ActionConfig } from '../config/config.ts';
++import { captureFileState, detectChanges } from '../file/file.ts';
+ 
+-import { extractImageUrls, downloadImages } from '../file/images.js';
+-import { GitHubError } from '../utils/errors.js';
++import { extractImageUrls, downloadImages } from '../file/images.ts';
++import { GitHubError } from '../utils/errors.ts';
+ import {
+   cloneRepository,
+   addEyeReaction,
+@@ -31,21 +31,21 @@ import {
+   removeEyeReaction,
+   addThumbUpReaction,
+   upsertComment,
+-} from './github.js';
++} from './github.ts';
+ 
+-import type { ProcessedEvent } from './event.js';
++import type { ProcessedEvent } from './event.ts';
+ 
+-import { maskSensitiveInfo } from '../security/security.js';
++import { maskSensitiveInfo } from '../security/security.ts';
+ 
+-import { runCodex } from '../client/codex.js';
++import { runCodex } from '../client/codex.ts';
+ 
+-import type { GitHubEvent } from './github.js';
++import type { GitHubEvent } from './github.ts';
+ 
+ import {
+   PROGRESS_BAR_BLOCKS,
+   PROGRESS_TITLE,
+   LOADING_PHRASES,
+-} from '../constants.js';
++} from '../constants.ts';
+ 
+ /**
+  * Fetches the latest failed workflow run logs for the repository and returns their content.
+@@ -125,7 +125,7 @@ async function fetchLatestFailedWorkflowLogs(
+     throw new GitHubError(`Error fetching workflow runs: ${msg}`);
+   }
+ }
+-export { createIssuesFromFeaturePlan } from './createIssues.js';
++export { createIssuesFromFeaturePlan } from './createIssues.ts';
+ 
+ /**
+  * Escape special characters in a literal string so it can be used in a RegExp.
+diff --git a/src/github/createIssues.ts b/src/github/createIssues.ts
+index 05c8031..3e4b71a 100644
+--- a/src/github/createIssues.ts
++++ b/src/github/createIssues.ts
+@@ -5,8 +5,8 @@
+ import * as core from '@actions/core';
+ import type { Octokit } from 'octokit';
+ 
+-import type { GitHubEvent } from './github.js';
+-import { postComment } from './github.js';
++import type { GitHubEvent } from './github.ts';
++import { postComment } from './github.ts';
+ 
+ /**
+  * Creates GitHub issues based on a JSON feature plan output.
+diff --git a/src/github/event.ts b/src/github/event.ts
+index d1dd1d2..0fd864a 100644
+--- a/src/github/event.ts
++++ b/src/github/event.ts
+@@ -9,18 +9,18 @@ import { promises as fs } from 'fs';
+ 
+ import * as core from '@actions/core';
+ 
+-import type { ActionConfig } from '../config/config.js';
++import type { ActionConfig } from '../config/config.ts';
+ 
+-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
++import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
+ 
+-import { toErrorMessage } from '../utils/error.js';
++import { toErrorMessage } from '../utils/error.ts';
+ 
+-import { ParseError } from '../utils/errors.js';
+-import { extractPromptFlags } from '../utils/prompt.js';
++import { ParseError } from '../utils/errors.ts';
++import { extractPromptFlags } from '../utils/prompt.ts';
+ 
+-import { getEventType, extractText } from './github.js';
++import { getEventType, extractText } from './github.ts';
+ 
+-import type { AgentEvent } from './github.js';
++import type { AgentEvent } from './github.ts';
+ 
+ /**
+  * Represents a normalized event to trigger the Codex workflow.
+diff --git a/src/github/github.ts b/src/github/github.ts
+index 0d3b44b..32ab367 100644
+--- a/src/github/github.ts
++++ b/src/github/github.ts
+@@ -14,13 +14,13 @@ import { execa } from 'execa';
+ 
+ import { Octokit } from 'octokit';
+ 
+-import { promptBuilderConfig } from '../config/prompts.js';
++import { promptBuilderConfig } from '../config/prompts.ts';
+ 
+-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
+-import { genContentsString, genFullContentsString } from '../utils/contents.js';
++import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
++import { genContentsString, genFullContentsString } from '../utils/contents.ts';
+ 
+-import { toErrorMessage } from '../utils/error.js';
+-import { GitHubError } from '../utils/errors.js';
++import { toErrorMessage } from '../utils/error.ts';
++import { GitHubError } from '../utils/errors.ts';
+ 
+ /**
+  * Infer a branch type keyword from a commit message header.
+diff --git a/src/index.ts b/src/index.ts
+index 0c231a0..024adea 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -3,7 +3,7 @@
+  * This module imports and invokes the main orchestration logic.
+  */
+ 
+-import { run } from './main.js';
++import { run } from './main.ts';
+ 
+ // Invoke the main execution workflow
+ run();
+diff --git a/src/main.ts b/src/main.ts
+index e2c6f63..ee8191b 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -6,14 +6,14 @@
+ 
+ import * as core from '@actions/core';
+ 
+-import { getConfig } from './config/config.js';
+-import { getOpenAIClient } from './api/openai.js';
+-import { runAction } from './github/action.js';
++import { getConfig } from './config/config.ts';
++import { getOpenAIClient } from './api/openai.ts';
++import { runAction } from './github/action.ts';
+ 
+-import { processEvent } from './github/event.js';
+-import { postComment } from './github/github.js';
++import { processEvent } from './github/event.ts';
++import { postComment } from './github/github.ts';
+ 
+-import { checkPermission } from './security/security.js';
++import { checkPermission } from './security/security.ts';
+ 
+ /**
+  * Orchestrate the action's workflow.
+diff --git a/src/security/security.ts b/src/security/security.ts
+index 9c99861..b447a4a 100644
+--- a/src/security/security.ts
++++ b/src/security/security.ts
+@@ -7,8 +7,8 @@ import * as core from '@actions/core';
+ 
+ import type { Octokit } from 'octokit';
+ 
+-import type { ActionConfig } from '../config/config.js';
+-import { toErrorMessage } from '../utils/error.js';
++import type { ActionConfig } from '../config/config.ts';
++import { toErrorMessage } from '../utils/error.ts';
+ 
+ /**
+  * Check if the user has appropriate permissions to run the action.
+diff --git a/src/utils/prompt.ts b/src/utils/prompt.ts
+index 85df055..69742d4 100644
+--- a/src/utils/prompt.ts
++++ b/src/utils/prompt.ts
+@@ -4,7 +4,7 @@
+  * Extracts flags and remaining prompt text from user input.
+  */
+ 
+-import { parseFlags } from './flags.js';
++import { parseFlags } from './flags.ts';
+ 
+ /**
+  * @interface PromptFlagOptions
