@@ -17,7 +17,9 @@ export async function getChangedFiles(
   } else if (event.type === 'pullRequestReviewCommentCreated') {
     prNumber = event.github.pull_request.number;
   } else {
-    throw new GitHubError(`Cannot get changed files for event type: ${event.type}`);
+    throw new GitHubError(
+      `Cannot get changed files for event type: ${event.type}`,
+    );
   }
   const prFilesResponse = await octokit.rest.pulls.listFiles({
     ...repo,
@@ -77,16 +79,27 @@ async function getIssueData(
         title: string;
         body: string | null;
         author: { login: string };
-        comments: { nodes: { body: string | null; author: { login: string } }[] };
+        comments: {
+          nodes: { body: string | null; author: { login: string } }[];
+        };
       };
-    }>(query, {
+    };
+  }>(query, {
     owner: repo.owner,
     repo: repo.repo,
     issueNumber,
   });
   const issue = resp.repository.issue;
-  const content = { number: issue.number, title: issue.title, body: issue.body ?? '', login: issue.author.login };
-  const comments = issue.comments.nodes.map((c) => ({ body: c.body ?? '', login: c.author.login }));
+  const content = {
+    number: issue.number,
+    title: issue.title,
+    body: issue.body ?? '',
+    login: issue.author.login,
+  };
+  const comments = issue.comments.nodes.map((c) => ({
+    body: c.body ?? '',
+    login: c.author.login,
+  }));
   return { content, comments };
 }
 
@@ -112,11 +125,29 @@ async function getPullRequestData(
       }
     `;
   const resp = await octokit.graphql<{
-    repository: { pullRequest: { number: number; title: string; body: string | null; author: { login: string }; comments: { nodes: { body: string | null; author: { login: string } }[] } } };
+    repository: {
+      pullRequest: {
+        number: number;
+        title: string;
+        body: string | null;
+        author: { login: string };
+        comments: {
+          nodes: { body: string | null; author: { login: string } }[];
+        };
+      };
+    };
   }>(query, { owner: repo.owner, repo: repo.repo, prNumber });
   const pr = resp.repository.pullRequest;
-  const content = { number: pr.number, title: pr.title, body: pr.body ?? '', login: pr.author.login };
-  const comments = pr.comments.nodes.map((c) => ({ body: c.body ?? '', login: c.author.login }));
+  const content = {
+    number: pr.number,
+    title: pr.title,
+    body: pr.body ?? '',
+    login: pr.author.login,
+  };
+  const comments = pr.comments.nodes.map((c) => ({
+    body: c.body ?? '',
+    login: c.author.login,
+  }));
   return { content, comments };
 }
 
@@ -151,11 +182,28 @@ async function getPullRequestReviewCommentsData(
         title: string;
         body: string | null;
         author: { login: string };
-        reviewThreads: { nodes: { comments: { nodes: { body: string | null; author: { login: string } }[] } }[] };
+        reviewThreads: {
+          nodes: {
+            comments: {
+              nodes: { body: string | null; author: { login: string } }[];
+            };
+          }[];
+        };
       };
-    }>(query, { owner: repo.owner, repo: repo.repo, prNumber, commentId });
+    };
+  }>(query, { owner: repo.owner, repo: repo.repo, prNumber, commentId });
   const pr = resp.repository.pullRequest;
-  const content = { number: pr.number, title: pr.title, body: pr.body ?? '', login: pr.author.login };
-  const comments = pr.reviewThreads.nodes.flatMap((th) => th.comments.nodes.map((c) => ({ body: c.body ?? '', login: c.author.login })));
+  const content = {
+    number: pr.number,
+    title: pr.title,
+    body: pr.body ?? '',
+    login: pr.author.login,
+  };
+  const comments = pr.reviewThreads.nodes.flatMap((th) =>
+    th.comments.nodes.map((c) => ({
+      body: c.body ?? '',
+      login: c.author.login,
+    })),
+  );
   return { content, comments };
 }
