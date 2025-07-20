@@ -49,7 +49,9 @@ export async function cloneRepository(
     branchToClone = context.payload.repository?.default_branch!;
     core.info(`Cloning default branch: ${branchToClone}`);
   }
-  core.info(`Cloning repository ${cloneUrl} branch ${branchToClone} into ${workspace}`);
+  core.info(
+    `Cloning repository ${cloneUrl} branch ${branchToClone} into ${workspace}`,
+  );
   try {
     await fs.rm(workspace, { recursive: true, force: true });
     await fs.mkdir(workspace, { recursive: true });
@@ -59,13 +61,23 @@ export async function cloneRepository(
     );
     await execa(
       'git',
-      ['clone', '--depth', '1', '--branch', branchToClone, authenticatedCloneUrl, '.'],
+      [
+        'clone',
+        '--depth',
+        '1',
+        '--branch',
+        branchToClone,
+        authenticatedCloneUrl,
+        '.',
+      ],
       { cwd: workspace, stdio: 'inherit' },
     );
     core.info('Repository cloned successfully.');
   } catch (error) {
     throw new GitHubError(
-      `Failed to clone repository: ${error instanceof Error ? error.message : error}`,
+      `Failed to clone repository: ${
+        error instanceof Error ? error.message : error
+      }`,
     );
   }
 }
@@ -107,10 +119,14 @@ export async function createPullRequest(
       cwd: workspace,
       stdio: 'inherit',
     });
-    await execa('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    await execa(
+      'git',
+      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
+      {
+        cwd: workspace,
+        stdio: 'inherit',
+      },
+    );
     core.info(`Creating new branch: ${branchName}`);
     await execa('git', ['checkout', '-b', branchName], {
       cwd: workspace,
@@ -118,40 +134,69 @@ export async function createPullRequest(
     });
     core.info('Adding changed files to Git...');
     await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
-    const statusResult = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+    const statusResult = await execa('git', ['status', '--porcelain'], {
+      cwd: workspace,
+    });
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit. Skipping pull request creation.');
       const body = truncateOutput(output);
       if (progressCommentId) {
-        await octokit.rest.issues.updateComment({ ...repo, comment_id: progressCommentId, body });
+        await octokit.rest.issues.updateComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body,
+        });
       } else {
-        await octokit.rest.issues.createComment({ ...repo, issue_number: issueNumber, body });
+        await octokit.rest.issues.createComment({
+          ...repo,
+          issue_number: issueNumber,
+          body,
+        });
       }
       return;
     }
     core.info('Committing changes...');
-    await execa('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
+    await execa('git', ['commit', '-m', commitMessage], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
     core.info(`Pushing changes to origin/${branchName}...`);
-    await execa('git', ['push', 'origin', branchName, '--force'], { cwd: workspace, stdio: 'inherit' });
+    await execa('git', ['push', 'origin', branchName, '--force'], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
     core.info('Creating Pull Request...');
     const pr = await octokit.rest.pulls.create({
       ...repo,
       title: `${commitMessage}`,
       head: branchName,
       base: baseBranch,
-      body: `Closes #${issueNumber}\n\nApplied changes based on Issue #${issueNumber}.\n\n${truncateOutput(output)}`,
+      body: `Closes #${issueNumber}\n\nApplied changes based on Issue #${issueNumber}.\n\n${truncateOutput(
+        output,
+      )}`,
       maintainer_can_modify: true,
     });
     core.info(`Pull Request created: ${pr.data.html_url}`);
     const prCommentBody = `Created Pull Request: ${pr.data.html_url}`;
     if (progressCommentId) {
-      await octokit.rest.issues.updateComment({ ...repo, comment_id: progressCommentId, body: prCommentBody });
+      await octokit.rest.issues.updateComment({
+        ...repo,
+        comment_id: progressCommentId,
+        body: prCommentBody,
+      });
     } else {
-      await octokit.rest.issues.createComment({ ...repo, issue_number: issueNumber, body: prCommentBody });
+      await octokit.rest.issues.createComment({
+        ...repo,
+        issue_number: issueNumber,
+        body: prCommentBody,
+      });
     }
     try {
       const {
-        repository: { issue: { id: issueId }, pullRequest: { id: pullRequestId } },
+        repository: {
+          issue: { id: issueId },
+          pullRequest: { id: pullRequestId },
+        },
       } = await octokit.graphql<{
         repository: { issue: { id: string }; pullRequest: { id: string } };
       }>(
@@ -163,7 +208,12 @@ export async function createPullRequest(
           }
         }
         `,
-        { owner: repo.owner, repo: repo.repo, issueNumber, prNumber: pr.data.number },
+        {
+          owner: repo.owner,
+          repo: repo.repo,
+          issueNumber,
+          prNumber: pr.data.number,
+        },
       );
       await octokit.graphql(
         `
@@ -173,19 +223,31 @@ export async function createPullRequest(
         `,
         { issueId, pullRequestId },
       );
-      core.info(`Linked PR #${pr.data.number} to Issue #${issueNumber} in development panel`);
+      core.info(
+        `Linked PR #${pr.data.number} to Issue #${issueNumber} in development panel`,
+      );
     } catch (linkError) {
-      core.warning(`Failed to link PR to development panel: ${linkError instanceof Error ? linkError.message : linkError}`);
+      core.warning(
+        `Failed to link PR to development panel: ${
+          linkError instanceof Error ? linkError.message : linkError
+        }`,
+      );
     }
     try {
       await removeEyeReaction(octokit, repo, event);
       await addThumbUpReaction(octokit, repo, event);
     } catch (reactionError) {
-      core.warning(`Failed to update reaction on issue #${issueNumber}: ${reactionError instanceof Error ? reactionError.message : reactionError}`);
+      core.warning(
+        `Failed to update reaction on issue #${issueNumber}: ${
+          reactionError instanceof Error ? reactionError.message : reactionError
+        }`,
+      );
     }
   } catch (error) {
     core.error(`Error creating Pull Request: ${toErrorMessage(error)}`);
-    throw new GitHubError(`Failed to create Pull Request: ${toErrorMessage(error)}`);
+    throw new GitHubError(
+      `Failed to create Pull Request: ${toErrorMessage(error)}`,
+    );
   }
 }
 
@@ -203,34 +265,67 @@ export async function commitAndPush(
   output: string,
   progressCommentId?: number,
 ): Promise<void> {
-  const prNumber = 'issue' in event ? event.issue.number : event.pull_request.number;
+  const prNumber =
+    'issue' in event ? event.issue.number : event.pull_request.number;
   try {
     let currentBranch: string;
     try {
-      const prData = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
+      const prData = await octokit.rest.pulls.get({
+        ...repo,
+        pull_number: prNumber,
+      });
       currentBranch = prData.data.head.ref;
       core.info(`Checked out PR branch: ${currentBranch}`);
-      await execa('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+      await execa('git', ['checkout', currentBranch], {
+        cwd: workspace,
+        stdio: 'inherit',
+      });
     } catch (e) {
-      core.warning(`Could not get PR branch from API, attempting to use current branch: ${e}`);
-      const branchResult = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: workspace });
+      core.warning(
+        `Could not get PR branch from API, attempting to use current branch: ${e}`,
+      );
+      const branchResult = await execa(
+        'git',
+        ['rev-parse', '--abbrev-ref', 'HEAD'],
+        { cwd: workspace },
+      );
       currentBranch = branchResult.stdout.trim();
       core.info(`Using current branch from git: ${currentBranch}`);
-      await execa('git', ['checkout', currentBranch], { cwd: workspace, stdio: 'inherit' });
+      await execa('git', ['checkout', currentBranch], {
+        cwd: workspace,
+        stdio: 'inherit',
+      });
     }
     core.info('Configuring Git user identity locally...');
-    await execa('git', ['config', 'user.name', 'github-actions[bot]'], { cwd: workspace, stdio: 'inherit' });
-    await execa('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], { cwd: workspace, stdio: 'inherit' });
+    await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
+    await execa(
+      'git',
+      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
+      { cwd: workspace, stdio: 'inherit' },
+    );
     core.info('Adding changed files to Git...');
     await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
-    const statusResult = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+    const statusResult = await execa('git', ['status', '--porcelain'], {
+      cwd: workspace,
+    });
     if (!statusResult.stdout.trim()) {
       core.info('No changes to commit.');
       if (progressCommentId) {
         if ('issue' in event) {
-          await octokit.rest.issues.updateComment({ ...repo, comment_id: progressCommentId, body: truncateOutput(output) });
+          await octokit.rest.issues.updateComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: truncateOutput(output),
+          });
         } else if ('pull_request' in event && 'comment' in event) {
-          await octokit.rest.pulls.updateReviewComment({ ...repo, comment_id: progressCommentId, body: truncateOutput(output) });
+          await octokit.rest.pulls.updateReviewComment({
+            ...repo,
+            comment_id: progressCommentId,
+            body: truncateOutput(output),
+          });
         } else {
           await postComment(octokit, repo, event, output);
         }
@@ -240,15 +335,29 @@ export async function commitAndPush(
       return;
     }
     core.info('Committing changes...');
-    await execa('git', ['commit', '-m', commitMessage], { cwd: workspace, stdio: 'inherit' });
+    await execa('git', ['commit', '-m', commitMessage], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
     core.info(`Pushing changes to origin/${currentBranch}...`);
-    await execa('git', ['push', 'origin', currentBranch], { cwd: workspace, stdio: 'inherit' });
+    await execa('git', ['push', 'origin', currentBranch], {
+      cwd: workspace,
+      stdio: 'inherit',
+    });
     core.info('Changes committed and pushed.');
     if (progressCommentId) {
       if ('issue' in event) {
-        await octokit.rest.issues.updateComment({ ...repo, comment_id: progressCommentId, body: truncateOutput(output) });
+        await octokit.rest.issues.updateComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body: truncateOutput(output),
+        });
       } else if ('pull_request' in event && 'comment' in event) {
-        await octokit.rest.pulls.updateReviewComment({ ...repo, comment_id: progressCommentId, body: truncateOutput(output) });
+        await octokit.rest.pulls.updateReviewComment({
+          ...repo,
+          comment_id: progressCommentId,
+          body: truncateOutput(output),
+        });
       } else {
         await postComment(octokit, repo, event, output);
       }
@@ -256,12 +365,25 @@ export async function commitAndPush(
       await postComment(octokit, repo, event, output);
     }
   } catch (error) {
-    core.error(`Error committing and pushing changes: ${toErrorMessage(error)}`);
+    core.error(
+      `Error committing and pushing changes: ${toErrorMessage(error)}`,
+    );
     try {
-      await postComment(octokit, repo, event, `Failed to apply changes to this PR: ${error instanceof Error ? error.message : String(error)}`);
+      await postComment(
+        octokit,
+        repo,
+        event,
+        `Failed to apply changes to this PR: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     } catch (commentError) {
-      core.error(`Failed to post error comment: ${toErrorMessage(commentError)}`);
+      core.error(
+        `Failed to post error comment: ${toErrorMessage(commentError)}`,
+      );
     }
-    throw new GitHubError(`Failed to commit and push changes: ${toErrorMessage(error)}`);
+    throw new GitHubError(
+      `Failed to commit and push changes: ${toErrorMessage(error)}`,
+    );
   }
 }

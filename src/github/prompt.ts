@@ -20,7 +20,10 @@ export async function generatePrompt(
   );
   let prFiles: string[] = [];
   let contextInfo = '';
-  if (event.type === 'pullRequestCommentCreated' || event.type === 'pullRequestReviewCommentCreated') {
+  if (
+    event.type === 'pullRequestCommentCreated' ||
+    event.type === 'pullRequestReviewCommentCreated'
+  ) {
     prFiles = await getChangedFiles(octokit, repo, event);
   }
   if (event.type === 'pullRequestReviewCommentCreated') {
@@ -30,7 +33,9 @@ export async function generatePrompt(
       contextInfo += `, line: ${comment.line}`;
     }
   }
-  const formatter = includeFullHistory ? genFullContentsString : genContentsString;
+  const formatter = includeFullHistory
+    ? genFullContentsString
+    : genContentsString;
   let historyPrompt = formatter(contents.content);
   for (const comment of filteredComments) {
     historyPrompt += formatter(comment);
@@ -46,7 +51,9 @@ export async function generatePrompt(
     prompt += `${promptBuilderConfig.contextLabel}\n${contextInfo}\n\n`;
   }
   if (prFiles.length > 0) {
-    prompt += `${promptBuilderConfig.changedFilesLabel}\n${prFiles.join('\n')}\n\n`;
+    prompt += `${promptBuilderConfig.changedFilesLabel}\n${prFiles.join(
+      '\n',
+    )}\n\n`;
   }
   if (prompt) {
     prompt += `${promptBuilderConfig.promptSeparator}\n\n${userPrompt}`;

@@ -33,9 +33,15 @@ export async function postComment(
           comment_id: inReplyTo ?? commentId,
           body: truncateOutput(body),
         });
-        core.info(`Comment posted to PR #${prNumber} Reply to comment #${commentId}`);
+        core.info(
+          `Comment posted to PR #${prNumber} Reply to comment #${commentId}`,
+        );
       } catch (error) {
-        core.warning(`Failed to post reply comment: ${error instanceof Error ? error.message : error}`);
+        core.warning(
+          `Failed to post reply comment: ${
+            error instanceof Error ? error.message : error
+          }`,
+        );
         await octokit.rest.issues.createComment({
           ...repo,
           issue_number: prNumber,
@@ -45,7 +51,11 @@ export async function postComment(
       }
     }
   } catch (error) {
-    core.error(`Failed to post comment: ${error instanceof Error ? error.message : error}`);
+    core.error(
+      `Failed to post comment: ${
+        error instanceof Error ? error.message : error
+      }`,
+    );
   }
 }
 
@@ -79,6 +89,10 @@ export async function upsertComment(
       await postComment(octokit, repo, event, body);
     }
   } catch (error) {
-    core.warning(`Failed to upsert comment: ${error instanceof Error ? error.message : String(error)}`);
+    core.warning(
+      `Failed to upsert comment: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
 }

@@ -5,7 +5,11 @@ import path from 'path';
 import type { ActionConfig } from '../config/config';
 import type { ProcessedEvent } from './event';
 import { cloneRepository } from './git';
-import { addEyeReaction, removeEyeReaction, addThumbUpReaction } from './reactions';
+import {
+  addEyeReaction,
+  removeEyeReaction,
+  addThumbUpReaction,
+} from './reactions';
 import { upsertComment } from './comments';
 import { captureFileState, detectChanges } from '../file/file';
 import { maskSensitiveInfo } from '../security/security';

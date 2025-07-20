@@ -8,11 +8,20 @@
 export type AgentEvent =
   | { type: 'issuesOpened'; github: GitHubEventIssuesOpened }
   | { type: 'issueCommentCreated'; github: GitHubEventIssueCommentCreated }
-  | { type: 'pullRequestCommentCreated'; github: GitHubEventPullRequestCommentCreated }
-  | { type: 'pullRequestReviewCommentCreated'; github: GitHubEventPullRequestReviewCommentCreated }
+  | {
+      type: 'pullRequestCommentCreated';
+      github: GitHubEventPullRequestCommentCreated;
+    }
+  | {
+      type: 'pullRequestReviewCommentCreated';
+      github: GitHubEventPullRequestReviewCommentCreated;
+    }
   | { type: 'issuesAssigned'; github: GitHubEventIssuesAssigned }
   | { type: 'pullRequestOpened'; github: GitHubEventPullRequestOpened }
-  | { type: 'pullRequestSynchronize'; github: GitHubEventPullRequestSynchronize };
+  | {
+      type: 'pullRequestSynchronize';
+      github: GitHubEventPullRequestSynchronize;
+    };
 
 /**
  * Raw GitHub event payload types.
@@ -64,7 +73,12 @@ export type GitHubEventPullRequestSynchronize = {
 };
 
 export type GithubComment = { id: number; body: string };
-export type GitHubIssue = { number: number; title: string; body: string; pull_request: null };
+export type GitHubIssue = {
+  number: number;
+  title: string;
+  body: string;
+  pull_request: null;
+};
 export type GitHubPullRequest = {
   number: number;
   title: string;
