@@ -18,9 +18,17 @@ import { toErrorMessage } from '../utils/error';
 import { ParseError } from '../utils/errors';
 import { extractPromptFlags } from '../utils/prompt';
 
-import { getEventType, extractText } from './github';
-
 import type { AgentEvent } from './github';
+import { getEventType, extractText } from './github';
+import { z } from 'zod';
+
+/**
+ * Schema for a generic object record from JSON.parse.
+ */
+const RawRecordSchema = z.unknown().refine(
+  (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
+  { message: 'Expected JSON object' },
+);
 
 /**
  * Represents a normalized event to trigger the Codex workflow.
@@ -40,40 +48,26 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
-
-  /**
-   * Whether to skip pull request creation and only post AI output as a comment.
-   */
-
   noPr: boolean;
-
-  /**
-   * Whether to fetch and include the latest failed CI build logs as context.
-   */
-
   includeFixBuild: boolean;
-
-  /**
-   * Whether to fetch known URLs referenced in the prompt and include their contents.
-   */
-
   includeFetch: boolean;
 }
 
 /**
- * Load and parse the event payload from the specified file path.
+ * Load and parse the event payload from the specified file path, validating its shape.
  * @param eventPath - Path to the event payload file.
  * @returns Parsed event payload object as a generic record.
- * @throws If the file cannot be read or parsed.
+ * @throws If the file cannot be read, parsed, or validated.
  */
-
 export async function loadEventPayload(
   eventPath: string,
 ): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(eventPath, 'utf8');
-    // JSON.parse returns any; cast to a generic object to avoid untyped any
-    return JSON.parse(content) as Record<string, unknown>;
+    const raw = JSON.parse(content);
+    // Validate that the parsed content is an object
+    const parsed = RawRecordSchema.parse(raw);
+    return parsed;
   } catch (error) {
     throw new ParseError(
       `Failed to read or parse event payload at ${eventPath}: ${toErrorMessage(

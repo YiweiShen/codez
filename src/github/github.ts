@@ -251,7 +251,10 @@ export async function cloneRepository(
  * @returns An AgentEvent discriminator object, or null if unsupported.
  */
 
-export function getEventType(payload: any): AgentEvent | null {
+export function getEventType(payload: unknown): AgentEvent | null {
+  if (typeof payload !== 'object' || payload === null) {
+    return null;
+  }
   if (
     payload.action === 'opened' &&
     payload.issue &&

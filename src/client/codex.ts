@@ -8,6 +8,7 @@ import * as core from '@actions/core';
 
 import { execa } from 'execa';
 
+import type { ExecaError } from 'execa';
 import type { ActionConfig } from '../config/config';
 import { CliError, TimeoutError } from '../utils/errors';
 
@@ -126,25 +127,18 @@ export async function runCodex(
     const textResult = blockLines.join('\n').trim();
 
     return textResult;
-  } catch (error) {
-    // Log the full error for debugging
+  } catch (error: unknown) {
     core.error(
       `Error executing Codex command: ${
         error instanceof Error ? error.stack : String(error)
       }`,
     );
-    if (
-      error instanceof Error &&
-      error.message.startsWith('Failed to parse JSON output')
-    ) {
+    if (error instanceof Error && error.message.startsWith('Failed to parse JSON output')) {
       throw error;
     }
-    if (
-      error instanceof Error &&
-      'timedOut' in error &&
-      // Cast through a typed interface to avoid untyped any
-      (error as { timedOut?: boolean }).timedOut
-    ) {
+    const isExecaError = (e: unknown): e is ExecaError =>
+      e instanceof Error && 'timedOut' in e;
+    if (isExecaError(error) && error.timedOut) {
       throw new TimeoutError(`Codex command timed out after ${timeout}ms.`);
     }
     throw new CliError(
