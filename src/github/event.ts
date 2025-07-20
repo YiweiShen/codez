@@ -180,14 +180,14 @@ export async function processEvent(
   const rawPayload = await loadEventPayload(config.eventPath);
   const parsedEvent = GitHubEventSchema.safeParse(rawPayload);
   if (!parsedEvent.success) {
-    core.info('Unsupported event type or payload structure.');
+    core.info('Unsupported event payload structure.');
     return null;
   }
   const eventPayload = parsedEvent.data;
   const agentEvent = getEventType(eventPayload);
 
   if (!agentEvent) {
-    core.info('Unsupported event type or payload structure.');
+    core.info('Unsupported event type detected.');
     return null; // Exit gracefully for unsupported events
   }
   core.info(`Detected event type: ${agentEvent.type}`);
