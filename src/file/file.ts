@@ -16,7 +16,7 @@ import * as core from '@actions/core';
 import fg from 'fast-glob';
 import ignore from 'ignore';
 
-import { toErrorMessage } from '../utils/error';
+import { toErrorMessage, wrapError } from '../utils/error';
 
 import { DEFAULT_IGNORE_PATTERNS } from './constants';
 
@@ -47,11 +47,8 @@ async function calculateFileHash(filePath: string): Promise<string> {
     hashSum.update(fileBuffer);
     return hashSum.digest('hex');
   } catch (error) {
-    // Log error but rethrow to be handled by caller, as hash calculation is critical
-    core.error(
-      `Failed to calculate hash for ${filePath}: ${toErrorMessage(error)}`,
-    );
-    throw error;
+    // Wrap error with context; logging is handled by callers.
+    throw wrapError(error, `Failed to calculate hash for ${filePath}`);
   }
 }
 

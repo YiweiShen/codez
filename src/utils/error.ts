@@ -26,3 +26,13 @@ export function toErrorStack(error: unknown): string | undefined {
   }
   return undefined;
 }
+
+/**
+ * Wraps an existing error with additional context message.
+ * @param error - The caught error or value.
+ * @param message - Context message to prepend.
+ * @returns A new Error with combined message.
+ */
+export function wrapError(error: unknown, message: string): Error {
+  return new Error(`${message}: ${toErrorMessage(error)}`);
+}
