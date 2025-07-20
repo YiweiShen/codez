@@ -9,16 +9,17 @@ import { promises as fs } from 'fs';
 
 import * as core from '@actions/core';
 
-import type { ActionConfig } from '../config/config.js';
+import type { ActionConfig } from '../config/config';
 
-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants';
 
-import { toErrorMessage } from '../utils/error.js';
+import { toErrorMessage } from '../utils/error';
 
-import { ParseError } from '../utils/errors.js';
-import { extractPromptFlags } from '../utils/prompt.js';
+import { ParseError } from '../utils/errors';
+import { extractPromptFlags } from '../utils/prompt';
 
-import { getEventType, extractText } from './github.js';
+import type { AgentEvent } from './github';
+import { getEventType, extractText } from './github';
 import { z } from 'zod';
 
 /**
@@ -28,8 +29,6 @@ const RawRecordSchema = z.unknown().refine(
   (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
   { message: 'Expected JSON object' },
 );
-
-import type { AgentEvent } from './github.js';
 
 /**
  * Represents a normalized event to trigger the Codex workflow.
@@ -49,32 +48,10 @@ export interface ProcessedEvent {
   userPrompt: string;
   includeFullHistory: boolean;
   createIssues: boolean;
-
-  /**
-   * Whether to skip pull request creation and only post AI output as a comment.
-   */
-
   noPr: boolean;
-
-  /**
-   * Whether to fetch and include the latest failed CI build logs as context.
-   */
-
   includeFixBuild: boolean;
-
-  /**
-   * Whether to fetch known URLs referenced in the prompt and include their contents.
-   */
-
   includeFetch: boolean;
 }
-
-/**
- * Load and parse the event payload from the specified file path.
- * @param eventPath - Path to the event payload file.
- * @returns Parsed event payload object as a generic record.
- * @throws If the file cannot be read or parsed.
- */
 
 /**
  * Load and parse the event payload from the specified file path, validating its shape.

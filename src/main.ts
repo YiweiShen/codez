@@ -6,14 +6,14 @@
 
 import * as core from '@actions/core';
 
-import { getConfig } from './config/config.js';
-import { getOpenAIClient } from './api/openai.js';
-import { runAction } from './github/action.js';
+import { getConfig } from './config/config';
+import { getOpenAIClient } from './api/openai';
+import { runAction } from './github/action';
 
-import { processEvent } from './github/event.js';
-import { postComment } from './github/github.js';
+import { processEvent } from './github/event';
+import { postComment } from './github/github';
 
-import { checkPermission } from './security/security.js';
+import { checkPermission } from './security/security';
 
 /**
  * Orchestrate the action's workflow.
