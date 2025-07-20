@@ -244,7 +244,6 @@ export function getConfig(): ActionConfig {
     octokit,
     context,
     repo,
-
     openaiApiKey,
     openaiBaseUrl,
     openaiModel,
