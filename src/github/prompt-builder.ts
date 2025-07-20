@@ -55,11 +55,29 @@ async function fetchLatestFailedWorkflowLogs(
     if (!entries || entries.length === 0) {
       return 'No log files found in the logs archive.';
     }
-    const logs: string[] = entries.map((entry: any) => {
-      const name = entry.entryName;
-      const content = entry.getData().toString('utf8');
-      return `=== ${name} ===\n${content}`;
-    });
+    // Limit number of files and size per entry to prevent zip-slip and resource exhaustion
+    const MAX_ENTRIES = 100;
+    const MAX_ENTRY_SIZE = 10 * 1024 * 1024; // 10MB
+    if (entries.length > MAX_ENTRIES) {
+      throw new GitHubError(
+        `Logs archive contains too many files: ${entries.length}`
+      );
+    }
+    const logs: string[] = [];
+    for (const entry of entries) {
+      const entryName = entry.entryName;
+      const normalized = path.normalize(entryName);
+      if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
+        throw new GitHubError(`Unsafe entry name in logs archive: ${entryName}`);
+      }
+      const data = entry.getData();
+      if (data.length > MAX_ENTRY_SIZE) {
+        throw new GitHubError(
+          `Log file ${entryName} is too large: ${data.length} bytes`
+        );
+      }
+      logs.push(`=== ${entryName} ===\n${data.toString('utf8')}`);
+    }
     return logs.join('\n\n');
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
