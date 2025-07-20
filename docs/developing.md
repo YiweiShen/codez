@@ -35,3 +35,19 @@ codez-<type>-<issueNumber>-<short-description>
 - `<type>` is one of `feat`, `fix`, `docs`, `styles`, or `chore`, inferred from the commit message.
 - `<issueNumber>` is the related issue number.
 - `<short-description>` is a slugified version of the generated commit message (lowercase, spaces replaced with hyphens, and non-alphanumeric characters removed).
+
+## Ensuring No Dead Code
+
+This project is configured to detect and prevent dead (unused) code in several ways:
+
+- **TypeScript compiler** flags unused locals and parameters via the `noUnusedLocals` and `noUnusedParameters` options in [`tsconfig.json`](../tsconfig.json).
+- **ESLint** automatically removes or errors on unused imports using the [`eslint-plugin-unused-imports`](https://github.com/sweepline/eslint-plugin-unused-imports) plugin.
+- **Module coverage**: All `src/` modules are reachable from the main entrypoints (`src/index.ts`, `src/main.ts`) and covered by tests, so there are no orphaned files.
+
+If you’d like to enforce these checks in CI, consider adding a CI step:
+
+```bash
+tsc --noEmit
+```
+
+For detecting unused dependencies in `package.json`, you can add tools like [depcheck](https://github.com/depcheck/depcheck) or [madge](https://github.com/pahen/madge).
