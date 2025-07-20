@@ -14,13 +14,13 @@ import { execa } from 'execa';
 
 import { Octokit } from 'octokit';
 
-import { promptBuilderConfig } from '../config/prompts.js';
+import { promptBuilderConfig } from '../config/prompts.ts';
 
-import { DEFAULT_TRIGGER_PHRASE } from '../constants.js';
-import { genContentsString, genFullContentsString } from '../utils/contents.js';
+import { DEFAULT_TRIGGER_PHRASE } from '../constants.ts';
+import { genContentsString, genFullContentsString } from '../utils/contents.ts';
 
-import { toErrorMessage } from '../utils/error.js';
-import { GitHubError } from '../utils/errors.js';
+import { toErrorMessage } from '../utils/error.ts';
+import { GitHubError } from '../utils/errors.ts';
 
 /**
  * Infer a branch type keyword from a commit message header.
