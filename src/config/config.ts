@@ -10,7 +10,11 @@ import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 
 import { defaultModel } from '../api/openai';
-import { DEFAULT_TRIGGER_PHRASE } from '../constants';
+import {
+  DEFAULT_TRIGGER_PHRASE,
+  DEFAULT_TIMEOUT_SECONDS,
+  DEFAULT_WORKSPACE_PATH,
+} from '../constants';
 
 import { ConfigError } from '../utils/errors';
 import { z } from 'zod';
@@ -24,7 +28,15 @@ import { z } from 'zod';
 export interface ActionConfig {
   githubToken: string;
   eventPath: string;
+  /**
+   * GitHub workspace path.
+   * @default DEFAULT_WORKSPACE_PATH
+   */
   workspace: string;
+  /**
+   * Timeout in seconds for GitHub Action operations.
+   * @default DEFAULT_TIMEOUT_SECONDS
+   */
   timeoutSeconds: number;
   octokit: Octokit;
   context: typeof github.context;
@@ -177,7 +189,7 @@ export function parseStringList(input: string): string[] {
 export function getConfig(): ActionConfig {
   const githubToken = core.getInput('github-token', { required: true });
   const eventPath = core.getInput('event-path');
-  const workspace = '/workspace/app';
+  const workspace = DEFAULT_WORKSPACE_PATH;
   const timeoutInput = core.getInput('timeout');
   let timeoutSeconds: number;
   if (timeoutInput) {
@@ -188,7 +200,7 @@ export function getConfig(): ActionConfig {
       );
     }
   } else {
-    timeoutSeconds = 600;
+    timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
   }
   const octokit = new Octokit({ auth: githubToken });
   const context = github.context;

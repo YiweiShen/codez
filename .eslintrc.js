@@ -1,3 +1,11 @@
+/**
+ * ESLint configuration constants to avoid magic numbers.
+ */
+/** Maximum allowed line length for source code. */
+const MAX_LINE_LENGTH = 80;
+/** Maximum allowed line length for test files. */
+const MAX_LINE_LENGTH_TEST = 120;
+
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -26,7 +34,7 @@ module.exports = {
   rules: {
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
-    'max-len': ['error', { code: 80, ignoreComments: false }],
+    'max-len': ['error', { code: MAX_LINE_LENGTH, ignoreComments: false }],
     'import/order': [
       'error',
       {
@@ -86,8 +94,8 @@ module.exports = {
   overrides: [
     {
       files: ['**/__tests__/**/*.{js,jsx,ts,tsx}'],
-      rules: {
-        'max-len': ['error', { code: 120, ignoreComments: false }],
+        rules: {
+        'max-len': ['error', { code: MAX_LINE_LENGTH_TEST, ignoreComments: false }],
         '@typescript-eslint/no-explicit-any': 'off',
       },
     },
