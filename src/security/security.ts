@@ -71,6 +71,16 @@ async function checkUserPermissionGithub(
 }
 
 /**
+ * Escape special regex characters in a string.
+ * @param str - Input string to escape for RegExp usage.
+ * @returns Escaped string safe for RegExp patterns.
+ */
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Mask sensitive information (GitHub token and OpenAI API key) within a string.
  * @param text - Input text that may contain sensitive data.
  * @param config - Action configuration containing sensitive keys.
@@ -80,15 +90,20 @@ async function checkUserPermissionGithub(
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;
 
-  if (config.githubToken) {
-    maskedText = maskedText.replaceAll(config.githubToken, '***');
-  }
+  // Mask and register secrets to ensure they are filtered from logs
+  const secrets = [
+    config.githubToken,
+    config.openaiApiKey,
+    config.openaiBaseUrl,
+  ].filter((secret): secret is string => Boolean(secret));
 
-  if (config.openaiApiKey) {
-    maskedText = maskedText.replaceAll(config.openaiApiKey, '***');
-  }
-  if (config.openaiBaseUrl) {
-    maskedText = maskedText.replaceAll(config.openaiBaseUrl, '***');
+  // Sort by length to handle overlapping secrets correctly
+  secrets.sort((a, b) => b.length - a.length);
+
+  for (const secret of secrets) {
+    core.setSecret(secret);
+    const pattern = new RegExp(escapeRegExp(secret), 'g');
+    maskedText = maskedText.replace(pattern, '***');
   }
 
   return maskedText;
