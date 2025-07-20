@@ -137,7 +137,7 @@ export async function preparePrompt(
   let prompt = await generatePrompt(
     octokit,
     repo,
-    agentEvent.github,
+    agentEvent,
     effectiveUserPrompt,
     includeFullHistory,
   );
