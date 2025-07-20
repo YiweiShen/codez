@@ -16,20 +16,6 @@ import { toErrorMessage } from '../utils/error.js';
  * @returns True if the user has permission; false otherwise.
  */
 
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
   const actor = context.actor;
@@ -59,27 +45,6 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
  * @returns True if the user has write or admin permissions; false otherwise.
  */
 
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param username
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param username
- */
-
-/**
- *
- */
 async function checkUserPermissionGithub(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -112,23 +77,6 @@ async function checkUserPermissionGithub(
  * @returns The text with sensitive information replaced by '***'.
  */
 
-/**
- *
- * @param text
- * @param config
- */
-
-/**
- *
- * @param text
- * @param config
- */
-
-/**
- *
- * @param text
- * @param config
- */
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;
 
