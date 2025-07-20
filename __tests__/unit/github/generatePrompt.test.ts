@@ -37,7 +37,7 @@ describe('generatePrompt', () => {
   it('partial history → includes [History] with only bot‐comments', async () => {
     const content = { body: 'body text', title: 'T', login: 'user1' };
     const comments = [
-      { body: 'first', login: 'github-actions[bot]' },
+      { body: 'first', login: 'codez[bot]' },
       { body: 'second', login: 'alice' },
     ];
     jest
