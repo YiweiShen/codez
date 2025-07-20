@@ -16,20 +16,6 @@ import { toErrorMessage } from '../utils/error.js';
  * @returns True if the user has permission; false otherwise.
  */
 
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
-
-/**
- *
- * @param config
- */
 export async function checkPermission(config: ActionConfig): Promise<boolean> {
   const { context, octokit, repo } = config;
   const actor = context.actor;
@@ -59,27 +45,6 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
  * @returns True if the user has write or admin permissions; false otherwise.
  */
 
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param username
- */
-
-/**
- *
- * @param octokit
- * @param repo
- * @param repo.owner
- * @param repo.repo
- * @param username
- */
-
-/**
- *
- */
 async function checkUserPermissionGithub(
   octokit: Octokit,
   repo: { owner: string; repo: string },
@@ -106,37 +71,21 @@ async function checkUserPermissionGithub(
 }
 
 /**
+ * Escape special regex characters in a string.
+ * @param str - Input string to escape for RegExp usage.
+ * @returns Escaped string safe for RegExp patterns.
+ */
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Mask sensitive information (GitHub token and OpenAI API key) within a string.
  * @param text - Input text that may contain sensitive data.
  * @param config - Action configuration containing sensitive keys.
  * @returns The text with sensitive information replaced by '***'.
  */
-
-/**
- *
- * @param text
- * @param config
- */
-
-/**
- *
- * @param text
- * @param config
- */
-
-/**
- *
- * @param text
- * @param config
- */
-/**
- * Escape special regex characters in a string.
- * @param str - Input string to escape for RegExp usage.
- * @returns Escaped string safe for RegExp patterns.
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
   let maskedText = text;
