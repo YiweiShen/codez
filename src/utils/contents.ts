@@ -5,7 +5,7 @@
 /**
  * Generate a quoted content string for bot comments.
  *
- * Prefixes each line of the body with "> " if the author is the Codez bot.
+ * Prefixes each line of the body with "> " if the author is the GitHub Actions bot.
  * @param content - Object containing body text and user login.
  * @returns Quoted body string for bot comments or empty string otherwise.
  */
@@ -18,20 +18,20 @@ interface CommentContent {
 
   body: string;
 
-  /** Author login of the comment (e.g., "codez[bot]"). */
+  /** Author login of the comment (e.g., "github-actions[bot]"). */
 
   login: string;
 }
 
 /**
- * Quote the comment body if authored by the Codez bot.
+* Quote the comment body if authored by the GitHub Actions bot.
  * @param comment - Comment to process.
  * @returns Quoted body string with each line prefixed by "> ", or empty string.
  */
 
 export function genContentsString(comment: CommentContent): string {
   const body = comment.body.trim();
-  if (!body || comment.login.trim() !== 'codez[bot]') {
+  if (!body || comment.login.trim() !== 'github-actions[bot]') {
     return '';
   }
   const quoted = body
