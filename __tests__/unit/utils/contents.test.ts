@@ -13,18 +13,18 @@ describe('genContentsString', () => {
     );
   });
 
-it('should return empty string when login is not github-actions[bot]', () => {
+  it('should return empty string when login is not github-actions[bot]', () => {
     const body = 'Line1\nLine2';
     expect(genContentsString({ body, login: 'some-user' })).toBe('');
   });
 
-it('should prefix each line of the body when login is github-actions[bot]', () => {
+  it('should prefix each line of the body when login is github-actions[bot]', () => {
     const body = 'Line1\nLine2';
     const result = genContentsString({ body, login: 'github-actions[bot]' });
     const expected = '> Line1\n> Line2\n\n';
     expect(result).toBe(expected);
   });
-it('should prefix a single-line body with blockquote and two newlines when login is github-actions[bot]', () => {
+  it('should prefix a single-line body with blockquote and two newlines when login is github-actions[bot]', () => {
     const body = 'SingleLine';
     const result = genContentsString({ body, login: 'github-actions[bot]' });
     const expected = '> SingleLine\n\n';

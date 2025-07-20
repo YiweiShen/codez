@@ -25,10 +25,12 @@ import { z } from 'zod';
 /**
  * Schema for a generic object record from JSON.parse.
  */
-const RawRecordSchema = z.unknown().refine(
-  (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
-  { message: 'Expected JSON object' },
-);
+const RawRecordSchema = z
+  .unknown()
+  .refine(
+    (x): x is Record<string, unknown> => typeof x === 'object' && x !== null,
+    { message: 'Expected JSON object' },
+  );
 
 /**
  * Represents a normalized event to trigger the Codex workflow.

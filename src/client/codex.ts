@@ -133,7 +133,10 @@ export async function runCodex(
         error instanceof Error ? error.stack : String(error)
       }`,
     );
-    if (error instanceof Error && error.message.startsWith('Failed to parse JSON output')) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Failed to parse JSON output')
+    ) {
       throw error;
     }
     const isExecaError = (e: unknown): e is ExecaError =>

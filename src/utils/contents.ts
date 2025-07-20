@@ -24,7 +24,7 @@ interface CommentContent {
 }
 
 /**
-* Quote the comment body if authored by the GitHub Actions bot.
+ * Quote the comment body if authored by the GitHub Actions bot.
  * @param comment - Comment to process.
  * @returns Quoted body string with each line prefixed by "> ", or empty string.
  */

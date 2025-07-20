@@ -1,4 +1,8 @@
-export { escapeRegExp, createProgressComment, updateProgressComment } from './progress';
+export {
+  escapeRegExp,
+  createProgressComment,
+  updateProgressComment,
+} from './progress';
 export { preparePrompt } from './prompt-builder';
 export { handleResult } from './result-handler';
 export { runAction } from './runAction';

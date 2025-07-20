@@ -71,11 +71,7 @@ export async function preparePrompt(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
 ): Promise<{ prompt: string; downloadedImageFiles: string[] }> {
-  const {
-    octokit,
-    repo,
-    workspace,
-  } = config;
+  const { octokit, repo, workspace } = config;
   const {
     agentEvent,
     userPrompt,

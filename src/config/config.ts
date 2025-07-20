@@ -82,7 +82,10 @@ const actionConfigSchema = z.object({
   githubToken: z.string().min(1, 'GitHub token is required'),
   eventPath: z.string().min(1, 'GitHub event path is required'),
   workspace: z.string().min(1, 'Workspace path is required'),
-  timeoutSeconds: z.number().int().positive('Timeout must be a positive integer'),
+  timeoutSeconds: z
+    .number()
+    .int()
+    .positive('Timeout must be a positive integer'),
   octokit: z.any(),
   context: z.any(),
   repo: z.object({
