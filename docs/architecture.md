@@ -5,7 +5,7 @@ This document provides a high-level overview of the Codez GitHub Action architec
 ```mermaid
 flowchart LR
   subgraph "GitHub Actions"
-    A[GitHub Event (issue_comment, pull_request)] --> B[Action Runner]
+    A["GitHub Event (issue_comment, pull_request)"] --> B[Action Runner]
   end
 
   subgraph "Core Orchestration"
@@ -15,7 +15,7 @@ flowchart LR
     E --> F[Permission Checker]
   end
 
-  F -->|allowed| G[Action Executor (runAction)]
+  F -->|allowed| G["Action Executor (runAction)"]
   F -->|denied| H[Exit Workflow]
 
   subgraph "Action Execution"
