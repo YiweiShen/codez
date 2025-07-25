@@ -51,13 +51,13 @@ export async function runAction(
   core.info(
     `[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`,
   );
-  // Update issue title to [WIP] when work starts for assigned issues
-  if (agentEvent.type === 'issuesAssigned') {
+  // Prefix issue/PR title with [WIP] when work starts
+  {
     const issueNumber = agentEvent.github.issue.number;
     const originalTitle = agentEvent.github.issue.title;
     const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
     const newTitle = `[WIP] ${strippedTitle}`;
-    core.info(`Updating issue #${issueNumber} title to '${newTitle}'`);
+    core.info(`Updating issue/PR #${issueNumber} title to '${newTitle}'`);
     await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
   }
 
@@ -260,13 +260,13 @@ export async function runAction(
     progressCommentId,
   );
 
-  // Update issue title to [Done] when work completes for assigned issues
-  if (agentEvent.type === 'issuesAssigned') {
+  // Prefix issue/PR title with [Done] when work completes
+  {
     const issueNumber = agentEvent.github.issue.number;
     const originalTitle = agentEvent.github.issue.title;
     const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
     const newTitle = `[Done] ${strippedTitle}`;
-    core.info(`Updating issue #${issueNumber} title to '${newTitle}'`);
+    core.info(`Updating issue/PR #${issueNumber} title to '${newTitle}'`);
     await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
   }
   core.info('Action completed successfully.');
