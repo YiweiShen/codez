@@ -1,5 +1,9 @@
 # Usage
 
+## Title Prefixing
+
+Codez will automatically prefix the title of the issue or pull request with `[WIP]` when it begins processing, and update it to `[Done]` once processing is complete. If re-run on a `[Done]` titled issue, it will toggle back to `[WIP]` to indicate re-work.
+
 ## Example Usage in Issues
 
 Create a new Issue and add the following to the body:
