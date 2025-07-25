@@ -51,6 +51,15 @@ export async function runAction(
   core.info(
     `[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`,
   );
+  // Update issue title to [WIP] when work starts for assigned issues
+  if (agentEvent.type === 'issuesAssigned') {
+    const issueNumber = agentEvent.github.issue.number;
+    const originalTitle = agentEvent.github.issue.title;
+    const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
+    const newTitle = `[WIP] ${strippedTitle}`;
+    core.info(`Updating issue #${issueNumber} title to '${newTitle}'`);
+    await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
+  }
 
   const progressSteps = [
     '🔍 Gathering context',
@@ -251,6 +260,15 @@ export async function runAction(
     progressCommentId,
   );
 
+  // Update issue title to [Done] when work completes for assigned issues
+  if (agentEvent.type === 'issuesAssigned') {
+    const issueNumber = agentEvent.github.issue.number;
+    const originalTitle = agentEvent.github.issue.title;
+    const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
+    const newTitle = `[Done] ${strippedTitle}`;
+    core.info(`Updating issue #${issueNumber} title to '${newTitle}'`);
+    await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
+  }
   core.info('Action completed successfully.');
   try {
     await removeEyeReaction(octokit, repo, agentEvent.github);
