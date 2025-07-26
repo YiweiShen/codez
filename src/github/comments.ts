@@ -3,9 +3,72 @@
  */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type { RepoContext, GitHubEvent } from './types';
-import { GitHubError } from '../utils/errors';
+import type {
+  GitHubEvent,
+  GitHubEventPullRequestReviewCommentCreated,
+  RepoContext,
+} from './types';
 import { truncateOutput } from './utils';
+
+// Type guards for GitHubEvent type narrowing
+function isIssueEvent(event: GitHubEvent): event is { issue: { number: number } } {
+  return 'issue' in event;
+}
+
+function isReviewCommentEvent(
+  event: GitHubEvent,
+): event is GitHubEventPullRequestReviewCommentCreated {
+  return 'pull_request' in event && 'comment' in event;
+}
+
+/**
+ * Post a comment to an issue (or pull request via issues API).
+ */
+async function postIssueComment(
+  octokit: Octokit,
+  repo: RepoContext,
+  issueNumber: number,
+  body: string,
+): Promise<void> {
+  await octokit.rest.issues.createComment({
+    ...repo,
+    issue_number: issueNumber,
+    body: truncateOutput(body),
+  });
+  core.info(`Comment posted to Issue/PR #${issueNumber}`);
+}
+
+/**
+ * Post a reply to a pull request review comment, or fallback to a regular PR comment.
+ */
+async function postReviewReply(
+  octokit: Octokit,
+  repo: RepoContext,
+  prNumber: number,
+  commentId: number,
+  inReplyToId: number | undefined,
+  body: string,
+): Promise<void> {
+  try {
+    await octokit.rest.pulls.createReplyForReviewComment({
+      ...repo,
+      pull_number: prNumber,
+      comment_id: inReplyToId ?? commentId,
+      body: truncateOutput(body),
+    });
+    core.info(
+      `Comment posted to PR #${prNumber} reply to comment #${commentId}`,
+    );
+  } catch (error) {
+    core.warning(
+      `Failed to post reply comment: ${
+        error instanceof Error ? error.message : error
+      }`,
+    );
+    await postIssueComment(octokit, repo, prNumber, body);
+    core.info(`Regular comment posted to PR #${prNumber}`);
+  }
+}
 
 /**
  * Posts a comment to an issue or pull request.
@@ -22,41 +85,20 @@ export async function postComment(
   body: string,
 ): Promise<void> {
   try {
-    if ('issue' in event) {
-      const issueNumber = event.issue.number;
-      await octokit.rest.issues.createComment({
-        ...repo,
-        issue_number: issueNumber,
-        body: truncateOutput(body),
-      });
-      core.info(`Comment posted to Issue/PR #${issueNumber}`);
-    } else if ('pull_request' in event && 'comment' in event) {
-      const prNumber = event.pull_request.number;
-      const commentId = event.comment.id;
-      const inReplyTo = event.comment.in_reply_to_id;
-      try {
-        await octokit.rest.pulls.createReplyForReviewComment({
-          ...repo,
-          pull_number: prNumber,
-          comment_id: inReplyTo ?? commentId,
-          body: truncateOutput(body),
-        });
-        core.info(
-          `Comment posted to PR #${prNumber} Reply to comment #${commentId}`,
-        );
-      } catch (error) {
-        core.warning(
-          `Failed to post reply comment: ${
-            error instanceof Error ? error.message : error
-          }`,
-        );
-        await octokit.rest.issues.createComment({
-          ...repo,
-          issue_number: prNumber,
-          body: truncateOutput(body),
-        });
-        core.info(`Regular comment posted to PR #${prNumber}`);
-      }
+    if (isIssueEvent(event)) {
+      await postIssueComment(octokit, repo, event.issue.number, body);
+      return;
+    }
+    if (isReviewCommentEvent(event)) {
+      await postReviewReply(
+        octokit,
+        repo,
+        event.pull_request.number,
+        event.comment.id,
+        event.comment.in_reply_to_id,
+        body,
+      );
+      return;
     }
   } catch (error) {
     core.error(
@@ -86,21 +128,25 @@ export async function upsertComment(
   try {
     if (!commentId) {
       await postComment(octokit, repo, event, body);
-    } else if ('issue' in event) {
+      return;
+    }
+    if (isIssueEvent(event)) {
       await octokit.rest.issues.updateComment({
         ...repo,
         comment_id: commentId,
         body,
       });
-    } else if ('pull_request' in event) {
+      return;
+    }
+    if ('pull_request' in event) {
       await octokit.rest.pulls.updateReviewComment({
         ...repo,
         comment_id: commentId,
         body,
       });
-    } else {
-      await postComment(octokit, repo, event, body);
+      return;
     }
+    await postComment(octokit, repo, event, body);
   } catch (error) {
     core.warning(
       `Failed to upsert comment: ${
