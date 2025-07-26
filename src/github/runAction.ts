@@ -180,6 +180,8 @@ export async function runAction(
       output,
       progressCommentId,
     );
+    await updateTitle('Done');
+    core.info('Action completed successfully.');
     await finalizeReactions();
     return;
   }
