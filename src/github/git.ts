@@ -14,6 +14,50 @@ import { removeEyeReaction, addThumbUpReaction } from './reactions';
 import { postComment } from './comments';
 import { toErrorMessage } from '../utils/error';
 
+// Helper to run git commands with inherited stdio.
+async function runGit(args: string[], cwd: string) {
+  return execa('git', args, { cwd, stdio: 'inherit' });
+}
+
+// Configure git user identity for GitHub Actions bot.
+async function configureGitUser(workspace: string): Promise<void> {
+  await runGit(['config', 'user.name', 'github-actions[bot]'], workspace);
+  await runGit(
+    ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
+    workspace,
+  );
+}
+
+// Stage all changes and return whether there are any to commit.
+async function hasChanges(workspace: string): Promise<boolean> {
+  await runGit(['add', '-A'], workspace);
+  const status = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+  return Boolean(status.stdout.trim());
+}
+
+// Determine which branch to clone based on the triggering event.
+async function determineBranchToClone(
+  event: AgentEvent,
+  repo: RepoContext,
+  octokit: Octokit,
+  defaultBranch: string,
+): Promise<string> {
+  if (
+    event.type === 'pullRequestCommentCreated' ||
+    event.type === 'pullRequestReviewCommentCreated'
+  ) {
+    const prNumber =
+      event.type === 'pullRequestCommentCreated'
+        ? event.github.issue.number
+        : event.github.pull_request.number;
+    const pr = await octokit.rest.pulls.get({ ...repo, pull_number: prNumber });
+    core.info(`Cloning PR branch: ${pr.data.head.ref}`);
+    return pr.data.head.ref;
+  }
+  core.info(`Cloning default branch: ${defaultBranch}`);
+  return defaultBranch;
+}
+
 /**
  * Clone the target repository and checkout the appropriate branch based on the given event.
  * @param workspace - Directory path where the repository will be cloned.
@@ -32,33 +76,17 @@ export async function cloneRepository(
   octokit: Octokit,
   event: AgentEvent,
 ): Promise<void> {
-  const cloneUrl = context.payload.repository?.clone_url;
-  if (!cloneUrl) {
-    throw new GitHubError('Repository clone URL not found');
+  const { repository } = context.payload;
+  if (!repository?.clone_url || !repository.default_branch) {
+    throw new GitHubError('Repository information not found');
   }
-  let branchToClone: string;
-  if (
-    event.type === 'pullRequestCommentCreated' ||
-    event.type === 'pullRequestReviewCommentCreated'
-  ) {
-    const prNumber =
-      event.type === 'pullRequestCommentCreated'
-        ? event.github.issue.number
-        : event.github.pull_request.number;
-    try {
-      const prData = await octokit.rest.pulls.get({
-        ...repo,
-        pull_number: prNumber,
-      });
-      branchToClone = prData.data.head.ref;
-      core.info(`Cloning PR branch: ${branchToClone}`);
-    } catch (e) {
-      throw new GitHubError(`Could not get PR branch from API: ${e}`);
-    }
-  } else {
-    branchToClone = context.payload.repository?.default_branch!;
-    core.info(`Cloning default branch: ${branchToClone}`);
-  }
+  const { clone_url: cloneUrl, default_branch: defaultBranch } = repository;
+  const branchToClone = await determineBranchToClone(
+    event,
+    repo,
+    octokit,
+    defaultBranch,
+  );
   core.info(
     `Cloning repository ${cloneUrl} branch ${branchToClone} into ${workspace}`,
   );
@@ -69,8 +97,7 @@ export async function cloneRepository(
       'https://',
       `https://x-access-token:${githubToken}@`,
     );
-    await execa(
-      'git',
+    await runGit(
       [
         'clone',
         '--depth',
@@ -80,7 +107,7 @@ export async function cloneRepository(
         authenticatedCloneUrl,
         '.',
       ],
-      { cwd: workspace, stdio: 'inherit' },
+      workspace,
     );
     core.info('Repository cloned successfully.');
   } catch (error) {
@@ -132,30 +159,11 @@ export async function createPullRequest(
     );
   }
   try {
-    core.info('Configuring Git user identity locally...');
-    await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
-    await execa(
-      'git',
-      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
-      {
-        cwd: workspace,
-        stdio: 'inherit',
-      },
-    );
+    await configureGitUser(workspace);
     core.info(`Creating new branch: ${branchName}`);
-    await execa('git', ['checkout', '-b', branchName], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
-    core.info('Adding changed files to Git...');
-    await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
-    const statusResult = await execa('git', ['status', '--porcelain'], {
-      cwd: workspace,
-    });
-    if (!statusResult.stdout.trim()) {
+    await runGit(['checkout', '-b', branchName], workspace);
+    core.info('Staging changes...');
+    if (!(await hasChanges(workspace))) {
       core.info('No changes to commit. Skipping pull request creation.');
       const body = truncateOutput(output);
       if (progressCommentId) {
@@ -174,15 +182,9 @@ export async function createPullRequest(
       return;
     }
     core.info('Committing changes...');
-    await execa('git', ['commit', '-m', commitMessage], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    await runGit(['commit', '-m', commitMessage], workspace);
     core.info(`Pushing changes to origin/${branchName}...`);
-    await execa('git', ['push', 'origin', branchName, '--force'], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    await runGit(['push', 'origin', branchName, '--force'], workspace);
     core.info('Creating Pull Request...');
     const pr = await octokit.rest.pulls.create({
       ...repo,
@@ -302,10 +304,7 @@ export async function commitAndPush(
       });
       currentBranch = prData.data.head.ref;
       core.info(`Checked out PR branch: ${currentBranch}`);
-      await execa('git', ['checkout', currentBranch], {
-        cwd: workspace,
-        stdio: 'inherit',
-      });
+      await runGit(['checkout', currentBranch], workspace);
     } catch (e) {
       core.warning(
         `Could not get PR branch from API, attempting to use current branch: ${e}`,
@@ -317,27 +316,11 @@ export async function commitAndPush(
       );
       currentBranch = branchResult.stdout.trim();
       core.info(`Using current branch from git: ${currentBranch}`);
-      await execa('git', ['checkout', currentBranch], {
-        cwd: workspace,
-        stdio: 'inherit',
-      });
+      await runGit(['checkout', currentBranch], workspace);
     }
-    core.info('Configuring Git user identity locally...');
-    await execa('git', ['config', 'user.name', 'github-actions[bot]'], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
-    await execa(
-      'git',
-      ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com'],
-      { cwd: workspace, stdio: 'inherit' },
-    );
-    core.info('Adding changed files to Git...');
-    await execa('git', ['add', '-A'], { cwd: workspace, stdio: 'inherit' });
-    const statusResult = await execa('git', ['status', '--porcelain'], {
-      cwd: workspace,
-    });
-    if (!statusResult.stdout.trim()) {
+    await configureGitUser(workspace);
+    core.info('Staging changes...');
+    if (!(await hasChanges(workspace))) {
       core.info('No changes to commit.');
       if (progressCommentId) {
         if ('issue' in event) {
@@ -361,15 +344,9 @@ export async function commitAndPush(
       return;
     }
     core.info('Committing changes...');
-    await execa('git', ['commit', '-m', commitMessage], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    await runGit(['commit', '-m', commitMessage], workspace);
     core.info(`Pushing changes to origin/${currentBranch}...`);
-    await execa('git', ['push', 'origin', currentBranch], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
+    await runGit(['push', 'origin', currentBranch], workspace);
     core.info('Changes committed and pushed.');
     if (progressCommentId) {
       if ('issue' in event) {
