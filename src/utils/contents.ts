@@ -1,61 +1,62 @@
 /**
- * @file Content formatting utilities module.
+ * Content formatting utilities module.
+ *
  * Provides functions to generate formatted content strings for GitHub comments.
  */
-/**
- * Generate a quoted content string for bot comments.
- *
- * Prefixes each line of the body with "> " if the author is the GitHub Actions bot.
- * @param content - Object containing body text and user login.
- * @returns Quoted body string for bot comments or empty string otherwise.
- */
+
+/** Author login string for GitHub Actions bot. */
+const GITHUB_ACTIONS_BOT_LOGIN = 'github-actions[bot]';
+
 /**
  * Represents a GitHub comment with body text and author login.
  */
-
-interface CommentContent {
+export interface CommentContent {
   /** Raw body text of the comment. */
-
   body: string;
-
   /** Author login of the comment (e.g., "github-actions[bot]"). */
-
   login: string;
 }
 
 /**
- * Quote the comment body if authored by the GitHub Actions bot.
- * @param comment - Comment to process.
- * @returns Quoted body string with each line prefixed by "> ", or empty string.
+ * Prefixes each line of the input text with "> ".
+ *
+ * @param text - The text to quote.
+ * @returns Quoted text with each line prefixed by "> ".
  */
-
-export function genContentsString(comment: CommentContent): string {
-  const body = comment.body.trim();
-  if (!body || comment.login.trim() !== 'github-actions[bot]') {
-    return '';
-  }
-  const quoted = body
+function quoteLines(text: string): string {
+  return text
     .split('\n')
     .map((line) => `> ${line}`)
     .join('\n');
-  return quoted + '\n\n';
+}
+
+/**
+ * Quote the comment body if it was authored by the GitHub Actions bot.
+ *
+ * @param comment - Comment to process.
+ * @returns Quoted body string with each line prefixed by "> " and two trailing newlines,
+ * or empty string if the body is empty or not authored by the GitHub Actions bot.
+ */
+export function genContentsString({ body, login }: CommentContent): string {
+  const trimmed = body.trim();
+  if (!trimmed || login.trim() !== GITHUB_ACTIONS_BOT_LOGIN) {
+    return '';
+  }
+  return `${quoteLines(trimmed)}\n\n`;
 }
 
 /**
  * Generate a fully quoted content string.
  *
  * Prefixes each line of the body with "> " and retains all content.
- * @param content - Object containing body text and user login.
- * @returns Fully quoted body string or empty string if the body is empty.
+ *
+ * @param comment - Comment to process.
+ * @returns Fully quoted body string with two trailing newlines or empty string if the body is empty.
  */
-export function genFullContentsString(comment: CommentContent): string {
-  const body = comment.body.trim();
-  if (!body) {
+export function genFullContentsString({ body }: CommentContent): string {
+  const trimmed = body.trim();
+  if (!trimmed) {
     return '';
   }
-  const quoted = body
-    .split('\n')
-    .map((line) => `> ${line}`)
-    .join('\n');
-  return quoted + '\n\n';
+  return `${quoteLines(trimmed)}\n\n`;
 }
