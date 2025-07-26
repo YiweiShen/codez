@@ -1,14 +1,6 @@
 /**
- * @file Prompt utilities module.
+ * Prompt utilities module.
  *
- * Extracts flags and remaining prompt text from user input.
+ * Re-exports extractPromptFlags and PromptFlagOptions from ./flags.
  */
-
-/**
- * @file Prompt utilities module.
- * Centralized flag parsing logic moved to src/utils/flags.ts.
- */
-
-import { extractPromptFlags, PromptFlagOptions } from './flags';
-
-export { extractPromptFlags, PromptFlagOptions };
+export { extractPromptFlags, PromptFlagOptions } from './flags';
