@@ -10,6 +10,9 @@ import type { Octokit } from 'octokit';
 import type { ActionConfig } from '../config/config';
 import { toErrorMessage } from '../utils/error';
 
+// Reuse repository info type from action configuration
+type Repo = ActionConfig['repo'];
+
 /**
  * Check if the user has appropriate permissions to run the action.
  * @param config - Action configuration object containing GitHub context.
@@ -35,35 +38,31 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
   }
 }
 
+
 /**
  * Check if a GitHub user has appropriate permissions for the repository.
  * @param octokit - GitHub API client instance.
  * @param repo - Repository information.
- * @param repo.owner
  * @param username - GitHub username to check permissions for.
- * @param repo.repo
  * @returns True if the user has write or admin permissions; false otherwise.
  */
-
 async function checkUserPermissionGithub(
   octokit: Octokit,
-  repo: { owner: string; repo: string },
+  repo: Repo,
   username: string,
 ): Promise<boolean> {
   try {
     // Check user's permissions as a repository collaborator
-    const { data: collaboratorPermission } =
-      await octokit.rest.repos.getCollaboratorPermissionLevel({
-        ...repo,
-        username,
-      });
+    const {
+      data: { permission },
+    } = await octokit.rest.repos.getCollaboratorPermissionLevel({
+      ...repo,
+      username,
+    });
+    core.info(`User permission level: ${permission}`);
 
-    const permission = collaboratorPermission.permission;
-    core.info(`User Permission level: ${permission}`);
-
-    // Determine based on permission level
-    // Permission levels include `admin, write, read, none`
-    return ['admin', 'write'].includes(permission);
+    const allowed = new Set(['admin', 'write']);
+    return allowed.has(permission);
   } catch (error) {
     core.warning(`Error checking user permission: ${toErrorMessage(error)}`);
     return false;
@@ -88,23 +87,17 @@ function escapeRegExp(str: string): string {
  */
 
 export function maskSensitiveInfo(text: string, config: ActionConfig): string {
-  let maskedText = text;
-
-  // Mask and register secrets to ensure they are filtered from logs
   const secrets = [
     config.githubToken,
     config.openaiApiKey,
     config.openaiBaseUrl,
-  ].filter((secret): secret is string => Boolean(secret));
+  ]
+    .filter((s): s is string => s.length > 0)
+    .sort((a, b) => b.length - a.length);
 
-  // Sort by length to handle overlapping secrets correctly
-  secrets.sort((a, b) => b.length - a.length);
-
-  for (const secret of secrets) {
+  return secrets.reduce((result, secret) => {
     core.setSecret(secret);
     const pattern = new RegExp(escapeRegExp(secret), 'g');
-    maskedText = maskedText.replace(pattern, '***');
-  }
-
-  return maskedText;
+    return result.replace(pattern, '***');
+  }, text);
 }
