@@ -24,7 +24,7 @@ async function postErrorComment(
 ): Promise<void> {
   try {
     await postComment(config.octokit, config.repo, event.agentEvent.github, message);
-  } catch (err) {
+  } catch (err: unknown) {
     core.error(`Failed to post comment: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
@@ -32,97 +32,100 @@ async function postErrorComment(
 /**
  * Wraps a promise with a timeout, rejecting with the provided error on timeout.
  */
-async function withTimeout<T>(
+function withTimeout<T>(
   promise: Promise<T>,
   ms: number,
   timeoutError: Error,
 ): Promise<T> {
   let timer: NodeJS.Timeout;
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timer = setTimeout(() => reject(timeoutError), ms);
-      }),
-    ]);
-  } finally {
-    clearTimeout(timer!);
-  }
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      timer = setTimeout(() => reject(timeoutError), ms);
+    }),
+  ]).finally(() => clearTimeout(timer));
 }
 
 /**
  * Verifies OpenAI API key and model access.
  * @throws if the model is not accessible.
  */
+/**
+ * Verifies OpenAI API key and model access.
+ * @throws if the model is not accessible.
+ */
 async function verifyModelAccess(config: ActionConfig): Promise<void> {
-  const client = getOpenAIClient(config);
-  await client.models.retrieve(config.openaiModel);
+  await getOpenAIClient(config).models.retrieve(config.openaiModel);
 }
 
 /**
- * Orchestrate the action's workflow.
- *
- * Retrieves configuration, processes the event, checks permissions,
- * and executes the main action logic within the configured timeout budget.
- * @returns A promise that resolves when the action completes.
+ * Entry point for the action, handling setup and top-level error reporting.
  */
-
 export async function run(): Promise<void> {
   try {
     const config = getConfig();
-
-    core.info(`Verifying OpenAI API key and access to model ${config.openaiModel}`);
-    try {
-      await verifyModelAccess(config);
-    } catch (error) {
-      const message = `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}"`;
-      core.setFailed(message);
-      try {
-        const processedEvent = await processEvent(config);
-        if (processedEvent) {
-          await postErrorComment(config, processedEvent, message);
-        }
-      } catch (commentError) {
-        core.error(
-          `Failed to post API key error comment: ${
-            commentError instanceof Error ? commentError.message : String(commentError)
-          }`,
-        );
-      }
-      return;
-    }
-
-    const processedEvent = await processEvent(config);
-    if (!processedEvent) {
-      return;
-    }
-
-    if (!(await checkPermission(config))) {
-      core.warning('Permission check failed. Exiting process.');
-      return;
-    }
-
-    const timeoutMs = config.timeoutSeconds * 1000;
-    const timeoutErrorMessage = `Action timed out after ${config.timeoutSeconds} seconds`;
-    try {
-      await withTimeout(
-        runAction(config, processedEvent),
-        timeoutMs,
-        new Error(timeoutErrorMessage),
-      );
-    } catch (error) {
-      if (error instanceof Error && error.message === timeoutErrorMessage) {
-        core.setFailed(timeoutErrorMessage);
-        await postErrorComment(config, processedEvent, timeoutErrorMessage);
-        return;
-      }
-      throw error;
-    }
-  } catch (error) {
+    await executeAction(config);
+  } catch (error: unknown) {
     if (error instanceof Error) {
       core.setFailed(`Action failed: ${error.message}\n${error.stack ?? ''}`);
     } else {
       core.setFailed(`An unknown error occurred: ${String(error)}`);
     }
+  }
+}
+
+/**
+ * Orchestrates action workflow: model verification, event processing,
+ * permission check, and executing the main logic with timeout.
+ */
+async function executeAction(config: ActionConfig): Promise<void> {
+  core.info(`Verifying OpenAI API key and access to model ${config.openaiModel}`);
+
+  try {
+    await verifyModelAccess(config);
+  } catch (error: unknown) {
+    const message = `OPENAI_API_KEY invalid or no access to model "${config.openaiModel}"`;
+    core.setFailed(message);
+    try {
+      const processedEvent = await processEvent(config);
+      if (processedEvent) {
+        await postErrorComment(config, processedEvent, message);
+      }
+    } catch (commentError: unknown) {
+      core.error(
+        `Failed to post API key error comment: ${
+          commentError instanceof Error ? commentError.message : String(commentError)
+        }`,
+      );
+    }
+    return;
+  }
+
+  const processedEvent = await processEvent(config);
+  if (!processedEvent) {
+    return;
+  }
+
+  if (!(await checkPermission(config))) {
+    core.warning('Permission check failed. Exiting process.');
+    return;
+  }
+
+  const timeoutMs = config.timeoutSeconds * 1000;
+  const timeoutMessage = `Action timed out after ${config.timeoutSeconds} seconds`;
+
+  try {
+    await withTimeout(
+      runAction(config, processedEvent),
+      timeoutMs,
+      new Error(timeoutMessage),
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === timeoutMessage) {
+      core.setFailed(timeoutMessage);
+      await postErrorComment(config, processedEvent, timeoutMessage);
+      return;
+    }
+    throw error;
   }
 }
