@@ -6,6 +6,72 @@ import type { Octokit } from 'octokit';
 import type { RepoContext, AgentEvent, GitHubContentsData } from './types';
 import { GitHubError } from '../utils/errors';
 
+// Helper types for GraphQL content fetching
+type GraphQLContentNode = 'issue' | 'pullRequest';
+
+interface GraphQLContentResp<Node extends GraphQLContentNode> {
+  repository: {
+    [K in Node]: {
+      number: number;
+      title: string;
+      body: string | null;
+      author: { login: string };
+      comments: { nodes: { body: string | null; author: { login: string } }[] };
+    };
+  };
+}
+
+/**
+ * Generic fetch for issue or pull request content and comments via GraphQL.
+ */
+async function fetchContentNode<Node extends GraphQLContentNode>(
+  octokit: Octokit,
+  repo: RepoContext,
+  nodeType: Node,
+  numberArg: number,
+): Promise<GitHubContentsData> {
+  const label = nodeType === 'issue' ? 'issue' : 'pull request';
+  core.info(`Fetching data for ${label} #${numberArg} via GraphQL...`);
+  const query = `
+    query($owner: String!, $repo: String!, $numberArg: Int!) {
+      repository(owner: $owner, name: $repo) {
+        ${nodeType}(number: $numberArg) {
+          number
+          title
+          body
+          author { login }
+          comments(first: 100) {
+            nodes { body author { login } }
+          }
+        }
+      }
+    }
+  `;
+  try {
+    const resp = await octokit.graphql<GraphQLContentResp<Node>>(query, {
+      owner: repo.owner,
+      repo: repo.repo,
+      numberArg,
+    });
+    const node = resp.repository[nodeType];
+    const content = {
+      number: node.number,
+      title: node.title,
+      body: node.body ?? '',
+      login: node.author.login,
+    };
+    const comments = node.comments.nodes.map((c) => ({
+      body: c.body ?? '',
+      login: c.author.login,
+    }));
+    core.info(`Fetched ${comments.length} comments for ${label} #${numberArg}.`);
+    return { content, comments };
+  } catch {
+    core.error(`Failed to get data for ${label} #${numberArg}`);
+    throw new GitHubError(`Could not retrieve data for ${label} #${numberArg}`);
+  }
+}
+
 /**
  * Get the list of changed files for a pull request comment event.
  * @param octokit - Authenticated Octokit client.
@@ -18,21 +84,22 @@ export async function getChangedFiles(
   repo: RepoContext,
   event: AgentEvent,
 ): Promise<string[]> {
-  let prNumber: number;
-  if (event.type === 'pullRequestCommentCreated') {
-    prNumber = event.github.issue.number;
-  } else if (event.type === 'pullRequestReviewCommentCreated') {
-    prNumber = event.github.pull_request.number;
-  } else {
-    throw new GitHubError(
-      `Cannot get changed files for event type: ${event.type}`,
-    );
-  }
-  const prFilesResponse = await octokit.rest.pulls.listFiles({
+  const prNumber = (() => {
+    switch (event.type) {
+      case 'pullRequestCommentCreated':
+        return event.github.issue.number;
+      case 'pullRequestReviewCommentCreated':
+        return event.github.pull_request.number;
+      default:
+        throw new GitHubError(`Cannot get changed files for event type: ${event.type}`);
+    }
+  })();
+
+  const { data: files } = await octokit.rest.pulls.listFiles({
     ...repo,
     pull_number: prNumber,
   });
-  return prFilesResponse.data.map((file) => file.filename);
+  return files.map(({ filename }) => filename);
 }
 
 /**
@@ -42,146 +109,36 @@ export async function getChangedFiles(
  * @param event - AgentEvent triggering the data retrieval.
  * @returns Promise resolving to content and comments data.
  */
+/**
+ * Retrieve content and comments for issues and pull requests based on the event.
+ */
 export async function getContentsData(
   octokit: Octokit,
   repo: RepoContext,
   event: AgentEvent,
 ): Promise<GitHubContentsData> {
-  if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
-    return getIssueData(octokit, repo, event.github.issue.number);
-  } else if (event.type === 'pullRequestCommentCreated') {
-    return getPullRequestData(octokit, repo, event.github.issue.number);
-  } else if (event.type === 'pullRequestReviewCommentCreated') {
-    return getPullRequestReviewCommentsData(
-      octokit,
-      repo,
-      event.github.pull_request.number,
-      event.github.comment.in_reply_to_id ?? event.github.comment.id,
-    );
-  }
-  throw new GitHubError('Invalid event type for data retrieval');
-}
+  switch (event.type) {
+    case 'issuesOpened':
+    case 'issueCommentCreated':
+      return fetchContentNode(octokit, repo, 'issue', event.github.issue.number);
 
-async function getIssueData(
-  octokit: Octokit,
-  repo: RepoContext,
-  issueNumber: number,
-): Promise<GitHubContentsData> {
-  core.info(`Fetching data for issue #${issueNumber}...`);
-  try {
-    // Fetch issue and its comments via GraphQL in a single request
-    core.info(`Fetching data for issue #${issueNumber} via GraphQL...`);
-    const query = `
-      query($owner: String!, $repo: String!, $issueNumber: Int!) {
-        repository(owner: $owner, name: $repo) {
-          issue(number: $issueNumber) {
-            number
-            title
-            body
-            author { login }
-            comments(first: 100) {
-              nodes { body author { login } }
-            }
-          }
-        }
-      }
-    `;
-    const resp = await octokit.graphql<{
-      repository: {
-        issue: {
-          number: number;
-          title: string;
-          body: string | null;
-          author: { login: string };
-          comments: {
-            nodes: { body: string | null; author: { login: string } }[];
-          };
-        };
-      };
-    }>(query, {
-      owner: repo.owner,
-      repo: repo.repo,
-      issueNumber,
-    });
-    const issue = resp.repository.issue;
-    const content = {
-      number: issue.number,
-      title: issue.title,
-      body: issue.body ?? '',
-      login: issue.author.login,
-    };
-    const comments = issue.comments.nodes.map((c) => ({
-      body: c.body ?? '',
-      login: c.author.login,
-    }));
-    core.info(`Fetched ${comments.length} comments for issue #${issueNumber}.`);
-    return { content, comments };
-  } catch (error) {
-    core.error(`Failed to get data for issue #${issueNumber}: }`);
-    throw new GitHubError(`Could not retrieve data for issue #${issueNumber}`);
+    case 'pullRequestCommentCreated':
+      return fetchContentNode(octokit, repo, 'pullRequest', event.github.issue.number);
+
+    case 'pullRequestReviewCommentCreated':
+      return getPullRequestReviewCommentsData(
+        octokit,
+        repo,
+        event.github.pull_request.number,
+        event.github.comment.in_reply_to_id ?? event.github.comment.id,
+      );
+
+    default:
+      throw new GitHubError(`Invalid event type for data retrieval: ${event.type}`);
   }
 }
 
-async function getPullRequestData(
-  octokit: Octokit,
-  repo: RepoContext,
-  pullNumber: number,
-): Promise<GitHubContentsData> {
-  core.info(`Fetching data for pull request #${pullNumber} via GraphQL...`);
-  try {
-    // Fetch PR and its issue‐thread comments via GraphQL
-    const query = `
-      query($owner: String!, $repo: String!, $prNumber: Int!) {
-        repository(owner: $owner, name: $repo) {
-          pullRequest(number: $prNumber) {
-            number
-            title
-            body
-            author { login }
-            comments(first: 100) {
-              nodes { body author { login } }
-            }
-          }
-        }
-      }
-    `;
-    const resp = await octokit.graphql<{
-      repository: {
-        pullRequest: {
-          number: number;
-          title: string;
-          body: string | null;
-          author: { login: string };
-          comments: {
-            nodes: { body: string | null; author: { login: string } }[];
-          };
-        };
-      };
-    }>(query, {
-      owner: repo.owner,
-      repo: repo.repo,
-      prNumber: pullNumber,
-    });
-    const pr = resp.repository.pullRequest;
-    const content = {
-      number: pr.number,
-      title: pr.title,
-      body: pr.body ?? '',
-      login: pr.author.login,
-    };
-    const comments = pr.comments.nodes.map((c) => ({
-      body: c.body ?? '',
-      login: c.author.login,
-    }));
-    core.info(`Fetched ${comments.length} comments for PR #${pullNumber}.`);
-    return { content, comments };
-  } catch (error) {
-    core.error(`Failed to get data for pull request #${pullNumber}`);
-    throw new GitHubError(
-      `Could not retrieve data for pull request #${pullNumber}`,
-    );
-  }
-}
+
 
 async function getPullRequestReviewCommentsData(
   octokit: Octokit,
