@@ -5,7 +5,7 @@ import type { Octokit } from 'octokit';
 import type { RepoContext, AgentEvent } from './types';
 import { promptBuilderConfig } from '../config/prompts';
 import { genContentsString, genFullContentsString } from '../utils/contents';
-import { getContentsData, getChangedFiles } from './contents';
+import { getContentsData, getChangedFiles } from './github';
 
 /**
  * Generate the AI prompt based on event context and user input.
@@ -50,8 +50,12 @@ export async function generatePrompt(
     historyPrompt += formatter(comment);
   }
   let prompt = '';
-  if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
-    prompt += `${promptBuilderConfig.titleLabel}\n${contents.content.title}\n\n`;
+  if (
+    (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') &&
+    contents.content.title
+  ) {
+    prompt +=
+      `${promptBuilderConfig.titleLabel}\n${contents.content.title}\n\n`;
   }
   if (historyPrompt) {
     prompt += `${promptBuilderConfig.historyLabel}\n${historyPrompt}\n\n`;

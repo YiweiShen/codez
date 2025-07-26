@@ -160,8 +160,15 @@ export async function captureFileState(
           try {
             const stats = await fs.stat(absoluteFilePath);
             if (stats.isFile()) {
-              const hash = await calculateFileHash(absoluteFilePath);
-              fileState.set(relativeFilePath, hash);
+              // Skip unreadable files based on permission bits
+              if ((stats.mode & 0o444) === 0) {
+                core.warning(
+                  `Could not process file ${relativeFilePath}: file is not readable`,
+                );
+              } else {
+                const hash = await calculateFileHash(absoluteFilePath);
+                fileState.set(relativeFilePath, hash);
+              }
             }
           } catch (error) {
             core.warning(

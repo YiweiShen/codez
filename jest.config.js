@@ -15,5 +15,5 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(execa|@actions|octokit)/)'],
+  transformIgnorePatterns: [],
 };

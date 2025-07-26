@@ -21,6 +21,7 @@
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
+    "@octokit/app": "^16.0.1",
     "adm-zip": "^0.5.11",
     "axios": "^1.11.0",
     "execa": "^9.5.0",
@@ -28,6 +29,7 @@
     "ignore": "^7.0.3",
     "octokit": "^4.1.3",
     "openai": "^4.95.0",
+    "unicorn-magic": "^0.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

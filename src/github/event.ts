@@ -167,7 +167,7 @@ export async function processEvent(
   } else if ('pull_request' in agentEvent.github) {
     title = agentEvent.github.pull_request.title;
   }
-  if (title) {
+  if (title && userPrompt) {
     userPrompt = `${title.trim()}\n\n${userPrompt}`;
   }
 

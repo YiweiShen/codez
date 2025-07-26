@@ -104,28 +104,32 @@ export async function runCodex(
 
     core.info('Codex command executed successfully.');
 
-    // stdout parse
-    const codeResult = `\`\`\`\n${result.stdout}\n\`\`\``;
-
-    const lines = codeResult.split('\n');
-
-    // Find all timestamp line indices
-    const timestampRegex = /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}]/;
-    const timestampIndices = lines
-      .map((line, index) => (timestampRegex.test(line) ? index : -1))
-      .filter((index) => index !== -1);
-
-    if (timestampIndices.length < 2) {
-      throw new Error('Not enough timestamped blocks found in Codex output.');
+    // Parse JSON output from Codex stdout
+    const stdoutLines = result.stdout.split('\n');
+    const jsonLine = stdoutLines.find((l) => {
+      const t = l.trim();
+      return t.startsWith('{') || t.startsWith('[');
+    });
+    if (!jsonLine) {
+      throw new Error('Failed to parse JSON output from Codex: JSON not found in stdout');
     }
-
-    // Get range for second-last timestamp block
-    const startIndex = timestampIndices[timestampIndices.length - 2];
-    const endIndex = timestampIndices[timestampIndices.length - 1];
-
-    const blockLines = lines.slice(startIndex + 1, endIndex);
-    const textResult = blockLines.join('\n').trim();
-
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonLine);
+    } catch (e) {
+      throw new Error(
+        `Failed to parse JSON output from Codex: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
+      );
+    }
+    if (!parsed || !Array.isArray(parsed.content)) {
+      throw new Error(
+        'Failed to parse JSON output from Codex: Invalid JSON structure',
+      );
+    }
+    const texts = parsed.content.map((item: any) => item.text);
+    const textResult = texts.join('\n\n') + '\n\n';
     return textResult;
   } catch (error: unknown) {
     core.error(
