@@ -39,24 +39,34 @@ export type GitHubEventIssuesOpened = { action: 'opened'; issue: GitHubIssue };
 export type GitHubEventIssueCommentCreated = {
   action: 'created';
   issue: GitHubIssue;
-  comment: GithubComment;
+  comment: GitHubComment;
 };
 export type GitHubEventPullRequestCommentCreated = {
   action: 'created';
   issue: GitHubPullRequest;
-  comment: GithubComment;
+  comment: GitHubComment;
 };
+/**
+ * Minimal pull request representation for review events.
+ */
+export type GitHubPullRequestMinimal = Pick<GitHubPullRequest, 'number' | 'title' | 'body'>;
+
+/**
+ * GitHub pull request review comment payload.
+ */
+export type GitHubReviewComment = {
+  id: number;
+  body: string;
+  path: string;
+  in_reply_to_id?: number;
+  position?: number;
+  line?: number;
+};
+
 export type GitHubEventPullRequestReviewCommentCreated = {
   action: 'created';
-  pull_request: { number: number; title?: string; body?: string };
-  comment: {
-    id: number;
-    body: string;
-    path: string;
-    in_reply_to_id?: number;
-    position?: number;
-    line?: number;
-  };
+  pull_request: GitHubPullRequestMinimal;
+  comment: GitHubReviewComment;
 };
 export type GitHubEventIssuesAssigned = {
   action: 'assigned';
@@ -72,7 +82,10 @@ export type GitHubEventPullRequestSynchronize = {
   pull_request: GitHubPullRequest;
 };
 
-export type GithubComment = { id: number; body: string };
+/**
+ * Basic GitHub issue or pull request comment.
+ */
+export type GitHubComment = { id: number; body: string };
 export type GitHubIssue = {
   number: number;
   title: string;
@@ -89,7 +102,7 @@ export type GitHubPullRequest = {
 /**
  * Content and comments data for issues and pull requests.
  */
-export type GithubContentsData = {
+export type GitHubContentsData = {
   content: { number?: number; title: string; body: string; login: string };
   comments: { body: string; login: string }[];
 };
