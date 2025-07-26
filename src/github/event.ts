@@ -6,18 +6,13 @@
  */
 
 import { promises as fs } from 'fs';
-
 import * as core from '@actions/core';
 
 import type { ActionConfig } from '../config/config';
-
 import { DEFAULT_TRIGGER_PHRASE } from '../constants';
-
 import { toErrorMessage } from '../utils/error';
-
 import { ParseError } from '../utils/errors';
 import { extractPromptFlags } from '../utils/prompt';
-
 import type { AgentEvent } from './types';
 import { getEventType, extractText } from './event-utils';
 import { z } from 'zod';
@@ -40,7 +35,6 @@ const RawRecordSchema = z
  * @property includeFixBuild - Whether to fetch and include the latest failed CI build logs as context.
  * @property includeFetch - Whether to fetch known URLs referenced in the prompt and include their contents.
  */
-
 export interface ProcessedEvent {
   type: 'codex';
   agentEvent: AgentEvent;
@@ -64,7 +58,6 @@ export async function loadEventPayload(
   try {
     const content = await fs.readFile(eventPath, 'utf8');
     const raw = JSON.parse(content);
-    // Validate that the parsed content is an object
     const parsed = RawRecordSchema.parse(raw);
     return parsed;
   } catch (error) {
@@ -77,80 +70,76 @@ export async function loadEventPayload(
 }
 
 /**
- * Process the GitHub event to determine the type and extract the user prompt.
- * @param config - Action configuration object.
- * @returns The processed event data or null if unsupported.
+ * Handle a direct prompt override, bypassing GitHub event triggers.
  */
-
-export async function processEvent(
-  config: ActionConfig,
-): Promise<ProcessedEvent | null> {
-  if (config.directPrompt) {
-    const {
-      prompt: userPrompt,
-      includeFixBuild,
-      includeFetch,
-    } = extractPromptFlags(config.directPrompt, true);
-    core.info('Direct prompt provided. Bypassing GitHub event trigger.');
-    return {
-      type: 'codex',
-      agentEvent: {
-        type: 'issuesOpened',
-        github: {
-          action: 'opened',
-          issue: { number: 0, title: '', body: '', pull_request: null },
-        },
+function handleDirectPrompt(directPrompt: string): ProcessedEvent {
+  const { prompt: userPrompt, includeFixBuild, includeFetch } = extractPromptFlags(
+    directPrompt,
+    true,
+  );
+  core.info('Direct prompt provided. Bypassing GitHub event trigger.');
+  return {
+    type: 'codex',
+    agentEvent: {
+      type: 'issuesOpened',
+      github: {
+        action: 'opened',
+        issue: { number: 0, title: '', body: '', pull_request: null },
       },
-      userPrompt,
-      includeFullHistory: false,
-      createIssues: false,
-      noPr: false,
-      includeFixBuild,
-      includeFetch,
-    };
-  }
-  const eventPayload = await loadEventPayload(config.eventPath);
-  const agentEvent = getEventType(eventPayload);
+    },
+    userPrompt,
+    includeFullHistory: false,
+    createIssues: false,
+    noPr: false,
+    includeFixBuild,
+    includeFetch,
+  };
+}
 
-  if (!agentEvent) {
-    core.info('Unsupported event type detected.');
-    return null; // Exit gracefully for unsupported events
+/**
+ * Handle issue-assigned events, triggering only for configured assignees.
+ */
+function handleIssuesAssigned(
+  agentEvent: AgentEvent & { type: 'issuesAssigned' },
+  assigneeTrigger: string[],
+): ProcessedEvent | null {
+  const assignee = agentEvent.github.assignee.login;
+  if (!assigneeTrigger.includes(assignee)) {
+    core.info(
+      `Issue assigned to '${assignee}', not in assignee-trigger list. Skipping.`,
+    );
+    return null;
   }
-  core.info(`Detected event type: ${agentEvent.type}`);
+  core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
+  const { title, body } = agentEvent.github.issue;
+  const userPrompt = `${title.trim()}
 
-  // Handle assignee-based triggers
-  if (agentEvent.type === 'issuesAssigned') {
-    const assignee = agentEvent.github.assignee.login;
-    if (!config.assigneeTrigger.includes(assignee)) {
-      core.info(
-        `Issue assigned to '${assignee}', not in assignee-trigger list. Skipping.`,
-      );
-      return null;
-    }
-    core.info(`Assignee-trigger matched for '${assignee}'. Invoking Codez.`);
-    const issue = agentEvent.github.issue;
-    const prompt = `${issue.title.trim()}\n\n${issue.body.trim()}`;
-    return {
-      type: 'codex',
-      agentEvent,
-      userPrompt: prompt,
-      includeFullHistory: false,
-      createIssues: false,
-      noPr: false,
-      includeFixBuild: false,
-      includeFetch: false,
-    };
-  }
+${body.trim()}`;
+  return {
+    type: 'codex',
+    agentEvent,
+    userPrompt,
+    includeFullHistory: false,
+    createIssues: false,
+    noPr: false,
+    includeFixBuild: false,
+    includeFetch: false,
+  };
+}
 
-  // Check for configured trigger phrase only
-  const trigger = config.triggerPhrase;
+/**
+ * Handle events with a trigger phrase in the body or title/comment.
+ */
+function handleTriggerPhrase(
+  agentEvent: AgentEvent,
+  trigger: string,
+): ProcessedEvent | null {
   const text = extractText(agentEvent.github);
   if (!text || !text.startsWith(trigger)) {
     core.info(`Command "${trigger}" not found in the event text.`);
     return null;
   }
-
-  const args = text.replace(trigger, '').trim();
+  const args = text.slice(trigger.length).trim();
   const {
     includeFullHistory,
     createIssues,
@@ -159,26 +148,26 @@ export async function processEvent(
     includeFetch,
     prompt: promptRest,
   } = extractPromptFlags(args, false);
-  let userPrompt = promptRest;
 
-  let title: string | undefined;
-  if ('issue' in agentEvent.github) {
-    title = agentEvent.github.issue.title;
-  } else if ('pull_request' in agentEvent.github) {
-    title = agentEvent.github.pull_request.title;
-  }
-  if (title) {
-    userPrompt = `${title.trim()}\n\n${userPrompt}`;
-  }
+  const title =
+    'issue' in agentEvent.github
+      ? agentEvent.github.issue.title
+      : 'pull_request' in agentEvent.github
+      ? agentEvent.github.pull_request.title
+      : undefined;
+  const userPrompt = title
+    ? `${title.trim()}
+
+${promptRest}`
+    : promptRest;
 
   if (!userPrompt) {
     core.info(`No prompt found after "${DEFAULT_TRIGGER_PHRASE}" command.`);
     return null;
   }
 
-  const type: 'codex' = 'codex';
   return {
-    type,
+    type: 'codex',
     agentEvent,
     userPrompt,
     includeFullHistory,
@@ -187,4 +176,34 @@ export async function processEvent(
     includeFixBuild,
     includeFetch,
   };
+}
+
+/**
+ * Process the GitHub event to determine the type and extract the user prompt.
+ * @param config - Action configuration object.
+ * @returns The processed event data or null if unsupported.
+ */
+export async function processEvent(
+  config: ActionConfig,
+): Promise<ProcessedEvent | null> {
+  const { directPrompt, eventPath, assigneeTrigger, triggerPhrase } = config;
+
+  if (directPrompt) {
+    return handleDirectPrompt(directPrompt);
+  }
+
+  const payload = await loadEventPayload(eventPath);
+  const agentEvent = getEventType(payload);
+
+  if (!agentEvent) {
+    core.info('Unsupported event type detected.');
+    return null;
+  }
+  core.info(`Detected event type: ${agentEvent.type}`);
+
+  if (agentEvent.type === 'issuesAssigned') {
+    return handleIssuesAssigned(agentEvent, assigneeTrigger);
+  }
+
+  return handleTriggerPhrase(agentEvent, triggerPhrase);
 }
