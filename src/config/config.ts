@@ -9,15 +9,15 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Octokit } from 'octokit';
 
+import { z } from 'zod';
+
 import { defaultModel } from '../api/openai';
 import {
   DEFAULT_TRIGGER_PHRASE,
   DEFAULT_TIMEOUT_SECONDS,
   DEFAULT_WORKSPACE_PATH,
 } from '../constants';
-
 import { ConfigError } from '../utils/errors';
-import { z } from 'zod';
 
 /**
  * Defines configuration inputs for the GitHub Action.
@@ -125,20 +125,21 @@ const actionConfigSchema = z.object({
  */
 
 export function parseKeyValueMap(input: string): Record<string, string> {
-  const result: Record<string, string> = {};
-  if (!input) return result;
-  // Split input into items based on newlines or commas
+  if (!input) {
+    return {};
+  }
   const items = parseStringList(input);
+  const result: Record<string, string> = {};
+
   for (const item of items) {
     // YAML-style mapping: key: value
-    const colonIdx = item.indexOf(':');
-    if (colonIdx > 0) {
-      const key = item.slice(0, colonIdx).trim();
-      let val = item.slice(colonIdx + 1).trim();
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      ) {
+    const yamlMatch = item.match(/^([^:]+)\s*:\s*(.*)$/);
+    if (yamlMatch) {
+      const [, rawKey, rawVal] = yamlMatch;
+      const key = rawKey.trim();
+      let val = rawVal.trim();
+      // Remove surrounding quotes if present
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
         val = val.slice(1, -1);
       }
       if (key) {
@@ -147,15 +148,17 @@ export function parseKeyValueMap(input: string): Record<string, string> {
       continue;
     }
     // CSV-style mapping: key=value
-    const eqIdx = item.indexOf('=');
-    if (eqIdx > 0) {
-      const key = item.slice(0, eqIdx).trim();
-      const val = item.slice(eqIdx + 1).trim();
+    const csvMatch = item.match(/^([^=]+)\s*=\s*(.*)$/);
+    if (csvMatch) {
+      const [, rawKey, rawVal] = csvMatch;
+      const key = rawKey.trim();
+      const val = rawVal.trim();
       if (key) {
         result[key] = val;
       }
     }
   }
+
   return result;
 }
 
@@ -169,15 +172,14 @@ export function parseStringList(input: string): string[] {
   if (!input) {
     return [];
   }
-  let items: string[] = [];
-  if (input.includes('\n')) {
-    items = input.split(/\r?\n/);
-  } else if (input.includes(',')) {
-    items = input.split(',');
-  } else {
-    items = [input];
-  }
-  return items.map((s) => s.trim()).filter((s) => s.length > 0);
+
+  const items = input.includes('\n')
+    ? input.split(/\r?\n/)
+    : input.includes(',')
+    ? input.split(',')
+    : [input];
+
+  return items.map((item) => item.trim()).filter((item) => item.length > 0);
 }
 
 /**
