@@ -15,11 +15,7 @@ import { generatePrompt } from './prompt';
 import { escapeRegExp } from './progress';
 
 /**
- * Fetches the latest failed workflow run logs for the repository and returns their content.
- * @param octokit - Authenticated Octokit client.
- * @param repo - Repository owner and name context.
- * @returns Promise resolving to combined log contents as a string.
- * @throws GitHubError if the logs cannot be fetched or parsed.
+ * Fetch the latest failed workflow run logs and return combined text.
  */
 async function fetchLatestFailedWorkflowLogs(
   octokit: Octokit,
@@ -94,104 +90,111 @@ async function fetchLatestFailedWorkflowLogs(
  * @param processedEvent - The normalized event data triggering the action.
  * @returns The final prompt string and a list of downloaded image file paths.
  */
-export async function preparePrompt(
-  config: ActionConfig,
-  processedEvent: ProcessedEvent,
-): Promise<{ prompt: string; downloadedImageFiles: string[] }> {
-  const { octokit, repo, workspace } = config;
-  const {
-    agentEvent,
-    userPrompt,
-    includeFullHistory,
-    includeFetch,
-    includeFixBuild,
-    createIssues,
-  } = processedEvent;
-  let effectiveUserPrompt = userPrompt;
-  if (includeFetch) {
+const URL_REGEX = /(https?:\/\/[^\s)]+)/g;
+const IMAGE_ALLOWED_PREFIX = 'https://github.com/user-attachments/assets/';
+
+/**
+ * Fetch text contents for a list of URLs via an external reader service.
+ */
+async function fetchUrlContents(urls: string[]): Promise<string[]> {
+  return Promise.all(
+    urls.map(async (url) => {
+      try {
+        const readerUrl = `https://r.jina.ai/${url}`;
+        const response = await axios.get<string>(readerUrl, {
+          responseType: 'text',
+          timeout: 60_000,
+        });
+        const data = typeof response.data === 'string'
+          ? response.data
+          : JSON.stringify(response.data);
+        return `=== ${url} ===\n${data}`;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return `Failed to fetch ${url}: ${msg}`;
+      }
+    }),
+  );
+}
+
+/**
+ * Assemble and return the effective user prompt, handling fetch, build-fix, and create-issues flags.
+ */
+async function buildEffectivePrompt(
+  processed: ProcessedEvent,
+  octokit: Octokit,
+  repo: { owner: string; repo: string },
+): Promise<string> {
+  let prompt = processed.userPrompt;
+  if (processed.includeFetch) {
     core.info('Fetching contents of URLs for --fetch flag');
-    const urlRegex = /(https?:\/\/[^\s)]+)/g;
-    const urls = userPrompt.match(urlRegex) || [];
+    const urls = Array.from(new Set(prompt.match(URL_REGEX) ?? []));
     core.info(`Matched URLs for --fetch: ${urls.join(', ')}`);
     if (urls.length > 0) {
-      const fetchedParts: string[] = [];
-      for (const url of urls) {
-        try {
-          const readerUrl = `https://r.jina.ai/${url}`;
-          const response = await axios.get<string>(readerUrl, {
-            responseType: 'text',
-            timeout: 60000,
-          });
-          const data =
-            typeof response.data === 'string'
-              ? response.data
-              : JSON.stringify(response.data);
-          fetchedParts.push(`=== ${url} ===\n${data}`);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          fetchedParts.push(`Failed to fetch ${url}: ${msg}`);
-        }
-      }
-      effectiveUserPrompt = `Contents from URLs:\n\n${fetchedParts.join(
-        '\n\n',
-      )}\n\n${effectiveUserPrompt}`;
+      const parts = await fetchUrlContents(urls);
+      prompt = `Contents from URLs:\n\n${parts.join('\n\n')}\n\n${prompt}`;
     } else {
       core.info('No URLs found to fetch for --fetch flag');
     }
   }
-  if (includeFixBuild) {
+  if (processed.includeFixBuild) {
     core.info('Fetching latest failed CI build logs for --fix-build flag');
     let logs: string;
     try {
       logs = await fetchLatestFailedWorkflowLogs(octokit, repo);
     } catch (err) {
-      core.warning(
-        `Failed to fetch build logs: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      logs = `Failed to fetch logs: ${
-        err instanceof Error ? err.message : String(err)
-      }`;
+      const msg = err instanceof Error ? err.message : String(err);
+      core.warning(`Failed to fetch build logs: ${msg}`);
+      logs = `Failed to fetch logs: ${msg}`;
     }
-    effectiveUserPrompt = `Latest failed build logs:\n\n${logs}\n\nPlease suggest changes to fix the build errors above.`;
-  } else if (createIssues) {
-    effectiveUserPrompt = `Please output only a JSON array of feature objects, each with a \"title\" (concise summary) and \"description\" (detailed explanation or examples). ${userPrompt}`;
+    prompt = `Latest failed build logs:\n\n${logs}\n\nPlease suggest changes to fix the build errors above.`;
+  } else if (processed.createIssues) {
+    prompt =
+      `Please output only a JSON array of feature objects, each with a ` +
+      `"title" (concise summary) and "description" (detailed explanation or examples). ` +
+      processed.userPrompt;
   }
+  return prompt;
+}
+
+/**
+ * Prepare the prompt for Codex based on flags and event data,
+ * including optional URL fetch, build logs, history, and images.
+ */
+export async function preparePrompt(
+  config: ActionConfig,
+  processedEvent: ProcessedEvent,
+): Promise<{ prompt: string; downloadedImageFiles: string[] }> {
+  const { octokit, repo, workspace } = config;
+  const { agentEvent, includeFullHistory } = processedEvent;
+
+  const effective = await buildEffectivePrompt(processedEvent, octokit, repo);
 
   core.info('[perf] generatePrompt start');
-  const startGeneratePrompt = Date.now();
+  const start = Date.now();
   let prompt = await generatePrompt(
     octokit,
     repo,
     agentEvent,
-    effectiveUserPrompt,
+    effective,
     includeFullHistory,
   );
-  core.info(
-    `[perf] generatePrompt end - ${Date.now() - startGeneratePrompt}ms`,
-  );
+  core.info(`[perf] generatePrompt end - ${Date.now() - start}ms`);
 
   const imageUrls = extractImageUrls(prompt);
   let downloadedImageFiles: string[] = [];
   if (imageUrls.length > 0) {
     const imagesDir = path.join(workspace, 'codex-comment-images');
-    const allowedPrefix = 'https://github.com/user-attachments/assets/';
     const downloadUrls = imageUrls.filter((url) =>
-      url.startsWith(allowedPrefix),
+      url.startsWith(IMAGE_ALLOWED_PREFIX),
     );
     downloadedImageFiles = await downloadImages(downloadUrls, imagesDir);
-    for (let i = 0; i < imageUrls.length; i++) {
-      const url = imageUrls[i];
+    for (const [i, url] of imageUrls.entries()) {
       const placeholder = `<image_${i}>`;
-      prompt = prompt.replace(
-        new RegExp(`!\\[[\\s\\S]*?\\]\\(${escapeRegExp(url)}\\)`, 'g'),
-        placeholder,
-      );
-      prompt = prompt.replace(
-        new RegExp(`<img[^>]*src=[\\"']${escapeRegExp(url)}[\\"'][^>]*>`, 'g'),
-        placeholder,
-      );
+      const esc = escapeRegExp(url);
+      prompt = prompt
+        .replace(new RegExp(`!\\[[\\s\\S]*?\\]\\(${esc}\\)`, 'g'), placeholder)
+        .replace(new RegExp(`<img[^>]*src=[\\"']${esc}[\\"'][^>]*>`, 'g'), placeholder);
     }
   }
   return { prompt, downloadedImageFiles };
