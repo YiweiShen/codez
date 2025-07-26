@@ -5,8 +5,7 @@
  */
 
 import * as core from '@actions/core';
-import OpenAI from 'openai';
-import type { ClientOptions } from 'openai';
+import OpenAI, { type ClientOptions } from 'openai';
 
 import type { ActionConfig } from '../config/config';
 import { conventionalCommitsSystemPrompt } from '../config/prompts';
@@ -32,93 +31,97 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
   return new OpenAI(openaiOptions);
 }
 
-/**
- * Generate a Git commit message using the OpenAI API.
- *
- * The generated commit message follows the Conventional Commits specification.
- * @param changedFiles - List of modified file paths.
- * @param userPrompt - The original user request or description.
- * @param context - Pull request or issue context.
- * @param context.prNumber - Pull request number (optional).
- * @param context.issueNumber - Issue number (optional).
- * @param config - Action configuration settings for API client.
- * @returns Promise that resolves to the generated commit message.
- * @example
- * const message = await generateCommitMessage(
- *   ['src/index.ts'],
- *   'Refactor index module',
- *   { prNumber: 42 },
- *   config
- * );
- */
 
+/**
+ * Context information for determining fallback commit messages.
+ */
+export interface CommitContext {
+  prNumber?: number;
+  issueNumber?: number;
+}
+
+const MAX_COMPLETION_TOKENS = 1024;
+const MAX_SUBJECT_LENGTH = 100;
+
+/**
+ * Generate a Git commit message using the OpenAI API, following Conventional Commits.
+ * Falls back to a generic chore message on errors or invalid output.
+ */
 export async function generateCommitMessage(
   changedFiles: string[],
   userPrompt: string,
-  context: { prNumber?: number; issueNumber?: number },
+  context: CommitContext,
   config: ActionConfig,
 ): Promise<string> {
+  const systemPrompt = conventionalCommitsSystemPrompt;
+  const userMessage = buildUserMessage(changedFiles, userPrompt, context);
+
+  const openai = getOpenAIClient(config);
   try {
-    // Create prompt - System prompt + User prompt structure
-    const systemPrompt = conventionalCommitsSystemPrompt;
-
-    let userContent = `User Request:
-${userPrompt}
-
-files changed:
-\`\`\`
-${changedFiles.join('\n')}
-\`\`\``;
-
-    // Add context information if available
-    if (context.prNumber) {
-      userContent += `\n\nThis change is related to PR #${context.prNumber}.`;
-    }
-    if (context.issueNumber) {
-      userContent += `\n\nThis change is related to Issue #${context.issueNumber}.`;
-    }
-
-    const openai = getOpenAIClient(config);
-
     const response = await openai.chat.completions.create({
       model: config.openaiModel,
-      max_completion_tokens: 1024,
+      max_completion_tokens: MAX_COMPLETION_TOKENS,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
+        { role: 'user', content: userMessage },
       ],
     });
 
-    // Extract commit message from response
-    let commitMessage = response.choices[0]?.message?.content?.trim() || '';
-    commitMessage = commitMessage.split('\n')[0]; // Take the first line
-
-    // Fallback if the message is empty or too long (adjust length check if needed)
-    if (!commitMessage || commitMessage.length > 100) {
-      // Keep 100 char limit for safety
-      core.warning(
-        `Generated commit message was empty or too long: "${commitMessage}". Falling back.`,
-      );
-      throw new ParseError('Generated commit message invalid.'); // Trigger fallback
+    const content = response.choices?.[0]?.message?.content?.trim() ?? '';
+    const subject = content.split(/\r?\n/)[0] || '';
+    if (!subject || subject.length > MAX_SUBJECT_LENGTH) {
+      throw new ParseError(`Invalid commit message: "${subject}"`);
     }
 
-    core.info(`Generated commit message: ${commitMessage}`);
-    return commitMessage;
+    core.info(`Generated commit message: ${subject}`);
+    return subject;
   } catch (error) {
     core.warning(
       `Error generating commit message with OpenAI: ${
         error instanceof Error ? error.message : String(error)
       }. Using fallback.`,
     );
-    if (context.prNumber) {
-      return `chore: apply changes for PR #${context.prNumber}`;
-    } else if (context.issueNumber) {
-      return `chore: apply changes for Issue #${context.issueNumber}`;
-    } else {
-      const fileCount = changedFiles.length;
-      return `chore: apply changes to ${fileCount} file${
-        fileCount !== 1 ? 's' : ''
-      }`;
-    }
+    return getFallbackMessage(changedFiles, context);
   }
+}
+
+/** Assemble the user prompt for OpenAI including file changes and context. */
+function buildUserMessage(
+  changedFiles: string[],
+  userPrompt: string,
+  context: CommitContext,
+): string {
+  const lines: string[] = [
+    'User Request:',
+    userPrompt,
+    '',
+    'Files changed:',
+    '```',
+    ...changedFiles,
+    '```',
+  ];
+  if (context.prNumber) {
+    lines.push(``, `This change is related to PR #${context.prNumber}.`);
+  }
+  if (context.issueNumber) {
+    lines.push(``, `This change is related to Issue #${context.issueNumber}.`);
+  }
+  return lines.join('\n');
+}
+
+/** Generate a fallback commit message when AI generation fails. */
+function getFallbackMessage(
+  changedFiles: string[],
+  context: CommitContext,
+): string {
+  if (context.prNumber) {
+    return `chore: apply changes for PR #${context.prNumber}`;
+  }
+  if (context.issueNumber) {
+    return `chore: apply changes for Issue #${context.issueNumber}`;
+  }
+  const fileCount = changedFiles.length;
+  return `chore: apply changes to ${fileCount} file${
+    fileCount !== 1 ? 's' : ''
+  }`;
 }
