@@ -13,6 +13,58 @@ import type { ActionConfig } from '../config/config';
 import { CliError, TimeoutError } from '../utils/errors';
 
 /**
+ * Build command-line arguments for Codex CLI invocation.
+ */
+function buildCliArgs(prompt: string, model: string, images: string[]): string[] {
+  const imageArgs = images.flatMap((img) => ['-i', img]);
+  return [
+    ...imageArgs,
+    '--model',
+    model,
+    'exec',
+    '--dangerously-bypass-approvals-and-sandbox',
+    prompt,
+  ];
+}
+
+/**
+ * Build environment variables for Codex CLI process.
+ */
+function buildEnvVars(config: ActionConfig): NodeJS.ProcessEnv {
+  const { openaiApiKey, openaiBaseUrl, codexEnv } = config;
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    OPENAI_API_KEY: openaiApiKey,
+    CODEX_QUIET_MODE: '1',
+    ...codexEnv,
+  };
+  if (openaiBaseUrl) {
+    env.OPENAI_API_BASE_URL = openaiBaseUrl;
+  }
+  return env;
+}
+
+/**
+ * Extract the text block between the second-last and last timestamped lines in stdout.
+ */
+function extractCodexOutput(stdout: string): string {
+  const lines = stdout.split('\n');
+  const timestampRegex = /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}]/;
+  const indices = lines.reduce<number[]>((acc, line, idx) => {
+    if (timestampRegex.test(line)) {
+      acc.push(idx);
+    }
+    return acc;
+  }, []);
+  if (indices.length < 2) {
+    throw new Error('Not enough timestamped blocks found in Codex output.');
+  }
+  const start = indices[indices.length - 2];
+  const end = indices[indices.length - 1];
+  return lines.slice(start + 1, end).join('\n').trim();
+}
+
+/**
  * Invoke the Codex CLI with the specified parameters.
  * @param workspace - Directory in which to run the Codex CLI.
  * @param config - Configuration containing API keys and environment settings.
@@ -29,119 +81,58 @@ export async function runCodex(
   timeout: number,
   images: string[] = [],
 ): Promise<string> {
+  const cliArgs = buildCliArgs(prompt, config.openaiModel, images);
+  const envVars = buildEnvVars(config);
+
   core.info(`Executing Codex CLI in ${workspace} with timeout ${timeout}ms`);
+
   try {
-    // Build CLI arguments (let execa handle argument quoting)
-    const cliArgs: string[] = [];
-    // Include image flags if provided
-    if (images.length > 0) {
-      for (const imgPath of images) {
-        cliArgs.push('-i', imgPath);
-      }
-    }
-    // Model and auto flags
-    cliArgs.push('--model', config.openaiModel);
-    cliArgs.push(
-      'exec', // headless
-      '--dangerously-bypass-approvals-and-sandbox',
-      prompt,
-    );
-
-    // Set up environment variables
-    const envVars: Record<string, string> = {
-      ...process.env,
-      OPENAI_API_KEY: config.openaiApiKey,
-      CODEX_QUIET_MODE: '1',
-      ...config.codexEnv,
-    };
-    if (config.openaiBaseUrl) {
-      envVars.OPENAI_API_BASE_URL = config.openaiBaseUrl;
-    }
-
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
-    const result = await execa(
-      'codex', // Assuming 'codex' is in the PATH
-      cliArgs,
-      {
-        timeout: timeout,
-        cwd: workspace,
-        env: envVars,
-        stdio: 'pipe', // Capture stdout/stderr
-        reject: false, // Don't throw on non-zero exit code, handle it below
-      },
-    );
+    const result = await execa('codex', cliArgs, {
+      timeout,
+      cwd: workspace,
+      env: envVars,
+      stdio: 'pipe',
+      reject: false,
+    });
 
     core.info(`Codex CLI exited with code ${result.exitCode}`);
 
-    // Adjusted error handling for async execa and stderr presence
-    if (result.stderr) {
-      // Log stderr even if exit code is 0, but only throw if non-zero
-      if (result.exitCode !== 0) {
-        core.error(
-          `Codex command failed with stderr. Exit code: ${result.exitCode}, stderr: ${result.stderr}`,
-        );
-        throw new CliError(
-          `Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`,
-        );
-      } else {
-        core.warning(
-          `Codex command exited successfully but produced stderr: ${result.stderr}`,
-        );
-      }
+    if (result.stderr && result.exitCode !== 0) {
+      core.error(
+        `Codex command failed with stderr. Exit code: ${result.exitCode}, stderr: ${result.stderr}`,
+      );
+      throw new CliError(
+        `Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`,
+      );
+    } else if (result.stderr) {
+      core.warning(`Codex command exited successfully but produced stderr: ${result.stderr}`);
     }
 
     if (result.failed || result.exitCode !== 0) {
       core.error(
         `Codex command failed. Exit code: ${result.exitCode}, stdout: ${result.stdout}`,
       );
-      const errorMessage = result.stderr
-        ? `Stderr: ${result.stderr}`
-        : `Stdout: ${result.stdout}`; // Use already captured stderr if available
       throw new CliError(
-        `Codex command failed with exit code ${result.exitCode}. ${errorMessage}`,
+        `Codex command failed with exit code ${result.exitCode}. ${
+          result.stderr ? `Stderr: ${result.stderr}` : `Stdout: ${result.stdout}`
+        }`,
       );
     }
 
     core.info('Codex command executed successfully.');
 
-    // stdout parse
-    const codeResult = `\`\`\`\n${result.stdout}\n\`\`\``;
-
-    const lines = codeResult.split('\n');
-
-    // Find all timestamp line indices
-    const timestampRegex = /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}]/;
-    const timestampIndices = lines
-      .map((line, index) => (timestampRegex.test(line) ? index : -1))
-      .filter((index) => index !== -1);
-
-    if (timestampIndices.length < 2) {
-      throw new Error('Not enough timestamped blocks found in Codex output.');
-    }
-
-    // Get range for second-last timestamp block
-    const startIndex = timestampIndices[timestampIndices.length - 2];
-    const endIndex = timestampIndices[timestampIndices.length - 1];
-
-    const blockLines = lines.slice(startIndex + 1, endIndex);
-    const textResult = blockLines.join('\n').trim();
-
-    return textResult;
+    return extractCodexOutput(result.stdout);
   } catch (error: unknown) {
     core.error(
       `Error executing Codex command: ${
         error instanceof Error ? error.stack : String(error)
       }`,
     );
-    if (
-      error instanceof Error &&
-      error.message.startsWith('Failed to parse JSON output')
-    ) {
+    if (error instanceof Error && error.message.startsWith('Failed to parse JSON output')) {
       throw error;
     }
-    const isExecaError = (e: unknown): e is ExecaError =>
-      e instanceof Error && 'timedOut' in e;
-    if (isExecaError(error) && error.timedOut) {
+    if (error instanceof Error && (error as ExecaError).timedOut) {
       throw new TimeoutError(`Codex command timed out after ${timeout}ms.`);
     }
     throw new CliError(
