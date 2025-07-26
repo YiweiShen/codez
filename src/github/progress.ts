@@ -20,6 +20,18 @@ export function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\\]\\\\]/g, '$\\&');
 }
 
+/** Repository owner and name context. */
+type RepoContext = { owner: string; repo: string };
+
+/** HTML snippet for the spinner icon displayed next to the active step. */
+const SPINNER_HTML =
+  ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>';
+
+/** Select a random loading phrase to display under the progress bar. */
+function getRandomLoadingPhrase(): string {
+  return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
+}
+
 /**
  * Create a GitHub comment to display initial progress steps with checkboxes.
  * @param octokit - Authenticated Octokit client.
@@ -30,34 +42,24 @@ export function escapeRegExp(str: string): string {
  */
 export async function createProgressComment(
   octokit: Octokit,
-  repo: { owner: string; repo: string },
+  repo: RepoContext,
   event: GitHubEvent,
   steps: string[],
 ): Promise<number> {
-  const barBlocks = PROGRESS_BAR_BLOCKS;
-  const emptyBar = '░'.repeat(barBlocks);
-  const title = PROGRESS_TITLE;
-  const loadingPhrase =
-    LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
-  const bodyLines: string[] = [
-    title,
+  const emptyBar = '░'.repeat(PROGRESS_BAR_BLOCKS);
+  const body = [
+    PROGRESS_TITLE,
     '',
     `Progress: [${emptyBar}] 0%`,
     '',
-    loadingPhrase,
+    getRandomLoadingPhrase(),
     '',
-  ];
-  for (let i = 0; i < steps.length; i++) {
-    const step = steps[i];
-    const prefix = `- [ ] ${step}`;
-    const spinnerSuffix =
-      i === 0
-        ? ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>'
-        : '';
-    bodyLines.push(prefix + spinnerSuffix);
-  }
-  bodyLines.push('');
-  const body = bodyLines.join('\n');
+    ...steps.map((step, i) => {
+      const checkbox = `- [ ] ${step}`;
+      return i === 0 ? `${checkbox}${SPINNER_HTML}` : checkbox;
+    }),
+    '',
+  ].join('\n');
   if ('issue' in event) {
     const { data } = await octokit.rest.issues.createComment({
       ...repo,
@@ -91,39 +93,32 @@ export async function createProgressComment(
  */
 export async function updateProgressComment(
   octokit: Octokit,
-  repo: { owner: string; repo: string },
+  repo: RepoContext,
   event: GitHubEvent,
   commentId: number,
   steps: string[],
 ): Promise<void> {
   const total = steps.length;
   const completed = steps.filter((s) => s.startsWith('- [x]')).length;
-  const barBlocks = PROGRESS_BAR_BLOCKS;
-  const filled = Math.round((completed / total) * barBlocks);
-  const bar = '█'.repeat(filled) + '░'.repeat(barBlocks - filled);
+  const filled = Math.round((completed / total) * PROGRESS_BAR_BLOCKS);
+  const bar =
+    '█'.repeat(filled) + '░'.repeat(PROGRESS_BAR_BLOCKS - filled);
   const percent = Math.round((completed / total) * 100);
-  const title = PROGRESS_TITLE;
-  const loadingPhrase =
-    LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
-  const bodyLines: string[] = [
-    title,
+
+  const body = [
+    PROGRESS_TITLE,
     '',
     `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
     '',
-    loadingPhrase,
+    getRandomLoadingPhrase(),
     '',
-  ];
-  for (let i = 0; i < steps.length; i++) {
-    let line = steps[i];
-    if (i === completed && completed !== total) {
-      line =
-        line +
-        ' <img src="https://github.com/user-attachments/assets/082dfba3-0ee2-4b6e-9606-93063bcc7590" alt="spinner" width="16" height="16"/>';
-    }
-    bodyLines.push(line);
-  }
-  bodyLines.push('');
-  const body = bodyLines.join('\n');
+    ...steps.map((line, i) =>
+      i === completed && completed !== total
+        ? `${line}${SPINNER_HTML}`
+        : line
+    ),
+    '',
+  ].join('\n');
   if ('issue' in event) {
     await octokit.rest.issues.updateComment({
       ...repo,
