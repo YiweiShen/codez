@@ -12,7 +12,53 @@ import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/ope
 import { GitHubError } from '../utils/errors';
 import { createPullRequest, commitAndPush } from './git';
 import { upsertComment } from './comments';
-import { detectChanges } from '../file/file';
+// Directories to ignore when processing results
+const WORKFLOWS_DIR = '.github/workflows';
+const IMAGES_DIR = 'codex-comment-images';
+const WORKFLOWS_PREFIX = `${WORKFLOWS_DIR}/`;
+const IMAGES_PREFIX = `${IMAGES_DIR}/`;
+
+/** Filter files by prefix */
+function filesWithPrefix(files: string[], prefix: string): string[] {
+  return files.filter((f) => f.startsWith(prefix));
+}
+
+/** Revert changes to workflow files via git checkout */
+async function revertWorkflowFiles(workspace: string): Promise<void> {
+  await execa('git', ['checkout', 'HEAD', '--', WORKFLOWS_DIR], {
+    cwd: workspace,
+    stdio: 'inherit',
+  });
+}
+
+/** Remove generated image artifacts directory */
+async function removeImageArtifacts(workspace: string): Promise<void> {
+  const dir = path.join(workspace, IMAGES_DIR);
+  try {
+    await fs.rm(dir, { recursive: true, force: true });
+    core.info(`Removed image artifacts directory: ${dir}`);
+  } catch (error) {
+    core.warning(
+      `Failed to remove image artifacts directory: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+/** Extract issue and PR numbers from processed event */
+function getEventNumbers(agentEvent: ProcessedEvent['agentEvent']) {
+  const { type, github: g } = agentEvent;
+  const issueNumber =
+    type === 'issuesOpened' || type === 'issueCommentCreated' || type === 'issuesAssigned'
+      ? g.issue.number
+      : undefined;
+  const prNumber =
+    type === 'pullRequestCommentCreated'
+      ? g.issue.number
+      : type === 'pullRequestReviewCommentCreated'
+      ? g.pull_request.number
+      : undefined;
+  return { issueNumber, prNumber };
+}
 
 /**
  * Process and publish the action's results: push commits, open PR, or post comments.
@@ -36,44 +82,24 @@ export async function handleResult(
   if (noPr) {
     core.info('Flag --no-pr detected; skipping pull request creation.');
   }
-
-  const workflowFiles = changedFiles.filter((f) =>
-    f.startsWith('.github/workflows/'),
-  );
+  // ignore workflow changes
+  const workflowFiles = changedFiles.filter((f) => f.startsWith(WORKFLOWS_PREFIX));
   if (workflowFiles.length > 0) {
-    core.warning(
-      `Ignoring changes to workflow files: ${workflowFiles.join(', ')}`,
-    );
-    await execa('git', ['checkout', 'HEAD', '--', '.github/workflows'], {
+    core.warning(`Ignoring changes to workflow files: ${workflowFiles.join(', ')}`);
+    await execa('git', ['checkout', 'HEAD', '--', WORKFLOWS_DIR], {
       cwd: workspace,
       stdio: 'inherit',
     });
   }
-  const imageFiles = changedFiles.filter((f) =>
-    f.startsWith('codex-comment-images/'),
-  );
+  // ignore generated image artifacts
+  const imageFiles = changedFiles.filter((f) => f.startsWith(IMAGES_PREFIX));
   if (imageFiles.length > 0) {
-    core.warning(
-      `Ignoring changes to codex-comment-images folder: ${imageFiles.join(
-        ', ',
-      )}`,
-    );
-    const imagesDir = path.join(workspace, 'codex-comment-images');
-    try {
-      await fs.rm(imagesDir, { recursive: true, force: true });
-      core.info(`Removed image artifacts directory: ${imagesDir}`);
-    } catch (error) {
-      core.warning(
-        `Failed to remove image artifacts directory: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
+    core.warning(`Ignoring changes to ${IMAGES_DIR} folder: ${imageFiles.join(', ')}`);
+    await fs.rm(path.join(workspace, IMAGES_DIR), { recursive: true, force: true });
+    core.info(`Removed image artifacts directory: ${path.join(workspace, IMAGES_DIR)}`);
   }
   const effectiveChangedFiles = changedFiles.filter(
-    (f) =>
-      !f.startsWith('.github/workflows/') &&
-      !f.startsWith('codex-comment-images/'),
+    (f) => !f.startsWith(WORKFLOWS_PREFIX) && !f.startsWith(IMAGES_PREFIX),
   );
 
   if (!noPr && effectiveChangedFiles.length > 0) {
@@ -83,33 +109,16 @@ export async function handleResult(
       } files:\n${effectiveChangedFiles.join('\n')}`,
     );
 
-    const generateCommitMessage = generateCommitMessageOpenAI;
+    const { issueNumber, prNumber } = getEventNumbers(agentEvent);
     core.info('[perf] generateCommitMessage start');
     const startGenerateCommitMessage = Date.now();
-    const commitMessage = await generateCommitMessage(
+    const commitMessage = await generateCommitMessageOpenAI(
       effectiveChangedFiles,
       userPrompt,
-      {
-        issueNumber:
-          agentEvent.type === 'issuesOpened' ||
-          agentEvent.type === 'issueCommentCreated' ||
-          agentEvent.type === 'issuesAssigned'
-            ? agentEvent.github.issue.number
-            : undefined,
-        prNumber:
-          agentEvent.type === 'pullRequestCommentCreated'
-            ? agentEvent.github.issue.number
-            : agentEvent.type === 'pullRequestReviewCommentCreated'
-            ? agentEvent.github.pull_request.number
-            : undefined,
-      },
+      { issueNumber, prNumber },
       config,
     );
-    core.info(
-      `[perf] generateCommitMessage end - ${
-        Date.now() - startGenerateCommitMessage
-      }ms`,
-    );
+    core.info(`[perf] generateCommitMessage end - ${Date.now() - startGenerateCommitMessage}ms`);
 
     if (
       agentEvent.type === 'issuesOpened' ||
