@@ -2,8 +2,6 @@
  * Main executor for the GitHub Action workflow.
  */
 import * as core from '@actions/core';
-import { execa } from 'execa';
-import path from 'path';
 
 import type { ActionConfig } from '../config/config';
 import type { ProcessedEvent } from './event';
@@ -35,24 +33,18 @@ export async function runAction(
     config;
   const {
     agentEvent,
-    userPrompt,
     includeFullHistory,
     createIssues,
     includeFixBuild,
     includeFetch,
   } = processedEvent;
+
   core.info(
     `runAction flags: includeFullHistory=${includeFullHistory}, createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, includeFetch=${includeFetch}`,
   );
 
-  core.info('[perf] addEyeReaction start');
-  const startAddEyeReaction = Date.now();
-  await addEyeReaction(octokit, repo, agentEvent.github);
-  core.info(
-    `[perf] addEyeReaction end - ${Date.now() - startAddEyeReaction}ms`,
-  );
-  // Prefix issue/PR title with [WIP] when work starts
-  {
+  // Helper to update issue/PR title prefixing with given label
+  const updateTitle = async (label: 'WIP' | 'Done') => {
     const isIssue = 'issue' in agentEvent.github;
     const number = isIssue
       ? agentEvent.github.issue.number
@@ -61,14 +53,35 @@ export async function runAction(
       ? agentEvent.github.issue.title
       : agentEvent.github.pull_request.title ?? '';
     const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
-    const newTitle = `[WIP] ${stripped}`;
+    const newTitle = `[${label}] ${stripped}`;
     core.info(`Updating issue/PR #${number} title to '${newTitle}'`);
     await octokit.rest.issues.update({
       ...repo,
       issue_number: number,
       title: newTitle,
     });
-  }
+  };
+
+  // Helper to safely update original reactions: remove 👀 and add 👍
+  const finalizeReactions = async () => {
+    try {
+      await removeEyeReaction(octokit, repo, agentEvent.github);
+      await addThumbUpReaction(octokit, repo, agentEvent.github);
+    } catch (reactionError) {
+      core.warning(
+        `Failed to update reaction on the original event: ${
+          reactionError instanceof Error ? reactionError.message : reactionError
+        }`,
+      );
+    }
+  };
+
+  core.info('[perf] addEyeReaction start');
+  const startEye = Date.now();
+  await addEyeReaction(octokit, repo, agentEvent.github);
+  core.info(`[perf] addEyeReaction end - ${Date.now() - startEye}ms`);
+
+  await updateTitle('WIP');
 
   const progressSteps = [
     '🔍 Gathering context',
@@ -84,24 +97,35 @@ export async function runAction(
       agentEvent.github,
       progressSteps,
     );
-  } catch (e) {
-    core.warning(
-      `Failed to create progress comment: ${
-        e instanceof Error ? e.message : e
-      }`,
-    );
+  } catch (error) {
+    core.warning(`Failed to create progress comment: ${String(error)}`);
   }
+
+  const safeUpdateProgress = async (completedIndex: number) => {
+    if (!progressCommentId) return;
+    try {
+      const steps = progressSteps.map((step, i) =>
+        `- [${i <= completedIndex ? 'x' : ' '}] ${step}`,
+      );
+      await updateProgressComment(
+        octokit,
+        repo,
+        agentEvent.github,
+        progressCommentId,
+        steps,
+      );
+    } catch (error) {
+      core.warning(
+        `Failed to update progress to '${progressSteps[completedIndex]}' complete: ${String(
+          error,
+        )}`,
+      );
+    }
+  };
 
   core.info('[perf] cloneRepository start');
   const startClone = Date.now();
-  await cloneRepository(
-    workspace,
-    githubToken,
-    repo,
-    context,
-    octokit,
-    agentEvent,
-  );
+  await cloneRepository(workspace, githubToken, repo, context, octokit, agentEvent);
   core.info(`[perf] cloneRepository end - ${Date.now() - startClone}ms`);
 
   core.info('[perf] captureFileState start');
@@ -115,26 +139,7 @@ export async function runAction(
   );
   core.info(`Prompt: \n${prompt}`);
 
-  if (progressCommentId) {
-    try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 0 ? 'x' : ' '}] ${s}`,
-      );
-      await updateProgressComment(
-        octokit,
-        repo,
-        agentEvent.github,
-        progressCommentId,
-        steps,
-      );
-    } catch (e) {
-      core.warning(
-        `Failed to update progress to 'Gathering context' complete: ${
-          e instanceof Error ? e.message : e
-        }`,
-      );
-    }
-  }
+  await safeUpdateProgress(0);
 
   let output: string;
   try {
@@ -150,26 +155,7 @@ export async function runAction(
     );
     core.info(`[perf] runCodex end - ${Date.now() - startCodex}ms`);
     output = maskSensitiveInfo(rawOutput, config);
-    if (progressCommentId) {
-      try {
-        const steps = progressSteps.map(
-          (s, i) => `- [${i <= 1 ? 'x' : ' '}] ${s}`,
-        );
-        await updateProgressComment(
-          octokit,
-          repo,
-          agentEvent.github,
-          progressCommentId,
-          steps,
-        );
-      } catch (e) {
-        core.warning(
-          `Failed to update progress to 'Planning' complete: ${
-            e instanceof Error ? e.message : e
-          }`,
-        );
-      }
-    }
+    await safeUpdateProgress(1);
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     await upsertComment(
@@ -179,18 +165,10 @@ export async function runAction(
       progressCommentId,
       `CLI execution failed: ${msg}`,
     );
-    try {
-      await removeEyeReaction(octokit, repo, agentEvent.github);
-      await addThumbUpReaction(octokit, repo, agentEvent.github);
-    } catch (reactionError) {
-      core.warning(
-        `Failed to update reaction on the original event: ${
-          reactionError instanceof Error ? reactionError.message : reactionError
-        }`,
-      );
-    }
+    await finalizeReactions();
     return;
   }
+
   core.info(`Output: \n${output}`);
 
   if (createIssues) {
@@ -202,16 +180,7 @@ export async function runAction(
       output,
       progressCommentId,
     );
-    try {
-      await removeEyeReaction(octokit, repo, agentEvent.github);
-      await addThumbUpReaction(octokit, repo, agentEvent.github);
-    } catch (reactionError) {
-      core.warning(
-        `Failed to update reaction on the original issue: ${
-          reactionError instanceof Error ? reactionError.message : reactionError
-        }`,
-      );
-    }
+    await finalizeReactions();
     return;
   }
 
@@ -220,46 +189,8 @@ export async function runAction(
   const changedFiles = await detectChanges(workspace, originalFileState);
   core.info(`[perf] detectChanges end - ${Date.now() - startDetect}ms`);
 
-  if (progressCommentId) {
-    try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 2 ? 'x' : ' '}] ${s}`,
-      );
-      await updateProgressComment(
-        octokit,
-        repo,
-        agentEvent.github,
-        progressCommentId,
-        steps,
-      );
-    } catch (e) {
-      core.warning(
-        `Failed to update progress to 'Applying edits' complete: ${
-          e instanceof Error ? e.message : e
-        }`,
-      );
-    }
-  }
-  if (progressCommentId) {
-    try {
-      const steps = progressSteps.map(
-        (s, i) => `- [${i <= 3 ? 'x' : ' '}] ${s}`,
-      );
-      await updateProgressComment(
-        octokit,
-        repo,
-        agentEvent.github,
-        progressCommentId,
-        steps,
-      );
-    } catch (e) {
-      core.warning(
-        `Failed to update progress to 'Testing' complete: ${
-          e instanceof Error ? e.message : e
-        }`,
-      );
-    }
-  }
+  await safeUpdateProgress(2);
+  await safeUpdateProgress(3);
 
   await handleResult(
     config,
@@ -269,33 +200,7 @@ export async function runAction(
     progressCommentId,
   );
 
-  // Prefix issue/PR title with [Done] when work completes
-  {
-    const isIssue = 'issue' in agentEvent.github;
-    const number = isIssue
-      ? agentEvent.github.issue.number
-      : agentEvent.github.pull_request.number;
-    const title = isIssue
-      ? agentEvent.github.issue.title
-      : agentEvent.github.pull_request.title ?? '';
-    const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
-    const newTitle = `[Done] ${stripped}`;
-    core.info(`Updating issue/PR #${number} title to '${newTitle}'`);
-    await octokit.rest.issues.update({
-      ...repo,
-      issue_number: number,
-      title: newTitle,
-    });
-  }
+  await updateTitle('Done');
   core.info('Action completed successfully.');
-  try {
-    await removeEyeReaction(octokit, repo, agentEvent.github);
-    await addThumbUpReaction(octokit, repo, agentEvent.github);
-  } catch (reactionError) {
-    core.warning(
-      `Failed to update reaction on the original event: ${
-        reactionError instanceof Error ? reactionError.message : reactionError
-      }`,
-    );
-  }
+  await finalizeReactions();
 }
