@@ -6,6 +6,69 @@ import type { Octokit } from 'octokit';
 import type { RepoContext, GitHubEvent } from './types';
 
 /**
+ * Get handlers for reactions based on the GitHub event.
+ */
+function getReactionHandlers(
+  octokit: Octokit,
+  repo: RepoContext,
+  event: GitHubEvent,
+) {
+  if ((event.action === 'opened' || event.action === 'assigned') && 'issue' in event) {
+    const issueNumber = event.issue.number;
+    const logTarget = `issue #${issueNumber}`;
+    return {
+      create: (content: string) =>
+        octokit.rest.reactions.createForIssue({ ...repo, issue_number: issueNumber, content }),
+      list: () =>
+        octokit.rest.reactions.listForIssue({ ...repo, issue_number: issueNumber }),
+      delete: (reaction_id: number) =>
+        octokit.rest.reactions.deleteForIssue({ ...repo, issue_number: issueNumber, reaction_id }),
+      logTarget,
+    };
+  }
+  if (event.action === 'created' && 'comment' in event && 'issue' in event) {
+    const issueNumber = event.issue.number;
+    const commentId = event.comment.id;
+    const logTarget = `comment on issue/PR #${issueNumber}`;
+    return {
+      create: (content: string) =>
+        octokit.rest.reactions.createForIssueComment({ ...repo, comment_id: commentId, content }),
+      list: () =>
+        octokit.rest.reactions.listForIssueComment({ ...repo, comment_id: commentId }),
+      delete: (reaction_id: number) =>
+        octokit.rest.reactions.deleteForIssueComment({ ...repo, comment_id: commentId, reaction_id }),
+      logTarget,
+    };
+  }
+  if (event.action === 'created' && 'comment' in event && 'pull_request' in event) {
+    const prNumber = event.pull_request.number;
+    const commentId = event.comment.id;
+    const logTarget = `review comment on PR #${prNumber}`;
+    return {
+      create: (content: string) =>
+        octokit.rest.reactions.createForPullRequestReviewComment({ ...repo, comment_id: commentId, content }),
+      list: () =>
+        octokit.rest.reactions.listForPullRequestReviewComment({ ...repo, comment_id: commentId }),
+      delete: (reaction_id: number) => {
+        if (typeof octokit.rest.reactions.deleteForPullRequestReviewComment === 'function') {
+          return octokit.rest.reactions.deleteForPullRequestReviewComment({
+            ...repo,
+            comment_id: commentId,
+            reaction_id,
+          });
+        }
+        return octokit.request(
+          'DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}',
+          { ...repo, comment_id: commentId, reaction_id },
+        );
+      },
+      logTarget,
+    };
+  }
+  return null;
+}
+
+/**
  * Adds an 'eyes' reaction to the specified issue or comment event.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
@@ -17,47 +80,14 @@ export async function addEyeReaction(
   repo: RepoContext,
   event: GitHubEvent,
 ): Promise<void> {
+  const handler = getReactionHandlers(octokit, repo, event);
+  if (!handler) return;
+
   try {
-    if (event.action === 'opened' && 'issue' in event) {
-      await octokit.rest.reactions.createForIssue({
-        ...repo,
-        issue_number: event.issue.number,
-        content: 'eyes',
-      });
-      core.info(`Added eye reaction to issue #${event.issue.number}`);
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'issue' in event
-    ) {
-      await octokit.rest.reactions.createForIssueComment({
-        ...repo,
-        comment_id: event.comment.id,
-        content: 'eyes',
-      });
-      core.info(
-        `Added eye reaction to comment on issue/PR #${event.issue.number}`,
-      );
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'pull_request' in event
-    ) {
-      await octokit.rest.reactions.createForPullRequestReviewComment({
-        ...repo,
-        comment_id: event.comment.id,
-        content: 'eyes',
-      });
-      core.info(
-        `Added eye reaction to review comment on PR #${event.pull_request.number}`,
-      );
-    }
+    await handler.create('eyes');
+    core.info(`Added eye reaction to ${handler.logTarget}`);
   } catch (error) {
-    core.warning(
-      `Failed to add reaction: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.warning(`Failed to add reaction: ${error instanceof Error ? error.message : error}`);
   }
 }
 
@@ -73,100 +103,21 @@ export async function removeEyeReaction(
   repo: RepoContext,
   event: GitHubEvent,
 ): Promise<void> {
+  const handler = getReactionHandlers(octokit, repo, event);
+  if (!handler) return;
+
   try {
-    if (
-      (event.action === 'opened' || event.action === 'assigned') &&
-      'issue' in event
-    ) {
-      const reactions = await octokit.rest.reactions.listForIssue({
-        ...repo,
-        issue_number: event.issue.number,
-      });
-      for (const reaction of reactions.data) {
-        if (
-          reaction.content === 'eyes' &&
-          reaction.user?.login === 'github-actions[bot]'
-        ) {
-          await octokit.rest.reactions.deleteForIssue({
-            ...repo,
-            issue_number: event.issue.number,
-            reaction_id: reaction.id,
-          });
-          core.info(`Removed eye reaction from issue #${event.issue.number}`);
-          break;
-        }
-      }
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'issue' in event
-    ) {
-      const reactions = await octokit.rest.reactions.listForIssueComment({
-        ...repo,
-        comment_id: event.comment.id,
-      });
-      for (const reaction of reactions.data) {
-        if (
-          reaction.content === 'eyes' &&
-          reaction.user?.login === 'github-actions[bot]'
-        ) {
-          await octokit.rest.reactions.deleteForIssueComment({
-            ...repo,
-            comment_id: event.comment.id,
-            reaction_id: reaction.id,
-          });
-          core.info(
-            `Removed eye reaction from comment on issue/PR #${event.issue.number}`,
-          );
-          break;
-        }
-      }
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'pull_request' in event
-    ) {
-      const reactions = await octokit.rest.reactions.listForPullRequestReviewComment({
-        ...repo,
-        comment_id: event.comment.id,
-      });
-      for (const reaction of reactions.data) {
-        if (
-          reaction.content === 'eyes' &&
-          reaction.user?.login === 'github-actions[bot]'
-        ) {
-          if (
-            typeof octokit.rest.reactions.deleteForPullRequestReviewComment ===
-            'function'
-          ) {
-            await octokit.rest.reactions.deleteForPullRequestReviewComment({
-              ...repo,
-              comment_id: event.comment.id,
-              reaction_id: reaction.id,
-            });
-          } else {
-            await octokit.request(
-              'DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}',
-              {
-                ...repo,
-                comment_id: event.comment.id,
-                reaction_id: reaction.id,
-              },
-            );
-          }
-          core.info(
-            `Removed eye reaction from review comment on PR #${event.pull_request.number}`,
-          );
-          break;
-        }
-      }
+    const reactions = await handler.list();
+    const reaction = reactions.data.find(
+      r => r.content === 'eyes' && r.user?.login === 'github-actions[bot]',
+    );
+
+    if (reaction) {
+      await handler.delete(reaction.id);
+      core.info(`Removed eye reaction from ${handler.logTarget}`);
     }
   } catch (error) {
-    core.warning(
-      `Failed to remove eye reaction: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.warning(`Failed to remove eye reaction: ${error instanceof Error ? error.message : error}`);
   }
 }
 
@@ -182,50 +133,15 @@ export async function addThumbUpReaction(
   repo: RepoContext,
   event: GitHubEvent,
 ): Promise<void> {
+  await removeEyeReaction(octokit, repo, event);
+
+  const handler = getReactionHandlers(octokit, repo, event);
+  if (!handler) return;
+
   try {
-    await removeEyeReaction(octokit, repo, event);
-    if (
-      (event.action === 'opened' || event.action === 'assigned') &&
-      'issue' in event
-    ) {
-      await octokit.rest.reactions.createForIssue({
-        ...repo,
-        issue_number: event.issue.number,
-        content: '+1',
-      });
-      core.info(`Added thumbs up reaction to issue #${event.issue.number}`);
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'issue' in event
-    ) {
-      await octokit.rest.reactions.createForIssueComment({
-        ...repo,
-        comment_id: event.comment.id,
-        content: '+1',
-      });
-      core.info(
-        `Added thumbs up reaction to comment on issue/PR #${event.issue.number}`,
-      );
-    } else if (
-      event.action === 'created' &&
-      'comment' in event &&
-      'pull_request' in event
-    ) {
-      await octokit.rest.reactions.createForPullRequestReviewComment({
-        ...repo,
-        comment_id: event.comment.id,
-        content: '+1',
-      });
-      core.info(
-        `Added thumbs up reaction to review comment on PR #${event.pull_request.number}`,
-      );
-    }
+    await handler.create('+1');
+    core.info(`Added thumbs up reaction to ${handler.logTarget}`);
   } catch (error) {
-    core.warning(
-      `Failed to add thumbs up reaction: ${
-        error instanceof Error ? error.message : error
-      }`,
-    );
+    core.warning(`Failed to add thumbs up reaction: ${error instanceof Error ? error.message : error}`);
   }
 }
