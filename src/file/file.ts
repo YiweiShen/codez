@@ -6,8 +6,7 @@
  */
 
 import * as crypto from 'crypto';
-
-import { promises as fs } from 'fs';
+import { createReadStream, promises as fs } from 'fs';
 
 import * as os from 'os';
 import * as path from 'path';
@@ -21,188 +20,90 @@ import { toErrorMessage } from '../utils/error';
 import { DEFAULT_IGNORE_PATTERNS } from './constants';
 
 /**
- * Calculate the SHA-256 hash of the specified file.
- * @param filePath - Absolute path to the file.
- * @returns The SHA-256 hash of the file content.
- */
-
-/**
- *
- * @param filePath
- */
-
-/**
- *
- * @param filePath
- */
-
-/**
- *
- * @param filePath
+ * Calculate the SHA-256 hash of the specified file using a streaming approach.
+ * @param filePath Absolute path to the file.
+ * @returns SHA-256 hash of the file content as a hex string.
  */
 async function calculateFileHash(filePath: string): Promise<string> {
-  try {
-    const fileBuffer = await fs.readFile(filePath);
-    const hashSum = crypto.createHash('sha256');
-    hashSum.update(fileBuffer);
-    return hashSum.digest('hex');
-  } catch (error) {
-    // Log error but rethrow to be handled by caller, as hash calculation is critical
-    core.error(
-      `Failed to calculate hash for ${filePath}: ${toErrorMessage(error)}`,
-    );
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = createReadStream(filePath);
+    stream.on('error', (error) => {
+      core.error(`Failed to read file for hashing ${filePath}: ${toErrorMessage(error)}`);
+      reject(error);
+    });
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex')));
+  });
 }
+
 
 /**
  * Check if a file or directory exists at the given path.
- * @param filePath - Absolute or relative path to check.
+ * @param filePath Path to check (absolute or relative).
  * @returns Promise resolving to true if the path exists, false otherwise.
  */
-
-/**
- *
- * @param filePath
- */
-
-/**
- *
- * @param filePath
- */
-
-/**
- *
- * @param filePath
- */
-
 function pathExists(filePath: string): Promise<boolean> {
-  return fs
-    .access(filePath)
-    .then(() => true)
-    .catch(() => false);
+  return fs.access(filePath).then(() => true).catch(() => false);
 }
 
 /**
  * Capture the state of files in the workspace, respecting .gitignore rules.
- * @param workspace - The root directory of the workspace.
+ * @param workspace Root directory of the workspace.
  * @returns Map of relative file paths to their SHA-256 hashes.
  */
-
-/**
- *
- * @param workspace
- */
-
-/**
- *
- * @param workspace
- */
-
-/**
- *
- * @param workspace
- */
-export async function captureFileState(
-  workspace: string,
-): Promise<Map<string, string>> {
+export async function captureFileState(workspace: string): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
-  const fileState = new Map<string, string>();
   const gitignorePath = path.join(workspace, '.gitignore');
   const ig = ignore();
 
-  // Add default ignore patterns (e.g., .git, node_modules)
   ig.add(DEFAULT_IGNORE_PATTERNS);
-
   if (await pathExists(gitignorePath)) {
     core.info(`Reading .gitignore rules from ${gitignorePath}`);
     try {
-      const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
-      ig.add(gitignoreContent);
+      const content = await fs.readFile(gitignorePath, 'utf8');
+      ig.add(content);
     } catch (error) {
       core.warning(
-        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(
-          error,
-        )}. Proceeding with default ignores.`,
+        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
       );
     }
   } else {
     core.info('.gitignore not found in workspace root. Using default ignores.');
   }
 
-  // Use async fast-glob to find all files, with include/exclude patterns for performance
-  const allFiles = await fg(['**/*'], {
-    cwd: workspace,
-    onlyFiles: true,
-    dot: true,
-  });
+  const allPaths = await fg(['**/*'], { cwd: workspace, onlyFiles: true, dot: true });
+  const files = ig.filter(allPaths);
+  core.info(`Found ${allPaths.length} total entries, processing ${files.length} files after ignores.`);
 
-  // Filter the glob results using the ignore instance
-  // Note: ignore() expects relative paths from the workspace root
-  const filesToProcess = ig.filter(allFiles);
-
-  core.info(
-    `Found ${allFiles.length} total entries (files/dirs), processing ${filesToProcess.length} files after applying ignore rules.`,
-  );
-  // Hash files in parallel with a limit on concurrency
-  const concurrency = os.cpus().length;
-  const workerCount = Math.min(concurrency, filesToProcess.length);
-  let idx = 0;
-  const workers: Promise<void>[] = [];
-  for (let w = 0; w < workerCount; w++) {
-    workers.push(
-      (async () => {
-        while (true) {
-          const i = idx++;
-          if (i >= filesToProcess.length) break;
-          const relativeFilePath = filesToProcess[i];
-          const absoluteFilePath = path.join(workspace, relativeFilePath);
-          try {
-            const stats = await fs.stat(absoluteFilePath);
-            if (stats.isFile()) {
-              const hash = await calculateFileHash(absoluteFilePath);
-              fileState.set(relativeFilePath, hash);
-            }
-          } catch (error) {
-            core.warning(
-              `Could not process file ${relativeFilePath}: ${toErrorMessage(
-                error,
-              )}`,
-            );
-          }
+  const fileState = new Map<string, string>();
+  const concurrency = Math.min(os.cpus().length, files.length);
+  for (let i = 0; i < files.length; i += concurrency) {
+    const batch = files.slice(i, i + concurrency);
+    await Promise.all(
+      batch.map(async (relativeFilePath) => {
+        const absoluteFilePath = path.join(workspace, relativeFilePath);
+        try {
+          const hash = await calculateFileHash(absoluteFilePath);
+          fileState.set(relativeFilePath, hash);
+        } catch (error) {
+          core.warning(`Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`);
         }
-      })(),
+      }),
     );
   }
-  await Promise.all(workers);
+
   core.info(`Captured state of ${fileState.size} files.`);
   return fileState;
 }
 
 /**
  * Detect file changes by comparing two file state maps.
- * @param workspace - The root directory of the workspace.
- * @param originalState - Initial state of files mapped to hashes.
+ * @param workspace Root directory of the workspace.
+ * @param originalState Initial map of relative file paths to their SHA-256 hashes.
  * @returns Array of relative file paths that have been added, modified, or deleted.
  */
 
-/**
- *
- * @param workspace
- * @param originalState
- */
-
-/**
- *
- * @param workspace
- * @param originalState
- */
-
-/**
- *
- * @param workspace
- * @param originalState
- */
 export async function detectChanges(
   workspace: string,
   originalState: Map<string, string>,
