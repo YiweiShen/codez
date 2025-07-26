@@ -53,12 +53,21 @@ export async function runAction(
   );
   // Prefix issue/PR title with [WIP] when work starts
   {
-    const issueNumber = agentEvent.github.issue.number;
-    const originalTitle = agentEvent.github.issue.title;
-    const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
-    const newTitle = `[WIP] ${strippedTitle}`;
-    core.info(`Updating issue/PR #${issueNumber} title to '${newTitle}'`);
-    await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
+    const isIssue = 'issue' in agentEvent.github;
+    const number = isIssue
+      ? agentEvent.github.issue.number
+      : agentEvent.github.pull_request.number;
+    const title = isIssue
+      ? agentEvent.github.issue.title
+      : agentEvent.github.pull_request.title ?? '';
+    const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
+    const newTitle = `[WIP] ${stripped}`;
+    core.info(`Updating issue/PR #${number} title to '${newTitle}'`);
+    await octokit.rest.issues.update({
+      ...repo,
+      issue_number: number,
+      title: newTitle,
+    });
   }
 
   const progressSteps = [
@@ -262,12 +271,21 @@ export async function runAction(
 
   // Prefix issue/PR title with [Done] when work completes
   {
-    const issueNumber = agentEvent.github.issue.number;
-    const originalTitle = agentEvent.github.issue.title;
-    const strippedTitle = originalTitle.replace(/^\[(?:WIP|Done)\]\s*/, '');
-    const newTitle = `[Done] ${strippedTitle}`;
-    core.info(`Updating issue/PR #${issueNumber} title to '${newTitle}'`);
-    await octokit.rest.issues.update({ ...repo, issue_number: issueNumber, title: newTitle });
+    const isIssue = 'issue' in agentEvent.github;
+    const number = isIssue
+      ? agentEvent.github.issue.number
+      : agentEvent.github.pull_request.number;
+    const title = isIssue
+      ? agentEvent.github.issue.title
+      : agentEvent.github.pull_request.title ?? '';
+    const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
+    const newTitle = `[Done] ${stripped}`;
+    core.info(`Updating issue/PR #${number} title to '${newTitle}'`);
+    await octokit.rest.issues.update({
+      ...repo,
+      issue_number: number,
+      title: newTitle,
+    });
   }
   core.info('Action completed successfully.');
   try {
