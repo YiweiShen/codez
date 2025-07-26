@@ -5,8 +5,8 @@ export {
   escapeRegExp,
   createProgressComment,
   updateProgressComment,
-} from './progress';
-export { preparePrompt } from './prompt-builder';
-export { handleResult } from './result-handler';
-export { runAction } from './runAction';
+} from './progress.js';
+export { preparePrompt } from './prompt-builder.js';
+export { handleResult } from './result-handler.js';
+export { runAction } from './runAction.js';
 export { createIssuesFromFeaturePlan } from './createIssues.js';
