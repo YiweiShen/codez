@@ -3,7 +3,7 @@
  */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type { RepoContext, AgentEvent, GithubContentsData } from './types';
+import type { RepoContext, AgentEvent, GitHubContentsData } from './types';
 import { GitHubError } from '../utils/errors';
 
 /**
@@ -46,7 +46,7 @@ export async function getContentsData(
   octokit: Octokit,
   repo: RepoContext,
   event: AgentEvent,
-): Promise<GithubContentsData> {
+): Promise<GitHubContentsData> {
   if (event.type === 'issuesOpened' || event.type === 'issueCommentCreated') {
     return getIssueData(octokit, repo, event.github.issue.number);
   } else if (event.type === 'pullRequestCommentCreated') {
@@ -66,7 +66,7 @@ async function getIssueData(
   octokit: Octokit,
   repo: RepoContext,
   issueNumber: number,
-): Promise<GithubContentsData> {
+): Promise<GitHubContentsData> {
   core.info(`Fetching data for issue #${issueNumber}...`);
   try {
     // Fetch issue and its comments via GraphQL in a single request
@@ -126,7 +126,7 @@ async function getPullRequestData(
   octokit: Octokit,
   repo: RepoContext,
   pullNumber: number,
-): Promise<GithubContentsData> {
+): Promise<GitHubContentsData> {
   core.info(`Fetching data for pull request #${pullNumber} via GraphQL...`);
   try {
     // Fetch PR and its issue‐thread comments via GraphQL
@@ -188,7 +188,7 @@ async function getPullRequestReviewCommentsData(
   repo: RepoContext,
   pullNumber: number,
   targetCommentId: number,
-): Promise<GithubContentsData> {
+): Promise<GitHubContentsData> {
   core.info(`Fetching data for pull request review comments #${pullNumber}...`);
   try {
     // Get PR body
