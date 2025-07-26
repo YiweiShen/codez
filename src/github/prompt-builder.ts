@@ -105,9 +105,10 @@ async function fetchUrlContents(urls: string[]): Promise<string[]> {
           responseType: 'text',
           timeout: 60_000,
         });
-        const data = typeof response.data === 'string'
-          ? response.data
-          : JSON.stringify(response.data);
+        const data =
+          typeof response.data === 'string'
+            ? response.data
+            : JSON.stringify(response.data);
         return `=== ${url} ===\n${data}`;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -194,7 +195,10 @@ export async function preparePrompt(
       const esc = escapeRegExp(url);
       prompt = prompt
         .replace(new RegExp(`!\\[[\\s\\S]*?\\]\\(${esc}\\)`, 'g'), placeholder)
-        .replace(new RegExp(`<img[^>]*src=[\\"']${esc}[\\"'][^>]*>`, 'g'), placeholder);
+        .replace(
+          new RegExp(`<img[^>]*src=[\\"']${esc}[\\"'][^>]*>`, 'g'),
+          placeholder,
+        );
     }
   }
   return { prompt, downloadedImageFiles };

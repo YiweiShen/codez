@@ -11,7 +11,9 @@ import type {
 import { truncateOutput } from './utils';
 
 // Type guards for GitHubEvent type narrowing
-function isIssueEvent(event: GitHubEvent): event is { issue: { number: number } } {
+function isIssueEvent(
+  event: GitHubEvent,
+): event is { issue: { number: number } } {
   return 'issue' in event;
 }
 

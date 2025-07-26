@@ -31,7 +31,6 @@ export function getOpenAIClient(config: ActionConfig): OpenAI {
   return new OpenAI(openaiOptions);
 }
 
-
 /**
  * Context information for determining fallback commit messages.
  */

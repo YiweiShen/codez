@@ -73,10 +73,11 @@ export async function loadEventPayload(
  * Handle a direct prompt override, bypassing GitHub event triggers.
  */
 function handleDirectPrompt(directPrompt: string): ProcessedEvent {
-  const { prompt: userPrompt, includeFixBuild, includeFetch } = extractPromptFlags(
-    directPrompt,
-    true,
-  );
+  const {
+    prompt: userPrompt,
+    includeFixBuild,
+    includeFetch,
+  } = extractPromptFlags(directPrompt, true);
   core.info('Direct prompt provided. Bypassing GitHub event trigger.');
   return {
     type: 'codex',

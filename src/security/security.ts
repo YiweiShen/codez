@@ -38,7 +38,6 @@ export async function checkPermission(config: ActionConfig): Promise<boolean> {
   }
 }
 
-
 /**
  * Check if a GitHub user has appropriate permissions for the repository.
  * @param octokit - GitHub API client instance.

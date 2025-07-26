@@ -46,12 +46,8 @@ async function updateTitle(
   label: 'WIP' | 'Done',
 ): Promise<void> {
   const isIssue = 'issue' in github;
-  const number = isIssue
-    ? github.issue.number
-    : github.pull_request!.number;
-  const title = isIssue
-    ? github.issue.title
-    : github.pull_request!.title ?? '';
+  const number = isIssue ? github.issue.number : github.pull_request!.number;
+  const title = isIssue ? github.issue.title : github.pull_request!.title ?? '';
   const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
   const newTitle = `[${label}] ${stripped}`;
   core.info(`Updating issue/PR #${number} title to '${newTitle}'`);
@@ -95,11 +91,21 @@ async function safeUpdateProgress(
 ): Promise<void> {
   if (!progressCommentId) return;
   try {
-    const status = steps.map((step, i) => `- [${i <= completedIndex ? 'x' : ' '}] ${step}`);
-    await updateProgressComment(octokit, repo, github, progressCommentId, status);
+    const status = steps.map(
+      (step, i) => `- [${i <= completedIndex ? 'x' : ' '}] ${step}`,
+    );
+    await updateProgressComment(
+      octokit,
+      repo,
+      github,
+      progressCommentId,
+      status,
+    );
   } catch (error) {
     core.warning(
-      `Failed to update progress to '${steps[completedIndex]}' complete: ${String(error)}`,
+      `Failed to update progress to '${
+        steps[completedIndex]
+      }' complete: ${String(error)}`,
     );
   }
 }
@@ -151,7 +157,6 @@ export async function runAction(
   } catch (error) {
     core.warning(`Failed to create progress comment: ${String(error)}`);
   }
-
 
   // clone the repository and capture initial file state
   await measurePerformance('cloneRepository', () =>

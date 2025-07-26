@@ -1,7 +1,7 @@
 /**
  * @file Error handling utilities module.
  * Provides functions to convert unknown errors safely to message and stack strings.
-*/
+ */
 
 /**
  * Type guard to determine if a value is an Error.

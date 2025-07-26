@@ -31,7 +31,9 @@ async function configureGitUser(workspace: string): Promise<void> {
 // Stage all changes and return whether there are any to commit.
 async function hasChanges(workspace: string): Promise<boolean> {
   await runGit(['add', '-A'], workspace);
-  const status = await execa('git', ['status', '--porcelain'], { cwd: workspace });
+  const status = await execa('git', ['status', '--porcelain'], {
+    cwd: workspace,
+  });
   return Boolean(status.stdout.trim());
 }
 

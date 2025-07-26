@@ -49,7 +49,10 @@ export type GitHubEventPullRequestCommentCreated = {
 /**
  * Minimal pull request representation for review events.
  */
-export type GitHubPullRequestMinimal = Pick<GitHubPullRequest, 'number' | 'title' | 'body'>;
+export type GitHubPullRequestMinimal = Pick<
+  GitHubPullRequest,
+  'number' | 'title' | 'body'
+>;
 
 /**
  * GitHub pull request review comment payload.

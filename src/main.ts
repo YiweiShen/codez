@@ -23,9 +23,18 @@ async function postErrorComment(
   message: string,
 ): Promise<void> {
   try {
-    await postComment(config.octokit, config.repo, event.agentEvent.github, message);
+    await postComment(
+      config.octokit,
+      config.repo,
+      event.agentEvent.github,
+      message,
+    );
   } catch (err: unknown) {
-    core.error(`Failed to post comment: ${err instanceof Error ? err.message : String(err)}`);
+    core.error(
+      `Failed to post comment: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
   }
 }
 
@@ -79,7 +88,9 @@ export async function run(): Promise<void> {
  * permission check, and executing the main logic with timeout.
  */
 async function executeAction(config: ActionConfig): Promise<void> {
-  core.info(`Verifying OpenAI API key and access to model ${config.openaiModel}`);
+  core.info(
+    `Verifying OpenAI API key and access to model ${config.openaiModel}`,
+  );
 
   try {
     await verifyModelAccess(config);
@@ -94,7 +105,9 @@ async function executeAction(config: ActionConfig): Promise<void> {
     } catch (commentError: unknown) {
       core.error(
         `Failed to post API key error comment: ${
-          commentError instanceof Error ? commentError.message : String(commentError)
+          commentError instanceof Error
+            ? commentError.message
+            : String(commentError)
         }`,
       );
     }

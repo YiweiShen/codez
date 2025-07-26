@@ -6,7 +6,11 @@ describe('addThumbUpReaction', () => {
   const repo = { owner: 'owner', repo: 'repo' };
 
   it('removes eyes reaction and adds thumbs up to issue', async () => {
-    const reactions = { data: [{ content: 'eyes', id: 1, user: { login: 'github-actions[bot]' } }] };
+    const reactions = {
+      data: [
+        { content: 'eyes', id: 1, user: { login: 'github-actions[bot]' } },
+      ],
+    };
     const octokit = {
       rest: {
         reactions: {
@@ -31,7 +35,11 @@ describe('addThumbUpReaction', () => {
   });
 
   it('removes eyes reaction and adds thumbs up to issue comment', async () => {
-    const reactions = { data: [{ content: 'eyes', id: 2, user: { login: 'github-actions[bot]' } }] };
+    const reactions = {
+      data: [
+        { content: 'eyes', id: 2, user: { login: 'github-actions[bot]' } },
+      ],
+    };
     const octokit = {
       rest: {
         reactions: {
@@ -41,7 +49,11 @@ describe('addThumbUpReaction', () => {
         },
       },
     } as unknown as Octokit;
-    const event: any = { action: 'created', comment: { id: 10 }, issue: { number: 6 } };
+    const event: any = {
+      action: 'created',
+      comment: { id: 10 },
+      issue: { number: 6 },
+    };
     await addThumbUpReaction(octokit, repo, event);
     expect(octokit.rest.reactions.deleteForIssueComment).toHaveBeenCalledWith({
       ...repo,
@@ -56,24 +68,38 @@ describe('addThumbUpReaction', () => {
   });
 
   it('removes eyes reaction and adds thumbs up to review comment', async () => {
-    const reactions = { data: [{ content: 'eyes', id: 3, user: { login: 'github-actions[bot]' } }] };
+    const reactions = {
+      data: [
+        { content: 'eyes', id: 3, user: { login: 'github-actions[bot]' } },
+      ],
+    };
     const octokit = {
       rest: {
         reactions: {
-          listForPullRequestReviewComment: jest.fn().mockResolvedValue(reactions),
+          listForPullRequestReviewComment: jest
+            .fn()
+            .mockResolvedValue(reactions),
           deleteForPullRequestReviewComment: jest.fn().mockResolvedValue({}),
           createForPullRequestReviewComment: jest.fn().mockResolvedValue({}),
         },
       },
     } as unknown as Octokit;
-    const event: any = { action: 'created', comment: { id: 20 }, pull_request: { number: 7 } };
+    const event: any = {
+      action: 'created',
+      comment: { id: 20 },
+      pull_request: { number: 7 },
+    };
     await addThumbUpReaction(octokit, repo, event);
-    expect(octokit.rest.reactions.deleteForPullRequestReviewComment).toHaveBeenCalledWith({
+    expect(
+      octokit.rest.reactions.deleteForPullRequestReviewComment,
+    ).toHaveBeenCalledWith({
       ...repo,
       comment_id: 20,
       reaction_id: 3,
     });
-    expect(octokit.rest.reactions.createForPullRequestReviewComment).toHaveBeenCalledWith({
+    expect(
+      octokit.rest.reactions.createForPullRequestReviewComment,
+    ).toHaveBeenCalledWith({
       ...repo,
       comment_id: 20,
       content: '+1',

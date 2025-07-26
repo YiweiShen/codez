@@ -30,14 +30,14 @@ function parseFeatures(output: string): Feature[] {
         throw new Error(
           `Failed to parse feature plan JSON: ${
             parseError instanceof Error ? parseError.message : parseError
-          }`
+          }`,
         );
       }
     }
     throw new Error(
       `Failed to parse feature plan JSON: ${
         error instanceof Error ? error.message : error
-      }`
+      }`,
     );
   }
 }
@@ -49,7 +49,7 @@ function parseFeatures(output: string): Feature[] {
 function validateFeatures(features: unknown): Feature[] {
   if (!Array.isArray(features)) {
     throw new Error(
-      'Feature plan JSON is not an array. Please output an array of feature objects.'
+      'Feature plan JSON is not an array. Please output an array of feature objects.',
     );
   }
 
@@ -61,7 +61,7 @@ function validateFeatures(features: unknown): Feature[] {
       typeof (feature as any).description !== 'string'
     ) {
       throw new Error(
-        `Invalid feature format at index ${index}. Each feature must be an object with 'title' (string) and 'description' (string).`
+        `Invalid feature format at index ${index}. Each feature must be an object with 'title' (string) and 'description' (string).`,
       );
     }
   });
@@ -109,12 +109,20 @@ export async function createIssuesFromFeaturePlan(
         title: feature.title,
         body: feature.description,
       });
-      core.info(`Created feature issue #${issue.data.number}: ${feature.title}`);
+      core.info(
+        `Created feature issue #${issue.data.number}: ${feature.title}`,
+      );
 
       const commentBody = `Created new feature issue #${issue.data.number} for "${feature.title}"`;
 
       if (index === 0 && progressCommentId) {
-        await upsertComment(octokit, repo, event, progressCommentId, commentBody);
+        await upsertComment(
+          octokit,
+          repo,
+          event,
+          progressCommentId,
+          commentBody,
+        );
       } else {
         await postComment(octokit, repo, event, commentBody);
       }

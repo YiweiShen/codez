@@ -64,7 +64,9 @@ async function fetchContentNode<Node extends GraphQLContentNode>(
       body: c.body ?? '',
       login: c.author.login,
     }));
-    core.info(`Fetched ${comments.length} comments for ${label} #${numberArg}.`);
+    core.info(
+      `Fetched ${comments.length} comments for ${label} #${numberArg}.`,
+    );
     return { content, comments };
   } catch {
     core.error(`Failed to get data for ${label} #${numberArg}`);
@@ -91,7 +93,9 @@ export async function getChangedFiles(
       case 'pullRequestReviewCommentCreated':
         return event.github.pull_request.number;
       default:
-        throw new GitHubError(`Cannot get changed files for event type: ${event.type}`);
+        throw new GitHubError(
+          `Cannot get changed files for event type: ${event.type}`,
+        );
     }
   })();
 
@@ -120,10 +124,20 @@ export async function getContentsData(
   switch (event.type) {
     case 'issuesOpened':
     case 'issueCommentCreated':
-      return fetchContentNode(octokit, repo, 'issue', event.github.issue.number);
+      return fetchContentNode(
+        octokit,
+        repo,
+        'issue',
+        event.github.issue.number,
+      );
 
     case 'pullRequestCommentCreated':
-      return fetchContentNode(octokit, repo, 'pullRequest', event.github.issue.number);
+      return fetchContentNode(
+        octokit,
+        repo,
+        'pullRequest',
+        event.github.issue.number,
+      );
 
     case 'pullRequestReviewCommentCreated':
       return getPullRequestReviewCommentsData(
@@ -134,11 +148,11 @@ export async function getContentsData(
       );
 
     default:
-      throw new GitHubError(`Invalid event type for data retrieval: ${event.type}`);
+      throw new GitHubError(
+        `Invalid event type for data retrieval: ${event.type}`,
+      );
   }
 }
-
-
 
 async function getPullRequestReviewCommentsData(
   octokit: Octokit,

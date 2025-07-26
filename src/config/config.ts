@@ -139,7 +139,10 @@ export function parseKeyValueMap(input: string): Record<string, string> {
       const key = rawKey.trim();
       let val = rawVal.trim();
       // Remove surrounding quotes if present
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
         val = val.slice(1, -1);
       }
       if (key) {

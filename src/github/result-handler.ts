@@ -39,7 +39,9 @@ async function removeImageArtifacts(workspace: string): Promise<void> {
     core.info(`Removed image artifacts directory: ${dir}`);
   } catch (error) {
     core.warning(
-      `Failed to remove image artifacts directory: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to remove image artifacts directory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 }
@@ -48,7 +50,9 @@ async function removeImageArtifacts(workspace: string): Promise<void> {
 function getEventNumbers(agentEvent: ProcessedEvent['agentEvent']) {
   const { type, github: g } = agentEvent;
   const issueNumber =
-    type === 'issuesOpened' || type === 'issueCommentCreated' || type === 'issuesAssigned'
+    type === 'issuesOpened' ||
+    type === 'issueCommentCreated' ||
+    type === 'issuesAssigned'
       ? g.issue.number
       : undefined;
   const prNumber =
@@ -83,9 +87,13 @@ export async function handleResult(
     core.info('Flag --no-pr detected; skipping pull request creation.');
   }
   // ignore workflow changes
-  const workflowFiles = changedFiles.filter((f) => f.startsWith(WORKFLOWS_PREFIX));
+  const workflowFiles = changedFiles.filter((f) =>
+    f.startsWith(WORKFLOWS_PREFIX),
+  );
   if (workflowFiles.length > 0) {
-    core.warning(`Ignoring changes to workflow files: ${workflowFiles.join(', ')}`);
+    core.warning(
+      `Ignoring changes to workflow files: ${workflowFiles.join(', ')}`,
+    );
     await execa('git', ['checkout', 'HEAD', '--', WORKFLOWS_DIR], {
       cwd: workspace,
       stdio: 'inherit',
@@ -94,9 +102,16 @@ export async function handleResult(
   // ignore generated image artifacts
   const imageFiles = changedFiles.filter((f) => f.startsWith(IMAGES_PREFIX));
   if (imageFiles.length > 0) {
-    core.warning(`Ignoring changes to ${IMAGES_DIR} folder: ${imageFiles.join(', ')}`);
-    await fs.rm(path.join(workspace, IMAGES_DIR), { recursive: true, force: true });
-    core.info(`Removed image artifacts directory: ${path.join(workspace, IMAGES_DIR)}`);
+    core.warning(
+      `Ignoring changes to ${IMAGES_DIR} folder: ${imageFiles.join(', ')}`,
+    );
+    await fs.rm(path.join(workspace, IMAGES_DIR), {
+      recursive: true,
+      force: true,
+    });
+    core.info(
+      `Removed image artifacts directory: ${path.join(workspace, IMAGES_DIR)}`,
+    );
   }
   const effectiveChangedFiles = changedFiles.filter(
     (f) => !f.startsWith(WORKFLOWS_PREFIX) && !f.startsWith(IMAGES_PREFIX),
@@ -118,7 +133,11 @@ export async function handleResult(
       { issueNumber, prNumber },
       config,
     );
-    core.info(`[perf] generateCommitMessage end - ${Date.now() - startGenerateCommitMessage}ms`);
+    core.info(
+      `[perf] generateCommitMessage end - ${
+        Date.now() - startGenerateCommitMessage
+      }ms`,
+    );
 
     if (
       agentEvent.type === 'issuesOpened' ||

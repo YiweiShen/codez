@@ -101,8 +101,7 @@ export async function updateProgressComment(
   const total = steps.length;
   const completed = steps.filter((s) => s.startsWith('- [x]')).length;
   const filled = Math.round((completed / total) * PROGRESS_BAR_BLOCKS);
-  const bar =
-    '█'.repeat(filled) + '░'.repeat(PROGRESS_BAR_BLOCKS - filled);
+  const bar = '█'.repeat(filled) + '░'.repeat(PROGRESS_BAR_BLOCKS - filled);
   const percent = Math.round((completed / total) * 100);
 
   const body = [
@@ -113,9 +112,7 @@ export async function updateProgressComment(
     getRandomLoadingPhrase(),
     '',
     ...steps.map((line, i) =>
-      i === completed && completed !== total
-        ? `${line}${SPINNER_HTML}`
-        : line
+      i === completed && completed !== total ? `${line}${SPINNER_HTML}` : line,
     ),
     '',
   ].join('\n');

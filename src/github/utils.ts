@@ -29,7 +29,9 @@ export type BranchType = 'feat' | 'fix' | 'docs' | 'styles' | 'chore';
  */
 export function getBranchType(commitMessage: string): BranchType {
   const message = commitMessage.toLowerCase();
-  const match = BRANCH_TYPE_PATTERNS.find(({ pattern }) => pattern.test(message));
+  const match = BRANCH_TYPE_PATTERNS.find(({ pattern }) =>
+    pattern.test(message),
+  );
   return match?.type ?? 'chore';
 }
 
@@ -59,6 +61,8 @@ export function truncateOutput(
     return output;
   }
 
-  core.warning(`Output exceeds ${maxLength} characters; truncating to ${maxLength}.`);
+  core.warning(
+    `Output exceeds ${maxLength} characters; truncating to ${maxLength}.`,
+  );
   return output.slice(0, maxLength);
 }

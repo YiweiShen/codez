@@ -65,7 +65,10 @@ export async function downloadImages(
  * @param downloadDir - Local directory to save the image.
  * @returns Relative path of the downloaded image, or undefined if failed.
  */
-async function processImage(url: string, downloadDir: string): Promise<string | undefined> {
+async function processImage(
+  url: string,
+  downloadDir: string,
+): Promise<string | undefined> {
   try {
     const { pathname } = new URL(url);
     const filename = path.basename(pathname);
@@ -75,7 +78,11 @@ async function processImage(url: string, downloadDir: string): Promise<string | 
     core.info(`Downloaded image ${url} to ${destPath} (${stats.size} bytes)`);
     return path.relative(process.cwd(), destPath);
   } catch (err) {
-    core.warning(`Failed to download image ${url}: ${err instanceof Error ? err.message : String(err)}`);
+    core.warning(
+      `Failed to download image ${url}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
     return undefined;
   }
 }
@@ -89,5 +96,8 @@ async function downloadFile(url: string, dest: string): Promise<void> {
   const response = await axios.get<import('stream').Readable>(url, {
     responseType: 'stream',
   });
-  await pipeline(response.data as import('stream').Readable, createWriteStream(dest));
+  await pipeline(
+    response.data as import('stream').Readable,
+    createWriteStream(dest),
+  );
 }

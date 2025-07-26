@@ -29,7 +29,9 @@ async function calculateFileHash(filePath: string): Promise<string> {
     const hash = crypto.createHash('sha256');
     const stream = createReadStream(filePath);
     stream.on('error', (error) => {
-      core.error(`Failed to read file for hashing ${filePath}: ${toErrorMessage(error)}`);
+      core.error(
+        `Failed to read file for hashing ${filePath}: ${toErrorMessage(error)}`,
+      );
       reject(error);
     });
     stream.on('data', (chunk) => hash.update(chunk));
@@ -37,14 +39,16 @@ async function calculateFileHash(filePath: string): Promise<string> {
   });
 }
 
-
 /**
  * Check if a file or directory exists at the given path.
  * @param filePath Path to check (absolute or relative).
  * @returns Promise resolving to true if the path exists, false otherwise.
  */
 function pathExists(filePath: string): Promise<boolean> {
-  return fs.access(filePath).then(() => true).catch(() => false);
+  return fs
+    .access(filePath)
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
@@ -52,7 +56,9 @@ function pathExists(filePath: string): Promise<boolean> {
  * @param workspace Root directory of the workspace.
  * @returns Map of relative file paths to their SHA-256 hashes.
  */
-export async function captureFileState(workspace: string): Promise<Map<string, string>> {
+export async function captureFileState(
+  workspace: string,
+): Promise<Map<string, string>> {
   core.info('Capturing current file state (respecting .gitignore)...');
   const gitignorePath = path.join(workspace, '.gitignore');
   const ig = ignore();
@@ -65,16 +71,24 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
       ig.add(content);
     } catch (error) {
       core.warning(
-        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(error)}. Proceeding with default ignores.`,
+        `Failed to read .gitignore at ${gitignorePath}: ${toErrorMessage(
+          error,
+        )}. Proceeding with default ignores.`,
       );
     }
   } else {
     core.info('.gitignore not found in workspace root. Using default ignores.');
   }
 
-  const allPaths = await fg(['**/*'], { cwd: workspace, onlyFiles: true, dot: true });
+  const allPaths = await fg(['**/*'], {
+    cwd: workspace,
+    onlyFiles: true,
+    dot: true,
+  });
   const files = ig.filter(allPaths);
-  core.info(`Found ${allPaths.length} total entries, processing ${files.length} files after ignores.`);
+  core.info(
+    `Found ${allPaths.length} total entries, processing ${files.length} files after ignores.`,
+  );
 
   const fileState = new Map<string, string>();
   const concurrency = Math.min(os.cpus().length, files.length);
@@ -87,7 +101,11 @@ export async function captureFileState(workspace: string): Promise<Map<string, s
           const hash = await calculateFileHash(absoluteFilePath);
           fileState.set(relativeFilePath, hash);
         } catch (error) {
-          core.warning(`Could not process file ${relativeFilePath}: ${toErrorMessage(error)}`);
+          core.warning(
+            `Could not process file ${relativeFilePath}: ${toErrorMessage(
+              error,
+            )}`,
+          );
         }
       }),
     );

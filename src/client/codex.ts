@@ -15,7 +15,11 @@ import { CliError, TimeoutError } from '../utils/errors';
 /**
  * Build command-line arguments for Codex CLI invocation.
  */
-function buildCliArgs(prompt: string, model: string, images: string[]): string[] {
+function buildCliArgs(
+  prompt: string,
+  model: string,
+  images: string[],
+): string[] {
   const imageArgs = images.flatMap((img) => ['-i', img]);
   return [
     ...imageArgs,
@@ -61,7 +65,10 @@ function extractCodexOutput(stdout: string): string {
   }
   const start = indices[indices.length - 2];
   const end = indices[indices.length - 1];
-  return lines.slice(start + 1, end).join('\n').trim();
+  return lines
+    .slice(start + 1, end)
+    .join('\n')
+    .trim();
 }
 
 /**
@@ -106,7 +113,9 @@ export async function runCodex(
         `Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`,
       );
     } else if (result.stderr) {
-      core.warning(`Codex command exited successfully but produced stderr: ${result.stderr}`);
+      core.warning(
+        `Codex command exited successfully but produced stderr: ${result.stderr}`,
+      );
     }
 
     if (result.failed || result.exitCode !== 0) {
@@ -115,7 +124,9 @@ export async function runCodex(
       );
       throw new CliError(
         `Codex command failed with exit code ${result.exitCode}. ${
-          result.stderr ? `Stderr: ${result.stderr}` : `Stdout: ${result.stdout}`
+          result.stderr
+            ? `Stderr: ${result.stderr}`
+            : `Stdout: ${result.stdout}`
         }`,
       );
     }
@@ -129,7 +140,10 @@ export async function runCodex(
         error instanceof Error ? error.stack : String(error)
       }`,
     );
-    if (error instanceof Error && error.message.startsWith('Failed to parse JSON output')) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Failed to parse JSON output')
+    ) {
       throw error;
     }
     if (error instanceof Error && (error as ExecaError).timedOut) {

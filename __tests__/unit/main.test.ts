@@ -11,7 +11,9 @@ jest.mock('@actions/core', () => ({
 // Mock all collaborators of run()
 jest.mock('../../../src/config/config', () => ({ getConfig: jest.fn() }));
 jest.mock('../../../src/github/event', () => ({ processEvent: jest.fn() }));
-jest.mock('../../../src/security/security', () => ({ checkPermission: jest.fn() }));
+jest.mock('../../../src/security/security', () => ({
+  checkPermission: jest.fn(),
+}));
 jest.mock('../../../src/github/action', () => ({ runAction: jest.fn() }));
 // Mock OpenAI client to prevent real API calls during tests
 jest.mock('../../../src/api/openai', () => ({ getOpenAIClient: jest.fn() }));

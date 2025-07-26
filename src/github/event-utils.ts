@@ -22,7 +22,7 @@ function isObject(payload: unknown): payload is Record<string, unknown> {
 }
 
 function isIssuesOpenedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventIssuesOpened {
   return (
     isObject(payload) &&
@@ -33,7 +33,7 @@ function isIssuesOpenedPayload(
 }
 
 function isIssuesAssignedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventIssuesAssigned {
   return (
     isObject(payload) &&
@@ -45,7 +45,7 @@ function isIssuesAssignedPayload(
 }
 
 function isIssueCommentCreatedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventIssueCommentCreated {
   return (
     isObject(payload) &&
@@ -57,7 +57,7 @@ function isIssueCommentCreatedPayload(
 }
 
 function isPullRequestCommentCreatedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventPullRequestCommentCreated {
   return (
     isObject(payload) &&
@@ -69,7 +69,7 @@ function isPullRequestCommentCreatedPayload(
 }
 
 function isPullRequestReviewCommentCreatedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventPullRequestReviewCommentCreated {
   return (
     isObject(payload) &&
@@ -81,7 +81,7 @@ function isPullRequestReviewCommentCreatedPayload(
 }
 
 function isPullRequestOpenedOrSyncedPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is GitHubEventPullRequestOpened | GitHubEventPullRequestSynchronize {
   return (
     isObject(payload) &&
