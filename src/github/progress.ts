@@ -33,6 +33,18 @@ function getRandomLoadingPhrase(): string {
 }
 
 /**
+ * Construct a URL to the current GitHub Actions run.
+ * @returns A URL string if context vars are set, otherwise null.
+ */
+function getRunUrl(): string | null {
+  const server = process.env.GITHUB_SERVER_URL || 'https://github.com';
+  const repo = process.env.GITHUB_REPOSITORY;
+  const runId = process.env.GITHUB_RUN_ID;
+  if (!repo || !runId) return null;
+  return `${server}/${repo}/actions/runs/${runId}`;
+}
+
+/**
  * Create a GitHub comment to display initial progress steps with checkboxes.
  * @param octokit - Authenticated Octokit client.
  * @param repo - Repository owner and name context.
@@ -47,7 +59,8 @@ export async function createProgressComment(
   steps: string[],
 ): Promise<number> {
   const emptyBar = '░'.repeat(PROGRESS_BAR_BLOCKS);
-  const body = [
+  const runUrl = getRunUrl();
+  const lines = [
     PROGRESS_TITLE,
     '',
     `Progress: [${emptyBar}] 0%`,
@@ -59,7 +72,11 @@ export async function createProgressComment(
       return i === 0 ? `${checkbox}${SPINNER_HTML}` : checkbox;
     }),
     '',
-  ].join('\n');
+  ];
+  if (runUrl) {
+    lines.push(`[View job run](${runUrl})`, '');
+  }
+  const body = lines.join('\n');
   if ('issue' in event) {
     const { data } = await octokit.rest.issues.createComment({
       ...repo,
@@ -104,7 +121,8 @@ export async function updateProgressComment(
   const bar = '█'.repeat(filled) + '░'.repeat(PROGRESS_BAR_BLOCKS - filled);
   const percent = Math.round((completed / total) * 100);
 
-  const body = [
+  const runUrl = getRunUrl();
+  const lines = [
     PROGRESS_TITLE,
     '',
     `Progress: ${bar} ${percent}%${percent === 100 ? ' ✅' : ''}`,
@@ -115,7 +133,11 @@ export async function updateProgressComment(
       i === completed && completed !== total ? `${line}${SPINNER_HTML}` : line,
     ),
     '',
-  ].join('\n');
+  ];
+  if (runUrl) {
+    lines.push(`[View job run](${runUrl})`, '');
+  }
+  const body = lines.join('\n');
   if ('issue' in event) {
     await octokit.rest.issues.updateComment({
       ...repo,
