@@ -21,14 +21,7 @@ function buildCliArgs(
   images: string[],
 ): string[] {
   const imageArgs = images.flatMap((img) => ['-i', img]);
-  return [
-    ...imageArgs,
-    '--model',
-    model,
-    'exec',
-    '--yolo',
-    prompt,
-  ];
+  return [...imageArgs, '--model', model, 'exec', '--yolo', prompt];
 }
 
 /**
@@ -95,13 +88,17 @@ export async function runCodex(
 
   try {
     core.info('Logging into Codex CLI with provided OpenAI API key.');
-    await execa('sh', ['-c', 'printenv OPENAI_API_KEY | codex login --with-api-key'], {
-      timeout,
-      cwd: workspace,
-      env: envVars,
-      stdio: 'pipe',
-      reject: false,
-    });
+    await execa(
+      'sh',
+      ['-c', 'printenv OPENAI_API_KEY | codex login --with-api-key'],
+      {
+        timeout,
+        cwd: workspace,
+        env: envVars,
+        stdio: 'pipe',
+        reject: false,
+      },
+    );
 
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
     const result = await execa('codex', cliArgs, {
@@ -142,7 +139,7 @@ export async function runCodex(
 
     core.info('Codex command executed successfully.');
 
-    return extractCodexOutput(result.stdout);
+    return result.stdout; // Return full stdout for flexibility
   } catch (error: unknown) {
     core.error(
       `Error executing Codex command: ${
