@@ -26,7 +26,7 @@ function buildCliArgs(
     '--model',
     model,
     'exec',
-    '--dangerously-bypass-approvals-and-sandbox',
+    '--yolo',
     prompt,
   ];
 }
