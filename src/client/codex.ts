@@ -43,7 +43,7 @@ function buildEnvVars(config: ActionConfig): NodeJS.ProcessEnv {
     ...codexEnv,
   };
   if (openaiBaseUrl) {
-    env.OPENAI_API_BASE_URL = openaiBaseUrl;
+    env.OPENAI_BASE_URL = openaiBaseUrl;
   }
   return env;
 }
