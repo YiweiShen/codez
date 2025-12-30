@@ -24,7 +24,7 @@ inputs:
     description: 'Specify the OpenAI API base URL'
     required: false
   openai-model:
-    description: 'OpenAI model identifier to use (default: o4-mini)'
+    description: 'OpenAI model identifier to use (default: gpt-5.1-codex-mini)'
     required: false
   direct-prompt:
     description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'

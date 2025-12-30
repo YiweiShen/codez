@@ -15,7 +15,7 @@ import { ParseError } from '../utils/errors';
  * Default model identifier for OpenAI provider.
  */
 
-export const defaultModel = 'o4-mini';
+export const defaultModel = 'gpt-5.1-codex-mini';
 
 /**
  * Create and configure an OpenAI API client instance.

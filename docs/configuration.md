@@ -20,7 +20,7 @@
 | Input Name         | Description                                                                                                                                                                              |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `openai-base-url`  | OpenAI API base URL                                                                                                                                                                      |
-| `openai-model`     | OpenAI model identifier to use (default: `o4-mini`)                                                                                                                                      |
+| `openai-model`     | OpenAI model identifier to use (default: `gpt-5.1-codex-mini`)                                                                                                                                      |
 | `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`)                                                                                                                                |
 | `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment                                                                                                            |
 | `codex-env`        | Custom environment variables to inject into the Codex CLI execution context. Accepts either a YAML mapping (multiline) or comma-separated key=value pairs.                               |
