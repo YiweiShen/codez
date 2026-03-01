@@ -16,7 +16,7 @@ import { ParseError } from '../utils/errors';
  */
 
 export const defaultModel = 'gpt-5.3-codex';
-export const defaultCommitMessageModel = defaultModel;
+export const defaultCommitMessageModel = 'gpt-4.1-mini';
 
 /**
  * Create and configure an OpenAI API client instance.
