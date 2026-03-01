@@ -133,6 +133,19 @@ interface ActionRunContext {
   changedFiles?: ChangedFiles;
 }
 
+function buildProgressSteps(createIssues: boolean): string[] {
+  if (createIssues) {
+    return [
+      '🔍 Gather context',
+      '📝 Plan',
+      '🧩 Create issues',
+      '🏁 Wrap up',
+    ];
+  }
+
+  return ['🔍 Gather context', '📝 Plan', '✨ Apply edits', '🏁 Wrap up'];
+}
+
 function createRunContext(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -140,7 +153,7 @@ function createRunContext(
   return {
     config,
     processedEvent,
-    progressSteps: ['🔍 Gather context', '📝 Plan', '✨ Apply edits', '🏁 Wrap up'],
+    progressSteps: buildProgressSteps(processedEvent.createIssues),
     downloadedImageFiles: [],
   };
 }
@@ -233,13 +246,31 @@ async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResul
   core.info(`Output: \n${runCtx.output}`);
 
   if (createIssues) {
+    await safeUpdateProgress(
+      octokit,
+      repo,
+      agentEvent.github,
+      runCtx.progressCommentId,
+      progressSteps,
+      2,
+    );
+
     const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
     await createIssuesFromFeaturePlan(
       octokit,
       repo,
       agentEvent.github,
       runCtx.output,
+      undefined,
+    );
+
+    await safeUpdateProgress(
+      octokit,
+      repo,
+      agentEvent.github,
       runCtx.progressCommentId,
+      progressSteps,
+      3,
     );
     return 'success';
   }
