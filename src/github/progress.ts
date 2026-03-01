@@ -4,6 +4,7 @@
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { GitHubEvent } from './types';
+import { hasIssue, hasPullRequest, isReviewCommentEvent } from './types';
 import { GitHubError } from '../utils/errors';
 import {
   PROGRESS_BAR_BLOCKS,
@@ -77,7 +78,7 @@ export async function createProgressComment(
     lines.push(`[View job run](${runUrl})`, '');
   }
   const body = lines.join('\n');
-  if ('issue' in event) {
+  if (hasIssue(event)) {
     const { data } = await octokit.rest.issues.createComment({
       ...repo,
       issue_number: event.issue.number,
@@ -85,7 +86,8 @@ export async function createProgressComment(
     });
     core.info(`Created progress comment with id: ${data.id}`);
     return data.id;
-  } else if ('pull_request' in event && 'comment' in event) {
+  }
+  if (isReviewCommentEvent(event)) {
     const inReplyTo = event.comment.in_reply_to_id ?? event.comment.id;
     const { data } = await octokit.rest.pulls.createReplyForReviewComment({
       ...repo,
@@ -138,13 +140,13 @@ export async function updateProgressComment(
     lines.push(`[View job run](${runUrl})`, '');
   }
   const body = lines.join('\n');
-  if ('issue' in event) {
+  if (hasIssue(event)) {
     await octokit.rest.issues.updateComment({
       ...repo,
       comment_id: commentId,
       body,
     });
-  } else if ('pull_request' in event) {
+  } else if (hasPullRequest(event)) {
     await octokit.rest.pulls.updateReviewComment({
       ...repo,
       comment_id: commentId,
