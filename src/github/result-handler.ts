@@ -9,7 +9,6 @@ import { execa } from 'execa';
 import type { ActionConfig } from '../config/config';
 import type { ProcessedEvent } from './event';
 import { generateCommitMessage as generateCommitMessageOpenAI } from '../api/openai';
-import { GitHubError } from '../utils/errors';
 import { createPullRequest, commitAndPush } from './git';
 import { upsertComment } from './comments';
 // Directories to ignore when processing results
@@ -17,11 +16,6 @@ const WORKFLOWS_DIR = '.github/workflows';
 const IMAGES_DIR = 'codex-comment-images';
 const WORKFLOWS_PREFIX = `${WORKFLOWS_DIR}/`;
 const IMAGES_PREFIX = `${IMAGES_DIR}/`;
-
-/** Filter files by prefix */
-function filesWithPrefix(files: string[], prefix: string): string[] {
-  return files.filter((f) => f.startsWith(prefix));
-}
 
 /** Revert changes to workflow files via git checkout */
 async function revertWorkflowFiles(workspace: string): Promise<void> {
@@ -34,16 +28,8 @@ async function revertWorkflowFiles(workspace: string): Promise<void> {
 /** Remove generated image artifacts directory */
 async function removeImageArtifacts(workspace: string): Promise<void> {
   const dir = path.join(workspace, IMAGES_DIR);
-  try {
-    await fs.rm(dir, { recursive: true, force: true });
-    core.info(`Removed image artifacts directory: ${dir}`);
-  } catch (error) {
-    core.warning(
-      `Failed to remove image artifacts directory: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
+  await fs.rm(dir, { recursive: true, force: true });
+  core.info(`Removed image artifacts directory: ${dir}`);
 }
 
 /** Extract issue and PR numbers from processed event */
@@ -62,6 +48,60 @@ function getEventNumbers(agentEvent: ProcessedEvent['agentEvent']) {
       ? g.pull_request.number
       : undefined;
   return { issueNumber, prNumber };
+}
+
+type IgnoredPathRule = {
+  prefix: string;
+  warningLabel: string;
+  cleanup: (workspace: string) => Promise<void>;
+};
+
+const IGNORED_PATH_RULES: readonly IgnoredPathRule[] = [
+  {
+    prefix: WORKFLOWS_PREFIX,
+    warningLabel: 'workflow files',
+    cleanup: revertWorkflowFiles,
+  },
+  {
+    prefix: IMAGES_PREFIX,
+    warningLabel: `${IMAGES_DIR} folder`,
+    cleanup: removeImageArtifacts,
+  },
+];
+
+/**
+ * Canonical post-processing pipeline for changed files.
+ * Applies ignore rules, performs cleanup side-effects, and returns files
+ * that are eligible for commit/PR/comment diff publishing.
+ */
+async function postProcessChangedFiles(
+  workspace: string,
+  changedFiles: string[],
+): Promise<string[]> {
+  const ignoredFilesByRule = IGNORED_PATH_RULES.map(() => [] as string[]);
+
+  const effectiveChangedFiles: string[] = [];
+  for (const file of changedFiles) {
+    const matchingRuleIndex = IGNORED_PATH_RULES.findIndex((rule) =>
+      file.startsWith(rule.prefix),
+    );
+    if (matchingRuleIndex === -1) {
+      effectiveChangedFiles.push(file);
+      continue;
+    }
+    ignoredFilesByRule[matchingRuleIndex].push(file);
+  }
+
+  for (const [index, rule] of IGNORED_PATH_RULES.entries()) {
+    const ignoredFiles = ignoredFilesByRule[index];
+    if (ignoredFiles.length === 0) continue;
+    core.warning(
+      `Ignoring changes to ${rule.warningLabel}: ${ignoredFiles.join(', ')}`,
+    );
+    await rule.cleanup(workspace);
+  }
+
+  return effectiveChangedFiles;
 }
 
 /**
@@ -86,35 +126,9 @@ export async function handleResult(
   if (noPr) {
     core.info('Flag --no-pr detected; skipping pull request creation.');
   }
-  // ignore workflow changes
-  const workflowFiles = changedFiles.filter((f) =>
-    f.startsWith(WORKFLOWS_PREFIX),
-  );
-  if (workflowFiles.length > 0) {
-    core.warning(
-      `Ignoring changes to workflow files: ${workflowFiles.join(', ')}`,
-    );
-    await execa('git', ['checkout', 'HEAD', '--', WORKFLOWS_DIR], {
-      cwd: workspace,
-      stdio: 'inherit',
-    });
-  }
-  // ignore generated image artifacts
-  const imageFiles = changedFiles.filter((f) => f.startsWith(IMAGES_PREFIX));
-  if (imageFiles.length > 0) {
-    core.warning(
-      `Ignoring changes to ${IMAGES_DIR} folder: ${imageFiles.join(', ')}`,
-    );
-    await fs.rm(path.join(workspace, IMAGES_DIR), {
-      recursive: true,
-      force: true,
-    });
-    core.info(
-      `Removed image artifacts directory: ${path.join(workspace, IMAGES_DIR)}`,
-    );
-  }
-  const effectiveChangedFiles = changedFiles.filter(
-    (f) => !f.startsWith(WORKFLOWS_PREFIX) && !f.startsWith(IMAGES_PREFIX),
+  const effectiveChangedFiles = await postProcessChangedFiles(
+    workspace,
+    changedFiles,
   );
 
   if (!noPr && effectiveChangedFiles.length > 0) {
