@@ -19,6 +19,21 @@ import { createProgressComment, updateProgressComment } from './progress';
 import { preparePrompt } from './prompt-builder';
 import { handleResult } from './result-handler';
 
+type RunActionContext = {
+  config: ActionConfig;
+  processedEvent: ProcessedEvent;
+  progressSteps: string[];
+  progressCommentId?: number;
+  originalFileState?: Awaited<ReturnType<typeof captureFileState>>;
+  prompt?: string;
+  downloadedImageFiles: string[];
+  output?: string;
+};
+
+type ExecuteResult =
+  | { success: true }
+  | { success: false; errorMessage: string };
+
 /**
  * Utility to measure and log the duration of an async operation.
  * @param label - Description of the operation.
@@ -111,17 +126,11 @@ async function safeUpdateProgress(
 }
 
 /**
- * Executes the main logic of the GitHub Action.
- * @param config - Action configuration.
- * @param processedEvent - Processed event data.
- * @returns Promise that resolves when the action run completes.
+ * Initializes the action run and prepares execution inputs.
  */
-export async function runAction(
-  config: ActionConfig,
-  processedEvent: ProcessedEvent,
-): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
-    config;
+async function initializeAction(runContext: RunActionContext): Promise<void> {
+  const { config, processedEvent } = runContext;
+  const { octokit, repo, workspace, githubToken, context } = config;
   const {
     agentEvent,
     includeFullHistory,
@@ -134,80 +143,106 @@ export async function runAction(
     `runAction flags: includeFullHistory=${includeFullHistory}, createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, includeFetch=${includeFetch}`,
   );
 
-  // add 👀 reaction and mark title as Work In Progress
   await measurePerformance('addEyeReaction', () =>
     addEyeReaction(octokit, repo, agentEvent.github),
   );
   await updateTitle(octokit, repo, agentEvent.github, 'WIP');
 
-  const progressSteps = [
-    '🔍 Gathering context',
-    '📝 Planning',
-    '✨ Applying edits',
-    '🏁 Wrap up',
-  ];
-  let progressCommentId: number | undefined;
   try {
-    progressCommentId = await createProgressComment(
+    runContext.progressCommentId = await createProgressComment(
       octokit,
       repo,
       agentEvent.github,
-      progressSteps,
+      runContext.progressSteps,
     );
   } catch (error) {
     core.warning(`Failed to create progress comment: ${String(error)}`);
   }
 
-  // clone the repository and capture initial file state
   await measurePerformance('cloneRepository', () =>
     cloneRepository(workspace, githubToken, repo, context, octokit, agentEvent),
   );
-  const originalFileState = await measurePerformance('captureFileState', () =>
+  runContext.originalFileState = await measurePerformance('captureFileState', () =>
     captureFileState(workspace),
   );
 
-  const { prompt, downloadedImageFiles } = await preparePrompt(
-    config,
-    processedEvent,
-  );
+  const { prompt, downloadedImageFiles } = await preparePrompt(config, processedEvent);
+  runContext.prompt = prompt;
+  runContext.downloadedImageFiles = downloadedImageFiles;
   core.info(`Prompt: \n${prompt}`);
 
   await safeUpdateProgress(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
-    progressSteps,
+    runContext.progressCommentId,
+    runContext.progressSteps,
     0,
   );
+}
 
-  let output: string;
+/**
+ * Executes Codex and stores the masked output.
+ */
+async function executeAction(
+  runContext: RunActionContext,
+): Promise<ExecuteResult> {
+  const { config, processedEvent } = runContext;
+  const { octokit, repo, workspace, timeoutSeconds } = config;
+  const { agentEvent } = processedEvent;
+
+  if (!runContext.prompt) {
+    return { success: false, errorMessage: 'Prompt was not initialized.' };
+  }
+  const prompt = runContext.prompt;
+
   try {
-    const allImages = [...config.images, ...downloadedImageFiles];
+    const allImages = [...config.images, ...runContext.downloadedImageFiles];
     const rawOutput = await measurePerformance('runCodex', () =>
       runCodex(workspace, config, prompt, timeoutSeconds * 1000, allImages),
     );
-    output = maskSensitiveInfo(rawOutput, config);
+    runContext.output = maskSensitiveInfo(rawOutput, config);
     await safeUpdateProgress(
       octokit,
       repo,
       agentEvent.github,
-      progressCommentId,
-      progressSteps,
+      runContext.progressCommentId,
+      runContext.progressSteps,
       1,
     );
+    return { success: true };
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, errorMessage: msg };
+  }
+}
+
+/**
+ * Finalizes the run by handling success/error output, updates and reactions.
+ */
+async function finalizeAction(
+  runContext: RunActionContext,
+  executionResult: ExecuteResult,
+): Promise<void> {
+  const { config, processedEvent } = runContext;
+  const { octokit, repo, workspace } = config;
+  const { agentEvent, createIssues } = processedEvent;
+
+  if (!executionResult.success) {
     await upsertComment(
       octokit,
       repo,
       agentEvent.github,
-      progressCommentId,
-      `CLI execution failed: ${msg}`,
+      runContext.progressCommentId,
+      `CLI execution failed: ${executionResult.errorMessage}`,
     );
     await finalizeReactions(octokit, repo, agentEvent.github);
     return;
   }
+  if (runContext.output === undefined) {
+    throw new Error('Codex output was not initialized.');
+  }
+  const output = runContext.output;
 
   core.info(`Output: \n${output}`);
 
@@ -218,13 +253,18 @@ export async function runAction(
       repo,
       agentEvent.github,
       output,
-      progressCommentId,
+      runContext.progressCommentId,
     );
     await updateTitle(octokit, repo, agentEvent.github, 'Done');
     core.info('Action completed successfully.');
     await finalizeReactions(octokit, repo, agentEvent.github);
     return;
   }
+
+  if (!runContext.originalFileState) {
+    throw new Error('Original file state was not initialized.');
+  }
+  const originalFileState = runContext.originalFileState;
 
   const changedFiles = await measurePerformance('detectChanges', () =>
     detectChanges(workspace, originalFileState),
@@ -234,16 +274,16 @@ export async function runAction(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
-    progressSteps,
+    runContext.progressCommentId,
+    runContext.progressSteps,
     2,
   );
   await safeUpdateProgress(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
-    progressSteps,
+    runContext.progressCommentId,
+    runContext.progressSteps,
     3,
   );
 
@@ -252,10 +292,37 @@ export async function runAction(
     processedEvent,
     output,
     changedFiles,
-    progressCommentId,
+    runContext.progressCommentId,
   );
 
   await updateTitle(octokit, repo, agentEvent.github, 'Done');
   core.info('Action completed successfully.');
   await finalizeReactions(octokit, repo, agentEvent.github);
+}
+
+/**
+ * Executes the main logic of the GitHub Action.
+ * @param config - Action configuration.
+ * @param processedEvent - Processed event data.
+ * @returns Promise that resolves when the action run completes.
+ */
+export async function runAction(
+  config: ActionConfig,
+  processedEvent: ProcessedEvent,
+): Promise<void> {
+  const runContext: RunActionContext = {
+    config,
+    processedEvent,
+    progressSteps: [
+      '🔍 Gathering context',
+      '📝 Planning',
+      '✨ Applying edits',
+      '🏁 Wrap up',
+    ],
+    downloadedImageFiles: [],
+  };
+
+  await initializeAction(runContext);
+  const executionResult = await executeAction(runContext);
+  await finalizeAction(runContext, executionResult);
 }
