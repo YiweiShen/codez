@@ -228,13 +228,14 @@ async function finalizeAction(
   const { octokit, repo, workspace } = config;
   const { agentEvent, createIssues } = processedEvent;
 
-  if (!executionResult.success) {
+  if (executionResult.success === false) {
+    const { errorMessage } = executionResult;
     await upsertComment(
       octokit,
       repo,
       agentEvent.github,
       runContext.progressCommentId,
-      `CLI execution failed: ${executionResult.errorMessage}`,
+      `CLI execution failed: ${errorMessage}`,
     );
     await finalizeReactions(octokit, repo, agentEvent.github);
     return;
