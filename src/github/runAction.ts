@@ -141,9 +141,9 @@ export async function runAction(
   await updateTitle(octokit, repo, agentEvent.github, 'WIP');
 
   const progressSteps = [
-    '🔍 Gathering context',
-    '📝 Planning',
-    '✨ Applying edits',
+    '🔍 Gather context',
+    '📝 Plan',
+    '✨ Apply edits',
     '🏁 Wrap up',
   ];
   let progressCommentId: number | undefined;
