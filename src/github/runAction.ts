@@ -133,6 +133,24 @@ interface ActionRunContext {
   changedFiles?: ChangedFiles;
 }
 
+function getProgressSteps(createIssues: boolean): string[] {
+  if (createIssues) {
+    return [
+      '🔍 Gather context',
+      '🧠 Generate feature plan',
+      '📌 Create issues',
+      '🏁 Wrap up',
+    ];
+  }
+
+  return [
+    '🔍 Gather context',
+    '✨ Apply edits',
+    '🧪 Review changes',
+    '🏁 Wrap up',
+  ];
+}
+
 function createRunContext(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
@@ -140,7 +158,7 @@ function createRunContext(
   return {
     config,
     processedEvent,
-    progressSteps: ['🔍 Gather context', '📝 Plan', '✨ Apply edits', '🏁 Wrap up'],
+    progressSteps: getProgressSteps(processedEvent.createIssues),
     downloadedImageFiles: [],
   };
 }
@@ -241,6 +259,22 @@ async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResul
       runCtx.output,
       runCtx.progressCommentId,
     );
+    await safeUpdateProgress(
+      octokit,
+      repo,
+      agentEvent.github,
+      runCtx.progressCommentId,
+      progressSteps,
+      2,
+    );
+    await safeUpdateProgress(
+      octokit,
+      repo,
+      agentEvent.github,
+      runCtx.progressCommentId,
+      progressSteps,
+      3,
+    );
     return 'success';
   }
 
@@ -256,6 +290,13 @@ async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResul
     progressSteps,
     2,
   );
+  await handleResult(
+    config,
+    processedEvent,
+    runCtx.output,
+    runCtx.changedFiles,
+    runCtx.progressCommentId,
+  );
   await safeUpdateProgress(
     octokit,
     repo,
@@ -263,14 +304,6 @@ async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResul
     runCtx.progressCommentId,
     progressSteps,
     3,
-  );
-
-  await handleResult(
-    config,
-    processedEvent,
-    runCtx.output,
-    runCtx.changedFiles,
-    runCtx.progressCommentId,
   );
 
   return 'success';
