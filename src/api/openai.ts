@@ -16,7 +16,7 @@ import { ParseError } from '../utils/errors';
  */
 
 export const defaultModel = 'gpt-5.3-codex';
-export const defaultCommitMessageModel = 'gpt-5.2-codex';
+export const defaultCommitMessageModel = 'gpt-4.1-mini';
 
 /**
  * Create and configure an OpenAI API client instance.
@@ -58,16 +58,12 @@ export async function generateCommitMessage(
 
   const openai = getOpenAIClient(config);
   try {
-    const response = await openai.chat.completions.create({
-      model: config.openaiCommitMessageModel,
-      max_completion_tokens: MAX_COMPLETION_TOKENS,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-    });
-
-    const content = response.choices?.[0]?.message?.content?.trim() ?? '';
+    const content = await generateCommitMessageCompletion(
+      openai,
+      config.openaiCommitMessageModel,
+      systemPrompt,
+      userMessage,
+    );
     const subject = content.split(/\r?\n/)[0] || '';
     if (!subject || subject.length > MAX_SUBJECT_LENGTH) {
       throw new ParseError(`Invalid commit message: "${subject}"`);
@@ -82,6 +78,52 @@ export async function generateCommitMessage(
       }. Using fallback.`,
     );
     return getFallbackMessage(changedFiles, context);
+  }
+}
+
+async function generateCommitMessageCompletion(
+  openai: OpenAI,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+): Promise<string> {
+  let responsesError: unknown | undefined;
+  try {
+    const response = await openai.responses.create({
+      model,
+      instructions: systemPrompt,
+      input: userMessage,
+      max_output_tokens: MAX_COMPLETION_TOKENS,
+    });
+    const content = response.output_text?.trim() ?? '';
+    if (content) {
+      return content;
+    }
+    throw new ParseError('OpenAI responses API returned empty commit message');
+  } catch (error) {
+    responsesError = error;
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      max_completion_tokens: MAX_COMPLETION_TOKENS,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+    });
+    return response.choices?.[0]?.message?.content?.trim() ?? '';
+  } catch (chatError) {
+    const responseErrorMessage =
+      responsesError instanceof Error
+        ? responsesError.message
+        : String(responsesError);
+    const chatErrorMessage =
+      chatError instanceof Error ? chatError.message : String(chatError);
+    throw new Error(
+      `OpenAI responses API failed (${responseErrorMessage}) and chat completions failed (${chatErrorMessage})`,
+    );
   }
 }
 
