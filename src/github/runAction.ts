@@ -144,7 +144,7 @@ export async function runAction(
     '🔍 Gathering context',
     '📝 Planning',
     '✨ Applying edits',
-    '🧪 Testing',
+    '🏁 Wrap up',
   ];
   let progressCommentId: number | undefined;
   try {
