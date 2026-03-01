@@ -117,29 +117,38 @@ async function safeUpdateProgress(
   }
 }
 
-/**
- * Executes the main logic of the GitHub Action.
- * @param config - Action configuration.
- * @param processedEvent - Processed event data.
- * @returns Promise that resolves when the action run completes.
- */
-export async function runAction(
+type OriginalFileState = Awaited<ReturnType<typeof captureFileState>>;
+type ChangedFiles = Awaited<ReturnType<typeof detectChanges>>;
+type ActionPhaseResult = 'success' | 'cli_failed';
+
+interface ActionRunContext {
+  config: ActionConfig;
+  processedEvent: ProcessedEvent;
+  progressSteps: string[];
+  progressCommentId?: number;
+  prompt?: string;
+  downloadedImageFiles: string[];
+  originalFileState?: OriginalFileState;
+  output?: string;
+  changedFiles?: ChangedFiles;
+}
+
+function createRunContext(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
-): Promise<void> {
-  const { octokit, repo, workspace, githubToken, context, timeoutSeconds } =
-    config;
-  const {
-    agentEvent,
-    includeFullHistory,
-    createIssues,
-    includeFixBuild,
-    includeFetch,
-  } = processedEvent;
+): ActionRunContext {
+  return {
+    config,
+    processedEvent,
+    progressSteps: ['🔍 Gather context', '📝 Plan', '✨ Apply edits', '🏁 Wrap up'],
+    downloadedImageFiles: [],
+  };
+}
 
-  core.info(
-    `runAction flags: includeFullHistory=${includeFullHistory}, createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, includeFetch=${includeFetch}`,
-  );
+async function initializeAction(runCtx: ActionRunContext): Promise<void> {
+  const { config, processedEvent, progressSteps } = runCtx;
+  const { octokit, repo, workspace, githubToken, context } = config;
+  const { agentEvent } = processedEvent;
 
   // add 👀 reaction and mark title as Work In Progress
   await measurePerformance('addEyeReaction', () =>
@@ -147,15 +156,8 @@ export async function runAction(
   );
   await updateTitle(octokit, repo, agentEvent.github, 'WIP');
 
-  const progressSteps = [
-    '🔍 Gather context',
-    '📝 Plan',
-    '✨ Apply edits',
-    '🏁 Wrap up',
-  ];
-  let progressCommentId: number | undefined;
   try {
-    progressCommentId = await createProgressComment(
+    runCtx.progressCommentId = await createProgressComment(
       octokit,
       repo,
       agentEvent.github,
@@ -169,37 +171,50 @@ export async function runAction(
   await measurePerformance('cloneRepository', () =>
     cloneRepository(workspace, githubToken, repo, context, octokit, agentEvent),
   );
-  const originalFileState = await measurePerformance('captureFileState', () =>
+  runCtx.originalFileState = await measurePerformance('captureFileState', () =>
     captureFileState(workspace),
   );
 
-  const { prompt, downloadedImageFiles } = await preparePrompt(
-    config,
-    processedEvent,
-  );
+  const { prompt, downloadedImageFiles } = await preparePrompt(config, processedEvent);
+  runCtx.prompt = prompt;
+  runCtx.downloadedImageFiles = downloadedImageFiles;
   core.info(`Prompt: \n${prompt}`);
 
   await safeUpdateProgress(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
+    runCtx.progressCommentId,
     progressSteps,
     0,
   );
+}
 
-  let output: string;
+async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResult> {
+  const { config, processedEvent, progressSteps } = runCtx;
+  const { octokit, repo, workspace, timeoutSeconds } = config;
+  const { agentEvent, createIssues } = processedEvent;
+
+  if (runCtx.prompt == null) {
+    throw new Error('Missing prompt in execute phase');
+  }
+  if (runCtx.originalFileState == null) {
+    throw new Error('Missing original file state in execute phase');
+  }
+  const prompt = runCtx.prompt;
+  const originalFileState = runCtx.originalFileState;
+
   try {
-    const allImages = [...config.images, ...downloadedImageFiles];
+    const allImages = [...config.images, ...runCtx.downloadedImageFiles];
     const rawOutput = await measurePerformance('runCodex', () =>
       runCodex(workspace, config, prompt, timeoutSeconds * 1000, allImages),
     );
-    output = maskSensitiveInfo(rawOutput, config);
+    runCtx.output = maskSensitiveInfo(rawOutput, config);
     await safeUpdateProgress(
       octokit,
       repo,
       agentEvent.github,
-      progressCommentId,
+      runCtx.progressCommentId,
       progressSteps,
       1,
     );
@@ -209,14 +224,13 @@ export async function runAction(
       octokit,
       repo,
       agentEvent.github,
-      progressCommentId,
+      runCtx.progressCommentId,
       `CLI execution failed: ${msg}`,
     );
-    await finalizeReactions(octokit, repo, agentEvent.github);
-    return;
+    return 'cli_failed';
   }
 
-  core.info(`Output: \n${output}`);
+  core.info(`Output: \n${runCtx.output}`);
 
   if (createIssues) {
     const { createIssuesFromFeaturePlan } = await import('./createIssues.js');
@@ -224,16 +238,13 @@ export async function runAction(
       octokit,
       repo,
       agentEvent.github,
-      output,
-      progressCommentId,
+      runCtx.output,
+      runCtx.progressCommentId,
     );
-    await updateTitle(octokit, repo, agentEvent.github, 'Done');
-    core.info('Action completed successfully.');
-    await finalizeReactions(octokit, repo, agentEvent.github);
-    return;
+    return 'success';
   }
 
-  const changedFiles = await measurePerformance('detectChanges', () =>
+  runCtx.changedFiles = await measurePerformance('detectChanges', () =>
     detectChanges(workspace, originalFileState),
   );
 
@@ -241,7 +252,7 @@ export async function runAction(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
+    runCtx.progressCommentId,
     progressSteps,
     2,
   );
@@ -249,7 +260,7 @@ export async function runAction(
     octokit,
     repo,
     agentEvent.github,
-    progressCommentId,
+    runCtx.progressCommentId,
     progressSteps,
     3,
   );
@@ -257,12 +268,52 @@ export async function runAction(
   await handleResult(
     config,
     processedEvent,
-    output,
-    changedFiles,
-    progressCommentId,
+    runCtx.output,
+    runCtx.changedFiles,
+    runCtx.progressCommentId,
   );
 
-  await updateTitle(octokit, repo, agentEvent.github, 'Done');
-  core.info('Action completed successfully.');
+  return 'success';
+}
+
+async function finalizeAction(
+  runCtx: ActionRunContext,
+  phaseResult: ActionPhaseResult,
+): Promise<void> {
+  const { octokit, repo } = runCtx.config;
+  const { agentEvent } = runCtx.processedEvent;
+
+  if (phaseResult === 'success') {
+    await updateTitle(octokit, repo, agentEvent.github, 'Done');
+    core.info('Action completed successfully.');
+  }
+
   await finalizeReactions(octokit, repo, agentEvent.github);
+}
+
+/**
+ * Executes the main logic of the GitHub Action.
+ * @param config - Action configuration.
+ * @param processedEvent - Processed event data.
+ * @returns Promise that resolves when the action run completes.
+ */
+export async function runAction(
+  config: ActionConfig,
+  processedEvent: ProcessedEvent,
+): Promise<void> {
+  const {
+    includeFullHistory,
+    createIssues,
+    includeFixBuild,
+    includeFetch,
+  } = processedEvent;
+
+  core.info(
+    `runAction flags: includeFullHistory=${includeFullHistory}, createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, includeFetch=${includeFetch}`,
+  );
+
+  const runCtx = createRunContext(config, processedEvent);
+  await initializeAction(runCtx);
+  const phaseResult = await executeAction(runCtx);
+  await finalizeAction(runCtx, phaseResult);
 }
