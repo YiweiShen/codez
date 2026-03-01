@@ -27,7 +27,7 @@ inputs:
     description: 'OpenAI model identifier to use (default: gpt-5.3-codex)'
     required: false
   openai-commit-message-model:
-    description: 'OpenAI model identifier used to generate commit messages (default: gpt-5.2-codex)'
+    description: 'OpenAI model identifier used to generate commit messages (default: gpt-5.3-codex)'
     required: false
   direct-prompt:
     description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'

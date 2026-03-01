@@ -1,13 +1,16 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock OpenAI client to capture options and simulate chat completions
-const createMock = jest.fn();
+const chatCreateMock = jest.fn();
+const responsesCreateMock = jest.fn();
 class MockOpenAI {
   options: any;
   chat: any;
+  responses: any;
   constructor(options: any) {
     this.options = options;
-    this.chat = { completions: { create: createMock } };
+    this.chat = { completions: { create: chatCreateMock } };
+    this.responses = { create: responsesCreateMock };
   }
 }
 jest.unstable_mockModule('openai', () => ({
@@ -21,7 +24,8 @@ const { getOpenAIClient, generateCommitMessage } = await import(
 );
 
 beforeEach(() => {
-  createMock.mockReset();
+  chatCreateMock.mockReset();
+  responsesCreateMock.mockReset();
 });
 
 describe('getOpenAIClient', () => {
@@ -54,8 +58,8 @@ describe('generateCommitMessage', () => {
   const userPrompt = 'Test prompt';
 
   it('returns a valid one-line commit message', async () => {
-    createMock.mockResolvedValueOnce({
-      choices: [{ message: { content: 'feat: add feature\nDetails' } }],
+    responsesCreateMock.mockResolvedValueOnce({
+      output_text: 'feat: add feature\nDetails',
     });
     const result = await generateCommitMessage(
       changedFiles,
@@ -64,13 +68,30 @@ describe('generateCommitMessage', () => {
       config,
     );
     expect(result).toBe('feat: add feature');
-    expect(createMock).toHaveBeenCalledWith(
+    expect(responsesCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'commit-model' }),
     );
   });
 
+  it('falls back to chat completions when responses API fails', async () => {
+    responsesCreateMock.mockRejectedValueOnce(new Error('responses error'));
+    chatCreateMock.mockResolvedValueOnce({
+      choices: [{ message: { content: 'fix: use chat fallback' } }],
+    });
+    const result = await generateCommitMessage(
+      changedFiles,
+      userPrompt,
+      {},
+      config,
+    );
+    expect(result).toBe('fix: use chat fallback');
+  });
+
   it('falls back to PR message on empty commit', async () => {
-    createMock.mockResolvedValueOnce({
+    responsesCreateMock.mockResolvedValueOnce({
+      output_text: '',
+    });
+    chatCreateMock.mockResolvedValueOnce({
       choices: [{ message: { content: '' } }],
     });
     const result = await generateCommitMessage(
@@ -84,8 +105,8 @@ describe('generateCommitMessage', () => {
 
   it('falls back to Issue message on too long commit', async () => {
     const longContent = 'a'.repeat(101);
-    createMock.mockResolvedValueOnce({
-      choices: [{ message: { content: longContent } }],
+    responsesCreateMock.mockResolvedValueOnce({
+      output_text: longContent,
     });
     const result = await generateCommitMessage(
       changedFiles,
@@ -97,7 +118,10 @@ describe('generateCommitMessage', () => {
   });
 
   it('falls back to file count message when no context', async () => {
-    createMock.mockResolvedValueOnce({
+    responsesCreateMock.mockResolvedValueOnce({
+      output_text: '',
+    });
+    chatCreateMock.mockResolvedValueOnce({
       choices: [{ message: { content: '' } }],
     });
     const result = await generateCommitMessage(
@@ -107,7 +131,10 @@ describe('generateCommitMessage', () => {
       config,
     );
     expect(result).toBe('chore: apply changes to 2 files');
-    createMock.mockResolvedValueOnce({
+    responsesCreateMock.mockResolvedValueOnce({
+      output_text: '',
+    });
+    chatCreateMock.mockResolvedValueOnce({
       choices: [{ message: { content: '' } }],
     });
     const single = await generateCommitMessage(
