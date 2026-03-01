@@ -114,3 +114,57 @@ export type GitHubContentsData = {
  * Repository owner/name context for API calls.
  */
 export type RepoContext = { owner: string; repo: string };
+
+/**
+ * Event variants exposing common top-level fields.
+ */
+export type GitHubEventWithIssue = Extract<
+  GitHubEvent,
+  { issue: GitHubIssue | GitHubPullRequest }
+>;
+export type GitHubEventWithPullRequest = Extract<
+  GitHubEvent,
+  { pull_request: GitHubPullRequest | GitHubPullRequestMinimal }
+>;
+export type GitHubEventWithComment = Extract<
+  GitHubEvent,
+  { comment: GitHubComment | GitHubReviewComment }
+>;
+
+/**
+ * Shared type guards for issue/PR event discrimination.
+ */
+export function hasIssue(event: GitHubEvent): event is GitHubEventWithIssue {
+  return 'issue' in event;
+}
+
+export function hasPullRequest(
+  event: GitHubEvent,
+): event is GitHubEventWithPullRequest {
+  return 'pull_request' in event;
+}
+
+export function hasComment(event: GitHubEvent): event is GitHubEventWithComment {
+  return 'comment' in event;
+}
+
+export function isReviewCommentEvent(
+  event: GitHubEvent,
+): event is GitHubEventPullRequestReviewCommentCreated {
+  return hasPullRequest(event) && hasComment(event);
+}
+
+/**
+ * Unified accessors for issue/PR metadata used across modules.
+ */
+export function getIssueOrPullRequestNumber(event: GitHubEvent): number | null {
+  if (hasIssue(event)) return event.issue.number;
+  if (hasPullRequest(event)) return event.pull_request.number;
+  return null;
+}
+
+export function getIssueOrPullRequestTitle(event: GitHubEvent): string | null {
+  if (hasIssue(event)) return event.issue.title;
+  if (hasPullRequest(event)) return event.pull_request.title ?? '';
+  return null;
+}

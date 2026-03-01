@@ -3,25 +3,9 @@
  */
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
-import type {
-  GitHubEvent,
-  GitHubEventPullRequestReviewCommentCreated,
-  RepoContext,
-} from './types';
+import type { GitHubEvent, RepoContext } from './types';
+import { hasIssue, isReviewCommentEvent } from './types';
 import { truncateOutput } from './utils';
-
-// Type guards for GitHubEvent type narrowing
-function isIssueEvent(
-  event: GitHubEvent,
-): event is { issue: { number: number } } {
-  return 'issue' in event;
-}
-
-function isReviewCommentEvent(
-  event: GitHubEvent,
-): event is GitHubEventPullRequestReviewCommentCreated {
-  return 'pull_request' in event && 'comment' in event;
-}
 
 /**
  * Post a comment to an issue (or pull request via issues API).
@@ -87,7 +71,7 @@ export async function postComment(
   body: string,
 ): Promise<void> {
   try {
-    if (isIssueEvent(event)) {
+    if (hasIssue(event)) {
       await postIssueComment(octokit, repo, event.issue.number, body);
       return;
     }
@@ -132,7 +116,7 @@ export async function upsertComment(
       await postComment(octokit, repo, event, body);
       return;
     }
-    if (isIssueEvent(event)) {
+    if (hasIssue(event)) {
       await octokit.rest.issues.updateComment({
         ...repo,
         comment_id: commentId,
@@ -140,7 +124,7 @@ export async function upsertComment(
       });
       return;
     }
-    if ('pull_request' in event) {
+    if (isReviewCommentEvent(event)) {
       await octokit.rest.pulls.updateReviewComment({
         ...repo,
         comment_id: commentId,

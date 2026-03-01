@@ -18,6 +18,10 @@ import { runCodex } from '../client/codex';
 import { createProgressComment, updateProgressComment } from './progress';
 import { preparePrompt } from './prompt-builder';
 import { handleResult } from './result-handler';
+import {
+  getIssueOrPullRequestNumber,
+  getIssueOrPullRequestTitle,
+} from './types';
 
 /**
  * Utility to measure and log the duration of an async operation.
@@ -45,9 +49,12 @@ async function updateTitle(
   github: ProcessedEvent['agentEvent']['github'],
   label: 'WIP' | 'Done',
 ): Promise<void> {
-  const isIssue = 'issue' in github;
-  const number = isIssue ? github.issue.number : github.pull_request!.number;
-  const title = isIssue ? github.issue.title : github.pull_request!.title ?? '';
+  const number = getIssueOrPullRequestNumber(github);
+  const title = getIssueOrPullRequestTitle(github);
+  if (number == null || title == null) {
+    core.warning('Skipping title update: event does not contain issue/PR data');
+    return;
+  }
   const stripped = title.replace(/^\[(?:WIP|Done)\]\s*/, '');
   const newTitle = `[${label}] ${stripped}`;
   core.info(`Updating issue/PR #${number} title to '${newTitle}'`);

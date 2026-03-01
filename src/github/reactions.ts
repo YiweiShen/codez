@@ -4,6 +4,7 @@
 import * as core from '@actions/core';
 import type { Octokit } from 'octokit';
 import type { RepoContext, GitHubEvent } from './types';
+import { hasComment, hasIssue, isReviewCommentEvent } from './types';
 
 /**
  * Get handlers for reactions based on the GitHub event.
@@ -15,7 +16,7 @@ function getReactionHandlers(
 ) {
   if (
     (event.action === 'opened' || event.action === 'assigned') &&
-    'issue' in event
+    hasIssue(event)
   ) {
     const issueNumber = event.issue.number;
     const logTarget = `issue #${issueNumber}`;
@@ -40,7 +41,7 @@ function getReactionHandlers(
       logTarget,
     };
   }
-  if (event.action === 'created' && 'comment' in event && 'issue' in event) {
+  if (event.action === 'created' && hasComment(event) && hasIssue(event)) {
     const issueNumber = event.issue.number;
     const commentId = event.comment.id;
     const logTarget = `comment on issue/PR #${issueNumber}`;
@@ -65,11 +66,7 @@ function getReactionHandlers(
       logTarget,
     };
   }
-  if (
-    event.action === 'created' &&
-    'comment' in event &&
-    'pull_request' in event
-  ) {
+  if (event.action === 'created' && isReviewCommentEvent(event)) {
     const prNumber = event.pull_request.number;
     const commentId = event.comment.id;
     const logTarget = `review comment on PR #${prNumber}`;
