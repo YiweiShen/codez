@@ -4,7 +4,10 @@ import * as github from '@actions/github';
 
 import { Octokit } from 'octokit';
 
-import { defaultModel } from '../../../src/api/openai';
+import {
+  defaultCommitMessageModel,
+  defaultModel,
+} from '../../../src/api/openai';
 import {
   parseKeyValueMap,
   parseStringList,
@@ -175,6 +178,7 @@ describe('getConfig', () => {
     expect(config.openaiApiKey).toBe('openai-key');
     expect(config.openaiBaseUrl).toBe('');
     expect(config.openaiModel).toBe(defaultModel);
+    expect(config.openaiCommitMessageModel).toBe(defaultCommitMessageModel);
     expect(config.directPrompt).toBe('');
     expect(config.triggerPhrase).toBe('/codex');
     expect(config.assigneeTrigger).toEqual([]);

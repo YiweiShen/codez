@@ -16,6 +16,7 @@ import { ParseError } from '../utils/errors';
  */
 
 export const defaultModel = 'gpt-5.3-codex';
+export const defaultCommitMessageModel = 'gpt-5.2-codex';
 
 /**
  * Create and configure an OpenAI API client instance.
@@ -58,7 +59,7 @@ export async function generateCommitMessage(
   const openai = getOpenAIClient(config);
   try {
     const response = await openai.chat.completions.create({
-      model: config.openaiModel,
+      model: config.openaiCommitMessageModel,
       max_completion_tokens: MAX_COMPLETION_TOKENS,
       messages: [
         { role: 'system', content: systemPrompt },

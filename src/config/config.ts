@@ -11,7 +11,7 @@ import { Octokit } from 'octokit';
 
 import { z } from 'zod';
 
-import { defaultModel } from '../api/openai';
+import { defaultCommitMessageModel, defaultModel } from '../api/openai';
 import {
   DEFAULT_TRIGGER_PHRASE,
   DEFAULT_TIMEOUT_SECONDS,
@@ -50,6 +50,10 @@ export interface ActionConfig {
    */
 
   openaiModel: string;
+  /**
+   * OpenAI model identifier used only for generating commit messages.
+   */
+  openaiCommitMessageModel: string;
 
   /**
    * One-shot direct prompt for automated workflows.
@@ -110,6 +114,9 @@ const actionConfigSchema = z.object({
     z.literal(''),
   ]),
   openaiModel: z.string().min(1, 'OpenAI model is required'),
+  openaiCommitMessageModel: z
+    .string()
+    .min(1, 'OpenAI commit message model is required'),
   directPrompt: z.string(),
   triggerPhrase: z.string().min(1, 'Trigger phrase is required'),
   assigneeTrigger: z.array(z.string()),
@@ -216,6 +223,10 @@ export function getConfig(): ActionConfig {
   const openaiBaseUrl = core.getInput('openai-base-url') || '';
   const openaiModelInput = core.getInput('openai-model') || '';
   const openaiModel = openaiModelInput || defaultModel;
+  const openaiCommitMessageModelInput =
+    core.getInput('openai-commit-message-model') || '';
+  const openaiCommitMessageModel =
+    openaiCommitMessageModelInput || defaultCommitMessageModel;
   const directPrompt = core.getInput('direct-prompt') || '';
   const triggerPhrase =
     core.getInput('trigger-phrase') || DEFAULT_TRIGGER_PHRASE;
@@ -252,6 +263,7 @@ export function getConfig(): ActionConfig {
     openaiApiKey,
     openaiBaseUrl,
     openaiModel,
+    openaiCommitMessageModel,
     directPrompt,
     triggerPhrase,
     assigneeTrigger,

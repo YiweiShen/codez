@@ -48,6 +48,7 @@ describe('generateCommitMessage', () => {
     openaiApiKey: 'key',
     openaiBaseUrl: '',
     openaiModel: 'model',
+    openaiCommitMessageModel: 'commit-model',
   } as any;
   const changedFiles = ['file1.ts', 'file2.ts'];
   const userPrompt = 'Test prompt';
@@ -63,6 +64,9 @@ describe('generateCommitMessage', () => {
       config,
     );
     expect(result).toBe('feat: add feature');
+    expect(createMock).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'commit-model' }),
+    );
   });
 
   it('falls back to PR message on empty commit', async () => {
