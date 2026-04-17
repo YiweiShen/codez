@@ -24,10 +24,10 @@ inputs:
     description: 'Specify the OpenAI API base URL'
     required: false
   openai-model:
-    description: 'OpenAI model identifier to use (default: gpt-5.3-codex)'
+    description: 'OpenAI model identifier to use (default: gpt-5.4)'
     required: false
   openai-commit-message-model:
-    description: 'OpenAI model identifier used to generate commit messages (default: gpt-4.1-mini)'
+    description: 'OpenAI model identifier used to generate commit messages (default: gpt-5.4)'
     required: false
   direct-prompt:
     description: 'One-shot prompt for automated workflows. Bypasses comment triggers.'

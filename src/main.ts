@@ -13,6 +13,7 @@ import type { ProcessedEvent } from './github/event';
 import { processEvent } from './github/event';
 import { postComment } from './github/comments';
 import { checkPermission } from './security/security';
+import { TimeoutError } from './utils/errors';
 
 /**
  * Safely post an error comment to GitHub, logging any failures.
@@ -131,12 +132,12 @@ async function executeAction(config: ActionConfig): Promise<void> {
     await withTimeout(
       runAction(config, processedEvent),
       timeoutMs,
-      new Error(timeoutMessage),
+      new TimeoutError(timeoutMessage),
     );
   } catch (error: unknown) {
-    if (error instanceof Error && error.message === timeoutMessage) {
-      core.setFailed(timeoutMessage);
-      await postErrorComment(config, processedEvent, timeoutMessage);
+    if (error instanceof TimeoutError) {
+      core.setFailed(error.message);
+      await postErrorComment(config, processedEvent, error.message);
       return;
     }
     throw error;

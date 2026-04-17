@@ -102,16 +102,20 @@ export async function runCodex(
       timeout,
       cwd: workspace,
       env: envVars,
-      stdio: 'pipe',
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
       reject: false,
     });
 
     core.info(`Codex CLI exited with code ${result.exitCode}`);
 
+    // Check for timeout first (execa sets timedOut even with reject: false)
+    if ((result as ExecaError).timedOut) {
+      throw new TimeoutError(`Codex command timed out after ${timeout}ms.`);
+    }
+
     if (result.stderr && result.exitCode !== 0) {
-      core.error(
-        `Codex command failed with stderr. Exit code: ${result.exitCode}, stderr: ${result.stderr}`,
-      );
       throw new CliError(
         `Codex command failed with exit code ${result.exitCode}. Stderr: ${result.stderr}`,
       );
@@ -121,10 +125,7 @@ export async function runCodex(
       );
     }
 
-    if (result.failed || result.exitCode !== 0) {
-      core.error(
-        `Codex command failed. Exit code: ${result.exitCode}, stdout: ${result.stdout}`,
-      );
+    if (result.exitCode !== 0) {
       throw new CliError(
         `Codex command failed with exit code ${result.exitCode}. ${
           result.stderr
@@ -136,19 +137,20 @@ export async function runCodex(
 
     core.info('Codex command executed successfully.');
 
-    return result.stdout; // Return full stdout for flexibility
+    return result.stdout;
   } catch (error: unknown) {
+    // Let known error types propagate without re-wrapping
+    if (error instanceof CliError || error instanceof TimeoutError) {
+      core.error(
+        `Error executing Codex command: ${error.stack ?? error.message}`,
+      );
+      throw error;
+    }
     core.error(
       `Error executing Codex command: ${
         error instanceof Error ? error.stack : String(error)
       }`,
     );
-    if (
-      error instanceof Error &&
-      error.message.startsWith('Failed to parse JSON output')
-    ) {
-      throw error;
-    }
     if (error instanceof Error && (error as ExecaError).timedOut) {
       throw new TimeoutError(`Codex command timed out after ${timeout}ms.`);
     }
