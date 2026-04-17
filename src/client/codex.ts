@@ -88,17 +88,14 @@ export async function runCodex(
 
   try {
     core.info('Logging into Codex CLI with provided OpenAI API key.');
-    await execa(
-      'sh',
-      ['-c', 'printenv OPENAI_API_KEY | codex login --with-api-key'],
-      {
-        timeout,
-        cwd: workspace,
-        env: envVars,
-        stdio: 'pipe',
-        reject: false,
-      },
-    );
+    const loginTimeout = Math.min(timeout, 30_000);
+    await execa('codex', ['login', '--with-api-key'], {
+      timeout: loginTimeout,
+      cwd: workspace,
+      env: envVars,
+      input: envVars.OPENAI_API_KEY ?? '',
+      reject: false,
+    });
 
     core.info(`Run command: codex ${cliArgs.join(' ')}`);
     const result = await execa('codex', cliArgs, {
