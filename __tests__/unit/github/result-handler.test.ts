@@ -165,7 +165,9 @@ describe('handleResult', () => {
       expect.stringContaining('Ignoring changes to workflow files:'),
     );
     expect(core.warning).toHaveBeenCalledWith(
-      expect.stringContaining('Ignoring changes to codex-comment-images folder:'),
+      expect.stringContaining(
+        'Ignoring changes to codex-comment-images folder:',
+      ),
     );
   });
 });

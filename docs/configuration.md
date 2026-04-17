@@ -17,12 +17,12 @@
 
 ## Advanced Codex Configuration
 
-| Input Name         | Description                                                                                                                                                                              |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openai-base-url`  | OpenAI API base URL                                                                                                                                                                      |
-| `openai-model`     | OpenAI model identifier to use (default: `gpt-5.3-codex`)                                                                                                                                |
-| `openai-commit-message-model` | OpenAI model identifier used to generate commit messages (default: `gpt-4.1-mini`)                                                                                       |
-| `trigger-phrase`   | Custom trigger phrase to invoke Codez (default: `/codex`)                                                                                                                                |
-| `assignee-trigger` | Comma-separated list of GitHub usernames to trigger Codez on issue assignment                                                                                                            |
-| `codex-env`        | Custom environment variables to inject into the Codex CLI execution context. Accepts either a YAML mapping (multiline) or comma-separated key=value pairs.                               |
-| `images`           | Comma-separated or newline-separated list of local image file paths to include in the Codex CLI invocation. Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc. |
+| Input Name                    | Description                                                                                                                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openai-base-url`             | OpenAI API base URL                                                                                                                                                                      |
+| `openai-model`                | OpenAI model identifier to use (default: `gpt-5.3-codex`)                                                                                                                                |
+| `openai-commit-message-model` | OpenAI model identifier used to generate commit messages (default: `gpt-4.1-mini`)                                                                                                       |
+| `trigger-phrase`              | Custom trigger phrase to invoke Codez (default: `/codex`)                                                                                                                                |
+| `assignee-trigger`            | Comma-separated list of GitHub usernames to trigger Codez on issue assignment                                                                                                            |
+| `codex-env`                   | Custom environment variables to inject into the Codex CLI execution context. Accepts either a YAML mapping (multiline) or comma-separated key=value pairs.                               |
+| `images`                      | Comma-separated or newline-separated list of local image file paths to include in the Codex CLI invocation. Each image can be referenced in the prompt by `<image_0>`, `<image_1>`, etc. |

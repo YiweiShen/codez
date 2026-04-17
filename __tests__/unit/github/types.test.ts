@@ -18,7 +18,12 @@ describe('github event typed helpers', () => {
   it('normalizes issue metadata for issue events', () => {
     const event: GitHubEventIssuesOpened = {
       action: 'opened',
-      issue: { number: 12, title: 'Issue title', body: 'body', pull_request: null },
+      issue: {
+        number: 12,
+        title: 'Issue title',
+        body: 'body',
+        pull_request: null,
+      },
     };
 
     expect(hasIssue(event)).toBe(true);

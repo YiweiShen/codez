@@ -140,7 +140,12 @@ function createRunContext(
   return {
     config,
     processedEvent,
-    progressSteps: ['🔍 Gather context', '📝 Plan', '✨ Apply edits', '🏁 Wrap up'],
+    progressSteps: [
+      '🔍 Gather context',
+      '📝 Plan',
+      '✨ Apply edits',
+      '🏁 Wrap up',
+    ],
     downloadedImageFiles: [],
   };
 }
@@ -175,7 +180,10 @@ async function initializeAction(runCtx: ActionRunContext): Promise<void> {
     captureFileState(workspace),
   );
 
-  const { prompt, downloadedImageFiles } = await preparePrompt(config, processedEvent);
+  const { prompt, downloadedImageFiles } = await preparePrompt(
+    config,
+    processedEvent,
+  );
   runCtx.prompt = prompt;
   runCtx.downloadedImageFiles = downloadedImageFiles;
   core.info(`Prompt: \n${prompt}`);
@@ -190,7 +198,9 @@ async function initializeAction(runCtx: ActionRunContext): Promise<void> {
   );
 }
 
-async function executeAction(runCtx: ActionRunContext): Promise<ActionPhaseResult> {
+async function executeAction(
+  runCtx: ActionRunContext,
+): Promise<ActionPhaseResult> {
   const { config, processedEvent, progressSteps } = runCtx;
   const { octokit, repo, workspace, timeoutSeconds } = config;
   const { agentEvent, createIssues } = processedEvent;
@@ -301,12 +311,8 @@ export async function runAction(
   config: ActionConfig,
   processedEvent: ProcessedEvent,
 ): Promise<void> {
-  const {
-    includeFullHistory,
-    createIssues,
-    includeFixBuild,
-    includeFetch,
-  } = processedEvent;
+  const { includeFullHistory, createIssues, includeFixBuild, includeFetch } =
+    processedEvent;
 
   core.info(
     `runAction flags: includeFullHistory=${includeFullHistory}, createIssues=${createIssues}, includeFixBuild=${includeFixBuild}, includeFetch=${includeFetch}`,

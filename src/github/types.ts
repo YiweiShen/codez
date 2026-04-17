@@ -144,7 +144,9 @@ export function hasPullRequest(
   return 'pull_request' in event;
 }
 
-export function hasComment(event: GitHubEvent): event is GitHubEventWithComment {
+export function hasComment(
+  event: GitHubEvent,
+): event is GitHubEventWithComment {
   return 'comment' in event;
 }
 
